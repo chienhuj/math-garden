@@ -1111,7 +1111,7 @@
             <div class="icon">⏱️</div>
             <h3>挑戰關</h3>
             <p>
-              加入時間累計，考驗因數心算速度。每次隨機挑選3個只有4個因數的數字(2~60)，找齊對應因數，培植出開花植物。
+              加入時間累計，考驗因數心算速度。每次隨機挑選3個2～60的目標數字，找齊對應因數，培植出開花植物。
             </p>
             <div class="mode-btn">開始心算挑戰</div>
           </div>
@@ -1811,6 +1811,13 @@
     }
 
     function openConfigModal() {
+      // 教師安全存取控制密碼鎖
+      const pwd = prompt("此設定區僅限教師使用。請輸入管理密碼或您的 Google 帳號識別碼：");
+      if (pwd !== 'chhsieh' && pwd !== 'math52') {
+        alert("密碼錯誤，拒絕進入連線設定！");
+        return;
+      }
+
       if (firebaseConfig) {
         document.getElementById('cfg-apiKey').value = firebaseConfig.apiKey || '';
         document.getElementById('cfg-databaseURL').value = firebaseConfig.databaseURL || '';

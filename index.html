@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌱 共生花園 - 因數與公因數學習大廳</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Outfit:wght@300;400;600;800&display=swap');
+
+    :root {
+      /* Morandi Palette - Soft Tones */
+      --bg-color: #E2E7E5;              /* Morandi Sage Green */
+      --panel-bg: rgba(248, 250, 249, 0.85); /* Frosted Morandi White */
+      --border-glow: rgba(255, 255, 255, 0.7);
+      --shadow-color: rgba(98, 114, 105, 0.12);
+      
+      --text-primary: #2C3E35;          /* Deep Slate Green */
+      --text-secondary: #74837A;        /* Sage Charcoal */
+      
+      --color-garden: #5C9E7A;          /* Morandi Green */
+      --color-battle: #7B1FA2;          /* Morandi Purple */
+      
+      --transition-smooth: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Background Particles */
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 50%, #EFF4F2 0%, #DCE5E1 100%);
+    }
+
+    /* Portal Container */
+    .portal-container {
+      width: 100%;
+      max-width: 950px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1.5px solid var(--border-glow);
+      border-radius: 28px;
+      box-shadow: 0 15px 45px var(--shadow-color);
+      padding: 50px 40px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Header styling */
+    header {
+      margin-bottom: 45px;
+    }
+
+    header h1 {
+      font-size: 2.3rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    header p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* Cards Grid - 2 Games Only */
+    .portal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 40px;
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 700px) {
+      .portal-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+    }
+
+    .game-card {
+      background: white;
+      border: 1.5px solid rgba(43, 61, 52, 0.08);
+      border-radius: 24px;
+      padding: 40px 30px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.02);
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+      transition: var(--transition-smooth);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 35px rgba(76, 94, 85, 0.1);
+    }
+
+    /* Card Themes */
+    .card-garden:hover {
+      border-color: var(--color-garden);
+      box-shadow: 0 15px 35px rgba(92, 158, 122, 0.15);
+    }
+    
+    .card-battle:hover {
+      border-color: var(--color-battle);
+      box-shadow: 0 15px 35px rgba(123, 31, 162, 0.15);
+    }
+
+    .card-icon {
+      font-size: 3.5rem;
+      margin-bottom: 20px;
+      transition: var(--transition-smooth);
+    }
+    .game-card:hover .card-icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .game-card h2 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .game-card p {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 25px;
+      flex-grow: 1;
+    }
+
+    .card-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: white;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+    .card-garden .card-badge { background-color: var(--color-garden); }
+    .card-battle .card-badge { background-color: var(--color-battle); }
+
+    .play-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: var(--transition-smooth);
+    }
+
+    .card-garden .play-btn {
+      background-color: rgba(92, 158, 122, 0.1);
+      color: var(--color-garden);
+    }
+    .card-garden:hover .play-btn {
+      background-color: var(--color-garden);
+      color: white;
+    }
+
+    .card-battle .play-btn {
+      background-color: rgba(123, 31, 162, 0.1);
+      color: var(--color-battle);
+    }
+    .card-battle:hover .play-btn {
+      background-color: var(--color-battle);
+      color: white;
+    }
+
+    /* Footer styling */
+    footer {
+      margin-top: 40px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Particle Background -->
+  <canvas id="particle-canvas"></canvas>
+
+  <div class="portal-container">
+    <header>
+      <h1>🌱 共生花園</h1>
+      <p>國小數學五年級因數與公因數學習大廳</p>
+    </header>
+
+    <div class="portal-grid">
+      <!-- Game 1: Sprouting Magic -->
+      <a href="factor_garden_game.html" class="game-card card-garden">
+        <span class="card-badge">單人探究／小組共學</span>
+        <div class="card-icon">🍃</div>
+        <h2>因數花園之發芽魔法</h2>
+        <p>輸入一個神奇數字的因數，讓植物發芽生長。</p>
+        <div class="play-btn">進入溫室培育</div>
+      </a>
+
+      <!-- Game 2: Tug of War -->
+      <a href="tug_of_war.html" class="game-card card-battle">
+        <span class="card-badge">雙人對戰 / AI 挑戰</span>
+        <div class="card-icon">⚡</div>
+        <h2>共生生命能量守護戰</h2>
+        <p>選擇守護方或汲取方，輪流輸入兩個數字的公因數進行能量拉鋸。搶先找出最大公因數 (GCF) 還能發動強力暴擊！</p>
+        <div class="play-btn">進入能量戰場</div>
+      </a>
+    </div>
+
+    <footer>
+      <span>網頁自學提示設計：謝千慧老師 ｜ 夢 N 講師 AI 協力實踐計畫</span>
+    </footer>
+  </div>
+
+  <script>
+    // Particle Canvas logic
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor() {
+        this.reset();
+        this.y = Math.random() * canvas.height;
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + 20;
+        this.size = Math.random() * 4 + 2;
+        this.speedY = Math.random() * 0.8 + 0.3;
+        this.speedX = Math.random() * 0.6 - 0.3;
+        this.opacity = Math.random() * 0.5 + 0.2;
+        this.color = Math.random() > 0.5 ? '#81C784' : '#FFD54F';
+      }
+      update() {
+        this.y -= this.speedY;
+        this.x += this.speedX;
+        if (this.y < -10) {
+          this.reset();
+        }
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = this.opacity;
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = this.color;
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    for (let i = 0; i < 35; i++) {
+      particles.push(new Particle());
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+  </script>
+</body>
+</html>

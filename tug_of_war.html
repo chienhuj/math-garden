@@ -1,0 +1,2618 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>共生生命能量守護戰 - 因數與公因數學習平台</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Outfit:wght@300;400;600;800&display=swap');
+
+    :root {
+      --bg-color: #E2E7E5; /* 莫蘭迪灰綠 */
+      --text-color: #2C3E35; /* 深灰綠石色 */
+      --text-muted: #7E8B83; /* 泥灰綠 */
+      --glass-bg: rgba(255, 255, 255, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.5);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+      
+      /* 守護者 (Guardians) - 金色與綠色 */
+      --color-guardian: #2E7D32;
+      --color-guardian-light: #E8F5E9;
+      --color-guardian-glow: rgba(46, 125, 50, 0.4);
+      --color-guardian-accent: #D4AF37;
+
+      /* 汲取者 (Marauders) - 暗紫色與霓虹紅 */
+      --color-marauder: #7B1FA2;
+      --color-marauder-light: #F3E5F5;
+      --color-marauder-glow: rgba(123, 31, 162, 0.4);
+      --color-marauder-accent: #E040FB;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      overflow-y: auto; /* 允許垂直捲動以防遮蔽 */
+      position: relative;
+    }
+
+    /* Background decorative elements */
+    .bg-glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      filter: blur(150px);
+      opacity: 0.15;
+      z-index: -1;
+      pointer-events: none;
+      transition: all 1s ease;
+    }
+
+    #glow-left {
+      background-color: var(--color-guardian);
+      top: -100px;
+      left: -100px;
+    }
+
+    #glow-right {
+      background-color: var(--color-marauder);
+      bottom: -100px;
+      right: -100px;
+    }
+
+    /* Global Header */
+    header {
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .logo-area {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .game-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--color-guardian) 30%, var(--color-marauder) 70%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .nav-controls {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-nav {
+      background: var(--glass-bg);
+      border: 1.5px solid var(--glass-border);
+      padding: 8px 16px;
+      border-radius: 10px;
+      color: var(--text-color);
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      font-size: 0.85rem;
+      box-shadow: var(--shadow);
+    }
+
+    .btn-nav:hover {
+      transform: translateY(-2px);
+      background: #fff;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .btn-nav svg {
+      stroke: var(--text-color);
+    }
+
+    /* Main Area Container */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start; /* 頂部對齊，確保捲動時不會裁切上方 */
+      padding: 0 30px 30px 30px;
+      position: relative;
+      z-index: 5;
+    }
+
+    /* SCREEN 0: Lobby Menu */
+    #screen-lobby {
+      width: 100%;
+      max-width: 850px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1.5px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 35px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      margin-top: 10px;
+    }
+
+    .lobby-header {
+      text-align: center;
+    }
+
+    .lobby-header h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text-color);
+      margin-bottom: 8px;
+    }
+
+    .lobby-header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .mode-select-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .mode-card {
+      background: rgba(255, 255, 255, 0.5);
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+      border-radius: 20px;
+      padding: 25px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mode-card:hover {
+      transform: translateY(-5px);
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+    }
+
+    .mode-card.guardian-theme:hover {
+      box-shadow: 0 12px 30px var(--color-guardian-glow);
+      border-color: var(--color-guardian);
+    }
+
+    .mode-card.marauder-theme:hover {
+      box-shadow: 0 12px 30px var(--color-marauder-glow);
+      border-color: var(--color-marauder);
+    }
+
+    .mode-icon {
+      font-size: 3rem;
+    }
+
+    .mode-card h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-color);
+    }
+
+    .mode-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .mode-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-top: 3px;
+    }
+
+    .guardian-theme .mode-tag {
+      background: var(--color-guardian-light);
+      color: var(--color-guardian);
+    }
+
+    .marauder-theme .mode-tag {
+      background: var(--color-marauder-light);
+      color: var(--color-marauder);
+    }
+
+    .custom-match-panel {
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 18px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .custom-inputs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .custom-inputs label {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .input-number {
+      width: 70px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1.5px solid var(--text-muted);
+      background: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-color);
+      text-align: center;
+      outline: none;
+    }
+
+    .input-number:focus {
+      border-color: var(--color-guardian);
+    }
+
+    .btn-start-custom {
+      background: linear-gradient(135deg, var(--color-guardian), var(--color-marauder));
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-start-custom:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    /* SCREEN 1: Game Arena */
+    #screen-arena {
+      width: 100%;
+      max-width: 1100px;
+      display: none;
+      flex-direction: column;
+      gap: 15px;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      margin-top: 5px;
+    }
+
+    /* Sky Dome / Round Info */
+    .sky-dome {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 10px 20px;
+      text-align: center;
+      position: relative;
+      box-shadow: var(--shadow);
+    }
+
+    .round-indicator {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    .sky-numbers {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin: 2px 0;
+    }
+
+    .sky-number-card {
+      background: #fff;
+      padding: 6px 18px;
+      border-radius: 10px;
+      font-size: 1.8rem;
+      font-weight: 800;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
+      border: 1px solid rgba(0,0,0,0.02);
+    }
+
+    .sky-number-separator {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    .sky-instruction {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Battleground Layout */
+    .battle-field {
+      display: grid;
+      grid-template-columns: 240px 1fr 240px;
+      gap: 15px;
+      align-items: stretch;
+      width: 100%;
+    }
+
+    @media (max-width: 1024px) {
+      .battle-field {
+        grid-template-columns: 200px 1fr 200px;
+        gap: 10px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .battle-field {
+        grid-template-columns: 180px 1fr 180px;
+        gap: 8px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .battle-field {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+
+    /* Team Panels */
+    .team-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 15px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      transition: all 0.3s ease;
+      overflow: hidden;
+      min-height: 280px;
+    }
+
+    .team-panel.guardian-panel {
+      border-left: 4px solid var(--color-guardian);
+    }
+
+    .team-panel.marauder-panel {
+      border-right: 4px solid var(--color-marauder);
+    }
+
+    .team-header {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .team-icon {
+      font-size: 2.2rem;
+      margin-bottom: 5px;
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+
+    .team-panel:hover .team-icon {
+      transform: scale(1.08) rotate(5deg);
+    }
+
+    .team-name {
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+
+    .guardian-panel .team-name {
+      color: var(--color-guardian);
+    }
+
+    .marauder-panel .team-name {
+      color: var(--color-marauder);
+    }
+
+    .team-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Input & Control Area */
+    .control-box {
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 14px;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 2;
+    }
+
+    .control-box label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-color);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .input-factor {
+      flex: 1;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1.5px solid rgba(0,0,0,0.1);
+      background: white;
+      font-size: 1.1rem;
+      font-weight: 800;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .guardian-panel .input-factor:focus {
+      border-color: var(--color-guardian);
+    }
+
+    .marauder-panel .input-factor:focus {
+      border-color: var(--color-marauder);
+    }
+
+    .btn-pull {
+      padding: 0 15px;
+      border-radius: 8px;
+      border: none;
+      color: white;
+      font-weight: 800;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .guardian-panel .btn-pull {
+      background: var(--color-guardian);
+    }
+
+    .marauder-panel .btn-pull {
+      background: var(--color-marauder);
+    }
+
+    .btn-pull:hover {
+      opacity: 0.9;
+      transform: scale(1.03);
+    }
+
+    /* GCF Skill Status */
+    .skill-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-align: center;
+      margin-top: 10px;
+      border: 1px dashed rgba(0,0,0,0.12);
+    }
+
+    .guardian-panel .skill-badge {
+      background: rgba(212, 175, 55, 0.08);
+      color: #9A7B1C;
+      border-color: rgba(212, 175, 55, 0.25);
+    }
+
+    .marauder-panel .skill-badge {
+      background: rgba(224, 64, 251, 0.06);
+      color: #B813D8;
+      border-color: rgba(224, 64, 251, 0.18);
+    }
+
+    /* Active Skill Effects overlays */
+    .panel-effect-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      text-align: center;
+      padding: 15px;
+    }
+
+    .shield-active-glow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border: 3.5px solid var(--color-guardian-accent);
+      border-radius: 18px;
+      box-shadow: inset 0 0 30px rgba(212, 175, 55, 0.35), 0 0 20px rgba(212, 175, 55, 0.25);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 1;
+    }
+
+    .guardian-panel.has-shield .shield-active-glow {
+      opacity: 1;
+    }
+
+    .marauder-panel.has-freeze .panel-effect-overlay.freeze-overlay,
+    .guardian-panel.has-freeze .panel-effect-overlay.freeze-overlay {
+      opacity: 1;
+      pointer-events: auto;
+      background: rgba(179, 229, 252, 0.85);
+      backdrop-filter: blur(4px);
+    }
+
+    .freeze-overlay .freeze-icon {
+      font-size: 2.5rem;
+      animation: pulse 1s infinite alternate;
+    }
+
+    .freeze-overlay h4 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0277BD;
+      margin: 4px 0;
+    }
+
+    .freeze-overlay p {
+      font-size: 0.78rem;
+      color: #01579B;
+      font-weight: 600;
+    }
+
+    .ai-bubble {
+      background: white;
+      border-radius: 12px;
+      padding: 8px 12px;
+      position: absolute;
+      bottom: 75px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.78rem;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 1px solid rgba(0,0,0,0.05);
+      z-index: 3;
+      display: none;
+      width: 90%;
+      text-align: center;
+    }
+
+    .ai-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px 6px 0;
+      border-style: solid;
+      border-color: white transparent;
+      display: block;
+      width: 0;
+    }
+
+    /* Center Arena */
+    .center-arena {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      gap: 10px;
+    }
+
+    .energy-bar-container {
+      width: 100%;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 10px 15px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .energy-bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 800;
+      font-size: 0.75rem;
+    }
+
+    .energy-bar-labels .guardians-lbl { color: var(--color-guardian); }
+    .energy-bar-labels .marauders-lbl { color: var(--color-marauder); }
+
+    .bar-track {
+      height: 18px;
+      background: #E0E0E0;
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .bar-fill-guardian {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-guardian) 0%, var(--color-guardian-accent) 100%);
+      position: absolute;
+      right: 50%;
+      left: 0;
+      transition: right 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      box-shadow: 0 0 10px var(--color-guardian-glow);
+    }
+
+    .bar-fill-marauder {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-marauder-accent) 0%, var(--color-marauder) 100%);
+      position: absolute;
+      left: 50%;
+      right: 0;
+      transition: left 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      box-shadow: 0 0 10px var(--color-marauder-glow);
+    }
+
+    .bar-pointer {
+      position: absolute;
+      top: -2px;
+      bottom: -2px;
+      width: 5px;
+      background: #fff;
+      box-shadow: 0 0 6px rgba(0,0,0,0.4), 0 0 10px #fff;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: left 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      z-index: 3;
+      border-radius: 3px;
+    }
+
+    .bar-center-mark {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: rgba(0,0,0,0.1);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+    }
+
+    .bar-force-text {
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--text-color);
+      margin-top: 1px;
+    }
+
+    /* Plant Pull Visualizer */
+    .plant-pull-visualizer {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      min-height: 130px; /* 縮小以防遮蔽 */
+      max-height: 180px;
+    }
+
+    .svg-canvas {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .float-msg {
+      position: absolute;
+      font-weight: 900;
+      font-size: 1.15rem;
+      pointer-events: none;
+      animation: floatUp 1.2s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+      z-index: 10;
+      text-shadow: 0 2px 8px rgba(255,255,255,0.8);
+    }
+
+    .float-msg.guardian-msg {
+      color: var(--color-guardian);
+    }
+
+    .float-msg.marauder-msg {
+      color: var(--color-marauder);
+    }
+
+    .float-msg.gcf-msg {
+      color: #D4AF37;
+      font-size: 1.4rem;
+      text-shadow: 0 0 8px rgba(212, 175, 55, 0.6), 0 2px 10px rgba(255,255,255,0.9);
+    }
+
+    /* Common Factors lock panel */
+    .factors-lock-panel {
+      width: 100%;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 10px 15px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .factors-lock-panel h4 {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .factors-grid {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .factor-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.05);
+      border: 1.5px dashed rgba(0, 0, 0, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .factor-badge.locked-guardian {
+      background: var(--color-guardian-light);
+      border: 2px solid var(--color-guardian);
+      color: var(--color-guardian);
+      box-shadow: 0 3px 8px var(--color-guardian-glow);
+      transform: scale(1.08);
+    }
+
+    .factor-badge.locked-marauder {
+      background: var(--color-marauder-light);
+      border: 2px solid var(--color-marauder);
+      color: var(--color-marauder);
+      box-shadow: 0 3px 8px var(--color-marauder-glow);
+      transform: scale(1.08);
+    }
+
+    .factor-badge.is-gcf {
+      border-width: 1.5px;
+      font-weight: 900;
+    }
+
+    .factor-badge.is-gcf::after {
+      content: '★';
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      font-size: 0.6rem;
+      background: #FFD54F;
+      color: #FF8F00;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #FF8F00;
+    }
+
+    /* Score HUD & Round logs */
+    .arena-footer {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 5px;
+    }
+
+    .round-log-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 8px 15px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+      font-size: 0.78rem;
+      max-height: 60px;
+      overflow-y: auto;
+    }
+
+    .log-item {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+      border-bottom: 1px dashed rgba(0,0,0,0.03);
+      padding: 1px 0;
+    }
+
+    .log-item.guardians { color: var(--color-guardian); }
+    .log-item.marauders { color: var(--color-marauder); }
+
+    .score-board {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 8px 15px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .score-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .score-val {
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    .guardian-score { color: var(--color-guardian); }
+    .marauder-score { color: var(--color-marauder); }
+
+    /* Modal / Result overlay popup */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(44, 62, 53, 0.5);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-icon {
+      font-size: 4rem;
+      margin-bottom: 15px;
+      display: inline-block;
+    }
+
+    .modal-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-color);
+      margin-bottom: 10px;
+    }
+
+    .modal-desc {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    .btn-modal {
+      background: linear-gradient(135deg, var(--color-guardian), var(--color-marauder));
+      color: white;
+      border: none;
+      padding: 12px 35px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-modal:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Screen shake animation */
+    .shake {
+      animation: screenShake 0.4s ease-in-out;
+    }
+
+    /* Animations */
+    @keyframes screenShake {
+      0%, 100% { transform: translate(0, 0); }
+      10%, 30%, 50%, 70%, 90% { transform: translate(-4px, 2px); }
+      20%, 40%, 60%, 80% { transform: translate(4px, -2px); }
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+      }
+      20% {
+        opacity: 1;
+        transform: translateY(-10px) scale(1.1);
+      }
+      80% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-80px) scale(0.9);
+      }
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.08); }
+    }
+
+    /* Input shaking on error */
+    .input-error-shake {
+      animation: errorShake 0.4s ease;
+      border-color: #E53935 !important;
+    }
+
+    @keyframes errorShake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    /* SVG plant animations */
+    .rope-path {
+      fill: none;
+      stroke-linecap: round;
+      stroke-dasharray: 8 6;
+      animation: dash 2s linear infinite;
+    }
+
+    .rope-path#rope-g {
+      stroke: #81C784;
+      filter: drop-shadow(0px 0px 4px rgba(76, 175, 80, 0.8));
+    }
+
+    .rope-path#rope-m {
+      stroke: #BA68C8;
+      filter: drop-shadow(0px 0px 4px rgba(156, 39, 176, 0.8));
+    }
+
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -42;
+      }
+    }
+
+    /* On-Screen Keypad Styles */
+    .battle-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+      width: 100%;
+    }
+
+    .battle-keypad button {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      padding: 6px 0;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text-color);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .battle-keypad button:active {
+      transform: scale(0.95);
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .battle-keypad .btn-keypad-clear {
+      color: #E53935;
+      background: rgba(229, 57, 53, 0.05);
+    }
+
+    .battle-keypad .btn-keypad-clear:active {
+      background: rgba(229, 57, 53, 0.15);
+    }
+
+    .battle-keypad .btn-keypad-backspace {
+      color: #FB8C00;
+      background: rgba(251, 140, 0, 0.05);
+    }
+
+    .battle-keypad .btn-keypad-backspace:active {
+      background: rgba(251, 140, 0, 0.15);
+    }
+
+    /* Extra responsiveness for devices with low height (Chromebook, Tablets, Landscape Mode) */
+    @media (max-height: 820px) {
+      body {
+        padding: 4px 0 !important;
+      }
+      header {
+        padding: 8px 16px !important;
+      }
+      main {
+        padding: 8px 16px !important;
+      }
+      .game-title {
+        font-size: 1.3rem !important;
+      }
+      .arena-header {
+        margin-bottom: 8px !important;
+        padding: 8px !important;
+      }
+      .sky-dome h2 {
+        font-size: 1.4rem !important;
+      }
+      .sky-number-card {
+        font-size: 1.3rem !important;
+        padding: 4px 10px !important;
+      }
+      .battle-field {
+        gap: 8px !important;
+      }
+      .team-panel {
+        min-height: 220px !important;
+        padding: 10px !important;
+      }
+      .team-icon {
+        font-size: 1.8rem !important;
+        margin-bottom: 2px !important;
+      }
+      .team-name {
+        font-size: 1rem !important;
+      }
+      .control-box {
+        padding: 6px !important;
+        gap: 4px !important;
+      }
+      .input-factor {
+        font-size: 0.95rem !important;
+        padding: 6px !important;
+      }
+      .btn-pull {
+        font-size: 0.8rem !important;
+        padding: 0 10px !important;
+      }
+      .skill-badge {
+        padding: 4px 8px !important;
+        margin-top: 6px !important;
+      }
+      .plant-pull-visualizer {
+        min-height: 90px !important;
+        max-height: 120px !important;
+      }
+      .battle-keypad {
+        gap: 3px !important;
+        margin-top: 4px !important;
+      }
+      .battle-keypad button {
+        padding: 3px 0 !important;
+        font-size: 0.9rem !important;
+        border-radius: 5px !important;
+      }
+      .arena-footer {
+        margin-top: 4px !important;
+        gap: 8px !important;
+      }
+      .round-log-panel {
+        max-height: 50px !important;
+        padding: 4px 10px !important;
+      }
+      .score-board {
+        padding: 4px 10px !important;
+      }
+      .score-val {
+        font-size: 1.3rem !important;
+      }
+      
+      /* Battle Result Modal responsiveness */
+      #result-modal .modal-content {
+        padding: 16px 20px !important;
+        gap: 10px !important;
+        max-width: 440px !important;
+      }
+      #modal-icon {
+        font-size: 3rem !important;
+        margin-bottom: 8px !important;
+      }
+      #modal-icon svg {
+        width: 60px !important;
+        height: 60px !important;
+      }
+      #modal-title {
+        font-size: 1.4rem !important;
+        margin-bottom: 6px !important;
+      }
+      #modal-desc {
+        font-size: 0.9rem !important;
+        margin-bottom: 12px !important;
+        line-height: 1.4 !important;
+      }
+      .btn-modal {
+        padding: 8px 24px !important;
+        font-size: 0.95rem !important;
+        border-radius: 10px !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Particle / Glows -->
+  <div class="bg-glow" id="glow-left"></div>
+  <div class="bg-glow" id="glow-right"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="logo-area">
+      <h1 class="game-title">共生生命能量守護戰</h1>
+      <span class="subtitle">公因數能量平衡與 GCF 技能戰術對決</span>
+    </div>
+    
+    <div class="nav-controls">
+      <a href="index.html" class="btn-nav">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>返回共生花園</span>
+      </a>
+      <button class="btn-nav" id="btn-restart-lobby" style="display: none;" onclick="showLobby()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <path d="M3 3v5h5"></path>
+        </svg>
+        <span>重選模式</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main>
+
+    <!-- SCREEN 0: Lobby Mode Selection -->
+    <section id="screen-lobby">
+      <div class="lobby-header">
+        <h2>守護魔力植物的生命能量！</h2>
+        <p>這是一款能量平衡守護戰。輸入雙數的天空<b>「公因數」</b>，即可為中央植物注入生命能（守護方）或汲取能量（汲取方）！<br>
+        搶下<b>最大公因數 (GCF)</b> 能激發高達 <b>+10 點的額外能量脈衝</b>，並觸發專屬技能！</p>
+      </div>
+
+      <div class="mode-select-grid">
+        <!-- Mode 1: Dual Match -->
+        <div class="mode-card guardian-theme" onclick="startGame('multi')">
+          <div class="mode-icon">⚔️</div>
+          <h3>雙方對抗</h3>
+          <p>適合雙方共學、課堂大螢幕或平板對抗。左側控制守護方，右側控制汲取方。</p>
+          <span class="mode-tag">同螢幕均勢對抗</span>
+        </div>
+
+        <!-- Mode 2: VS AI -->
+        <div class="mode-card marauder-theme" onclick="startGame('ai')">
+          <div class="mode-icon">🤖</div>
+          <h3>挑戰AI軍團</h3>
+          <p>對決AI軍團。AI會以逼真心算速度搶答，你必須比AI更快搶下最大公因數！</p>
+          <span class="mode-tag">人機策略對抗</span>
+        </div>
+      </div>
+
+      <!-- Custom Match (Teacher settings) -->
+      <div class="custom-match-panel">
+        <div class="custom-inputs">
+          <label>自訂天空對戰數字：</label>
+          <input type="number" id="custom-num1" class="input-number" value="24" min="2" max="100">
+          <span class="sky-number-separator">&</span>
+          <input type="number" id="custom-num2" class="input-number" value="36" min="2" max="100">
+        </div>
+        <button class="btn-start-custom" onclick="startCustomGame()">開啟自訂天空戰役</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 1: Game Arena -->
+    <section id="screen-arena">
+      <!-- Sky Dome -->
+      <div class="sky-dome">
+        <div class="round-indicator" id="round-lbl">戰役第一輪</div>
+        <div class="sky-numbers">
+          <div class="sky-number-card" id="sky-n1">12</div>
+          <span class="sky-number-separator">&</span>
+          <div class="sky-number-card" id="sky-n2">18</div>
+        </div>
+        <div class="sky-instruction">請找出天空雙數的所有公因數，輸入以注入或汲取生命植物的能量！</div>
+      </div>
+
+      <!-- Battle Field -->
+      <div class="battle-field">
+        
+        <!-- Left Faction: Guardians -->
+        <div class="team-panel guardian-panel" id="panel-guardian">
+          <div class="shield-active-glow"></div>
+          
+          <div class="team-header">
+            <span class="team-icon">🛡️</span>
+            <h3 class="team-name">守護方</h3>
+            <span class="team-desc">注入能量至 100%</span>
+          </div>
+
+          <!-- Controls -->
+          <div class="control-box">
+            <label for="input-g">輸入公因數：</label>
+            <div class="input-row">
+              <input type="number" id="input-g" class="input-factor" placeholder="?" min="1" max="100">
+              <button class="btn-pull" onclick="submitFactor('guardian')">注入！</button>
+            </div>
+          </div>
+
+          <div class="skill-badge" id="skill-g">
+            <span>🛡️ 神聖護盾：未觸發</span>
+          </div>
+          
+          <!-- Frozen Overlay -->
+          <div class="panel-effect-overlay freeze-overlay">
+            <span class="freeze-icon">❄️</span>
+            <h4>被暗影冰凍！</h4>
+            <p id="freeze-timer-g">剩餘 2.5 秒</p>
+          </div>
+        </div>
+
+        <!-- Center: Energy Balance & Visualizer -->
+        <div class="center-arena">
+          <!-- Energy Bar -->
+          <div class="energy-bar-container">
+            <div class="energy-bar-labels">
+              <span class="guardians-lbl">🛡️ 守護者淨化成功 (100%)</span>
+              <span class="marauders-lbl">🔮 汲取者侵蝕成功 (0%)</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-center-mark"></div>
+              <div class="bar-fill-guardian" id="bar-fill-g" style="right: 50%;"></div>
+              <div class="bar-fill-marauder" id="bar-fill-m" style="left: 50%;"></div>
+              <div class="bar-pointer" id="bar-pointer" style="left: 50%;"></div>
+            </div>
+            <div class="bar-force-text" id="energy-status-text">目前能量處於完美共生平衡</div>
+          </div>
+
+          <!-- SVG Plant Energy Visualizer -->
+          <div class="plant-pull-visualizer" id="visualizer-container">
+            <svg class="svg-canvas" id="svg-field" viewBox="0 0 400 300">
+              <!-- Left Life Well (Guardian Emitter) -->
+              <g transform="translate(50, 180)">
+                <circle cx="0" cy="0" r="14" fill="rgba(46, 125, 50, 0.15)" stroke="var(--color-guardian)" stroke-width="2" filter="drop-shadow(0 0 6px var(--color-guardian))"></circle>
+                <circle cx="0" cy="0" r="5" fill="var(--color-guardian-accent)"></circle>
+                <text x="0" y="28" font-size="10" font-weight="bold" fill="var(--color-guardian)" text-anchor="middle">生命泉源</text>
+              </g>
+              
+              <!-- Right Shadow Rift (Marauder Emitter) -->
+              <g transform="translate(350, 180)">
+                <circle cx="0" cy="0" r="14" fill="rgba(123, 31, 162, 0.15)" stroke="var(--color-marauder)" stroke-width="2" filter="drop-shadow(0 0 6px var(--color-marauder))"></circle>
+                <circle cx="0" cy="0" r="5" fill="var(--color-marauder-accent)"></circle>
+                <text x="0" y="28" font-size="10" font-weight="bold" fill="var(--color-marauder)" text-anchor="middle">暗影裂縫</text>
+              </g>
+              
+              <!-- Left life beam -->
+              <path id="rope-g" class="rope-path" d="M 50 180 Q 125 180 200 180" stroke-width="3"></path>
+              
+              <!-- Right shadow beam -->
+              <path id="rope-m" class="rope-path" d="M 350 180 Q 275 180 200 180" stroke-width="3"></path>
+              
+              <!-- Central magical plant -->
+              <g id="svg-plant-group" transform="translate(200, 240)">
+                <!-- Stem -->
+                <path id="plant-stem" d="M 0 0 C 0 -30, 0 -60, 0 -80" fill="none" stroke="#4CAF50" stroke-width="8" stroke-linecap="round"></path>
+                
+                <!-- Leaves -->
+                <path d="M 0 -30 Q -25 -40, -15 -15 Q -5 -20, 0 -30" fill="#81C784"></path>
+                <path d="M 0 -50 Q 25 -60, 15 -35 Q 5 -40, 0 -50" fill="#81C784"></path>
+                
+                <!-- Magical Energy Bud/Flower -->
+                <circle id="plant-core" cx="0" cy="-80" r="16" fill="#D4AF37" filter="drop-shadow(0px 0px 8px #FFD54F)"></circle>
+                <circle cx="0" cy="-80" r="8" fill="#FFF"></circle>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Locked Factors scorecard -->
+          <div class="factors-lock-panel">
+            <h4 id="factors-title">公因鎖定狀態 (計算並解鎖以轉化能量！)</h4>
+            <div class="factors-grid" id="factors-grid">
+              <!-- Dynamically populated e.g. <span class="factor-badge">2</span> -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Faction: Marauders (Draisers) -->
+        <div class="team-panel marauder-panel" id="panel-marauder">
+          <div class="shield-active-glow" style="border-color: var(--color-marauder-accent); box-shadow: inset 0 0 40px rgba(224, 64, 251, 0.4), 0 0 30px rgba(224, 64, 251, 0.3);"></div>
+          
+          <div class="team-header">
+            <span class="team-icon">🔮</span>
+            <h3 class="team-name">汲取方</h3>
+            <span class="team-desc">汲取能量至 0%</span>
+          </div>
+
+          <!-- Controls -->
+          <div class="control-box" id="marauder-controls">
+            <label for="input-m">輸入公因數：</label>
+            <div class="input-row">
+              <input type="number" id="input-m" class="input-factor" placeholder="?" min="1" max="100">
+              <button class="btn-pull" onclick="submitFactor('marauder')">汲取！</button>
+            </div>
+          </div>
+
+          <div class="skill-badge" id="skill-m">
+            <span>🔮 暗影冰凍：未觸發</span>
+          </div>
+          
+          <!-- AI Thinking bubble -->
+          <div class="ai-bubble" id="ai-bubble-msg">AI 正在努力心算中...</div>
+
+          <!-- Frozen Overlay -->
+          <div class="panel-effect-overlay freeze-overlay">
+            <span class="freeze-icon">❄️</span>
+            <h4>被神聖之光凍結！</h4>
+            <p id="freeze-timer-m">剩餘 2.5 秒</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Score & Log HUD -->
+      <div class="arena-footer">
+        <!-- Log panel -->
+        <div class="round-log-panel" id="round-log">
+          <div style="color: var(--text-muted); text-align: center; font-weight: bold; width: 100%;">戰局即時快報</div>
+        </div>
+        
+        <!-- Scoreboard -->
+        <div class="score-board">
+          <div class="score-item">
+            <span style="font-size: 1.2rem;">🛡️ 守護方積分</span>
+            <span class="score-val guardian-score" id="score-g">0</span>
+          </div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-muted);">VS</div>
+          <div class="score-item">
+            <span class="score-val marauder-score" id="score-m">0</span>
+            <span style="font-size: 1.2rem;">🔮 汲取方積分</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Victory / Settlement Modal Popup -->
+  <div class="modal-overlay" id="result-modal">
+    <div class="modal-content">
+      <span class="modal-icon" id="modal-icon">🏆</span>
+      <h3 class="modal-title" id="modal-title">守護者聯盟 獲勝！</h3>
+      <p class="modal-desc" id="modal-desc">
+        在這一輪對決中，守護者展現了驚人的數學力量與默契，搶下了關鍵的公因數，成功捍衛了魔力植物！
+      </p>
+      <button class="btn-modal" onclick="closeResultModal()">開啟下一輪對決</button>
+    </div>
+  </div>
+
+  <script>
+    // --- WEB AUDIO API SOUND GENERATOR ---
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'correct') {
+          // Rapid magical arpeggio (C5 -> E5 -> G5)
+          const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+          notes.forEach((freq, index) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + index * 0.08);
+            
+            gain.gain.setValueAtTime(0.15, now + index * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.08 + 0.3);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + index * 0.08);
+            osc.stop(now + index * 0.08 + 0.35);
+          });
+        } 
+        else if (type === 'incorrect') {
+          // Low descending buzz
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.linearRampToValueAtTime(80, now + 0.3);
+          
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.linearRampToValueAtTime(0.001, now + 0.3);
+          
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        }
+        else if (type === 'gcf') {
+          // Powerful chord explosion & frequency slide
+          const freqs = [150, 300, 450, 600];
+          freqs.forEach((freq) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now);
+            osc.frequency.exponentialRampToValueAtTime(freq * 2.5, now + 0.4);
+            
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.55);
+          });
+          // Noise pop
+          const bufferSize = audioCtx.sampleRate * 0.3;
+          const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+          }
+          const noise = audioCtx.createBufferSource();
+          noise.buffer = buffer;
+          const noiseFilter = audioCtx.createBiquadFilter();
+          noiseFilter.type = 'bandpass';
+          noiseFilter.frequency.value = 1000;
+          const noiseGain = audioCtx.createGain();
+          noiseGain.gain.setValueAtTime(0.08, now);
+          noiseGain.gain.linearRampToValueAtTime(0.001, now + 0.25);
+          
+          noise.connect(noiseFilter);
+          noiseFilter.connect(noiseGain);
+          noiseGain.connect(audioCtx.destination);
+          noise.start(now);
+          noise.stop(now + 0.3);
+        }
+        else if (type === 'shield') {
+          // Radiant metallic riser
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(400, now);
+          osc.frequency.exponentialRampToValueAtTime(1200, now + 0.6);
+          
+          // Tremolo
+          const lfo = audioCtx.createOscillator();
+          const lfoGain = audioCtx.createGain();
+          lfo.frequency.value = 20; // Hz
+          lfoGain.gain.value = 80;
+          lfo.connect(lfoGain);
+          lfoGain.connect(osc.frequency);
+          
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+          
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          lfo.start(now);
+          osc.start(now);
+          lfo.stop(now + 0.7);
+          osc.stop(now + 0.7);
+        }
+        else if (type === 'freeze') {
+          // Crystal high chime sweep
+          const notes = [1046.50, 1174.66, 1318.51, 1567.98]; // C6, D6, E6, G6
+          notes.forEach((freq, index) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + index * 0.05);
+            
+            gain.gain.setValueAtTime(0.12, now + index * 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.05 + 0.25);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + index * 0.05);
+            osc.stop(now + index * 0.05 + 0.3);
+          });
+        }
+        else if (type === 'win') {
+          // Triumphant major scale fanfare (C5, E5, G5, C6)
+          const melody = [523.25, 659.25, 783.99, 1046.50];
+          const durations = [0.15, 0.15, 0.15, 0.55];
+          let timeAccum = 0;
+          melody.forEach((freq, index) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + timeAccum);
+            
+            gain.gain.setValueAtTime(0.2, now + timeAccum);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + timeAccum + durations[index]);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + timeAccum);
+            osc.stop(now + timeAccum + durations[index] + 0.05);
+            timeAccum += durations[index] - 0.03;
+          });
+        }
+        else if (type === 'lose') {
+          // Sad descending minor sweep
+          const melody = [392.00, 349.23, 311.13, 261.63]; // G4, F4, Eb4, C4
+          let timeAccum = 0;
+          melody.forEach((freq, index) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, now + timeAccum);
+            
+            gain.gain.setValueAtTime(0.12, now + timeAccum);
+            gain.gain.linearRampToValueAtTime(0.001, now + timeAccum + 0.3);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + timeAccum);
+            osc.stop(now + timeAccum + 0.35);
+            timeAccum += 0.22;
+          });
+        }
+      } catch (e) {
+        console.error("Audio Web Synth Error: ", e);
+      }
+    }
+
+
+    // --- GAME ENGINE STATE ---
+    let gameMode = 'multi'; // 'multi' or 'ai'
+    let currentRound = 1;
+    let maxRounds = 3;
+    let scores = { guardian: 0, marauder: 0 };
+    
+    let num1 = 12;
+    let num2 = 18;
+    let commonFactors = [];
+    let gcfValue = 1;
+    
+    // Tug of War parameters
+    let energyVal = 50; // 0 (Marauders win) to 100 (Guardians win). Balance is 50.
+    let baseTons = 50; // Relative offset to show force
+    let lockedFactors = {}; // factor -> 'guardian' or 'marauder'
+    
+    // GCF Active Skill States
+    let activeSkills = {
+      guardianShield: false, // Guardians active: halves Marauders pull strength
+      marauderFreeze: false, // Marauders active: freezes Guardians panel
+      guardianFreeze: false, // Guardians active: freezes Marauders panel
+      marauderShield: false  // Marauders active: halves Guardians pull strength
+    };
+    
+    let timers = {
+      gFreeze: null,
+      mFreeze: null,
+      gShield: null,
+      mShield: null
+    };
+
+    // Predefined round sequences for balanced lesson play
+    let roundSequence = [
+      { n1: 12, n2: 18 }, // GCF: 6, Factors: 1, 2, 3, 6
+      { n1: 16, n2: 24 }, // GCF: 8, Factors: 1, 2, 4, 8
+      { n1: 20, n2: 30 }  // GCF: 10, Factors: 1, 2, 5, 10
+    ];
+
+    // AI parameters
+    let aiTimer = null;
+    let aiDifficulty = 'medium'; // Thinking speed: 2s to 4.5s
+
+    // Init lobby
+    window.onload = function() {
+      // Setup keyboard listeners for easy hot-seat play
+      document.getElementById('input-g').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') submitFactor('guardian');
+      });
+      document.getElementById('input-m').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') submitFactor('marauder');
+      });
+
+      // Keypad click handlers
+      document.querySelectorAll('.btn-keypad-num').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const side = btn.getAttribute('data-side');
+          const num = btn.getAttribute('data-num');
+          const inputEl = document.getElementById(side === 'guardian' ? 'input-g' : 'input-m');
+          if (inputEl && !inputEl.disabled) {
+            if (inputEl.value.length < 3) {
+              inputEl.value += num;
+            }
+          }
+        });
+      });
+
+      document.querySelectorAll('.btn-keypad-clear').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const side = btn.getAttribute('data-side');
+          const inputEl = document.getElementById(side === 'guardian' ? 'input-g' : 'input-m');
+          if (inputEl && !inputEl.disabled) {
+            inputEl.value = '';
+          }
+        });
+      });
+
+      document.querySelectorAll('.btn-keypad-backspace').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const side = btn.getAttribute('data-side');
+          const inputEl = document.getElementById(side === 'guardian' ? 'input-g' : 'input-m');
+          if (inputEl && !inputEl.disabled) {
+            inputEl.value = inputEl.value.slice(0, -1);
+          }
+        });
+      });
+    };
+
+    // Math engine helpers
+    function getCommonFactors(a, b) {
+      const factorsA = getFactors(a);
+      const factorsB = getFactors(b);
+      return factorsA.filter(x => factorsB.includes(x)).sort((x, y) => x - y);
+    }
+
+    function getFactors(n) {
+      const factors = [];
+      for (let i = 1; i <= Math.sqrt(n); i++) {
+        if (n % i === 0) {
+          factors.push(i);
+          if (n / i !== i) {
+            factors.push(n / i);
+          }
+        }
+      }
+      return factors.sort((x, y) => x - y);
+    }
+
+    // --- GAME FLOW CONTROLLERS ---
+    
+    function showLobby() {
+      document.getElementById('screen-lobby').style.display = 'flex';
+      document.getElementById('screen-arena').style.display = 'none';
+      document.getElementById('btn-restart-lobby').style.display = 'none';
+      
+      // Stop AI
+      if (aiTimer) {
+        clearTimeout(aiTimer);
+        aiTimer = null;
+      }
+    }
+
+    // Generate 3 random rounds (Easy, Medium, Hard) on the fly
+    function generateDynamicRounds() {
+      const sequence = [];
+      
+      // Helper to generate a round based on criteria
+      function getRound(minVal, maxVal, minFactorsCount, maxFactorsCount) {
+        for (let attempt = 0; attempt < 300; attempt++) {
+          const n1 = Math.floor(Math.random() * (maxVal - minVal + 1)) + minVal;
+          const n2 = Math.floor(Math.random() * (maxVal - minVal + 1)) + minVal;
+          
+          if (n1 === n2) continue;
+          
+          const cf = getCommonFactors(n1, n2);
+          
+          // GCF must be > 1 to ensure interactive factor play
+          if (cf.length >= minFactorsCount && cf.length <= maxFactorsCount && cf[cf.length - 1] > 1) {
+            return { n1, n2 };
+          }
+        }
+        
+        // Fallbacks in case random generation fails
+        if (minFactorsCount <= 4) {
+          return { n1: 12, n2: 18 }; 
+        } else if (minFactorsCount <= 6) {
+          return { n1: 24, n2: 36 }; 
+        } else {
+          return { n1: 48, n2: 72 }; 
+        }
+      }
+      
+      // Round 1: Easy (10 to 30, 2-4 factors)
+      sequence.push(getRound(10, 30, 2, 4));
+      
+      // Round 2: Medium (20 to 60, 4-6 factors)
+      sequence.push(getRound(20, 60, 4, 6));
+      
+      // Round 3: Hard (40 to 100, 6-10 factors)
+      sequence.push(getRound(40, 100, 6, 10));
+      
+      return sequence;
+    }
+
+    function startGame(mode) {
+      gameMode = mode;
+      window.roundHistory = []; // Reset history
+      
+      if (mode === 'ai') {
+        document.querySelector('#panel-marauder .team-name').textContent = 'AI 汲取方';
+        document.querySelector('#panel-marauder .team-desc').textContent = 'AI 自動心算 (汲取能量至 0%)';
+        document.getElementById('marauder-controls').style.display = 'none';
+      } else {
+        document.querySelector('#panel-marauder .team-name').textContent = '汲取方';
+        document.querySelector('#panel-marauder .team-desc').textContent = '汲取能量至 0%';
+        document.getElementById('marauder-controls').style.display = 'flex';
+      }
+      
+      currentRound = 1;
+      scores.guardian = 0;
+      scores.marauder = 0;
+      
+      document.getElementById('score-g').textContent = '0';
+      document.getElementById('score-m').textContent = '0';
+      
+      // Generate 3-round sequence dynamically from easy to hard under 100
+      maxRounds = 3;
+      roundSequence = generateDynamicRounds();
+      
+      loadRound(roundSequence[0].n1, roundSequence[0].n2);
+      
+      document.getElementById('screen-lobby').style.display = 'none';
+      document.getElementById('screen-arena').style.display = 'grid';
+      document.getElementById('btn-restart-lobby').style.display = 'block';
+      
+      if (gameMode === 'ai') {
+        document.getElementById('ai-bubble-msg').style.display = 'block';
+      } else {
+        document.getElementById('ai-bubble-msg').style.display = 'none';
+      }
+    }
+
+    function startCustomGame() {
+      const n1 = parseInt(document.getElementById('custom-num1').value);
+      const n2 = parseInt(document.getElementById('custom-num2').value);
+      
+      if (isNaN(n1) || isNaN(n2) || n1 < 2 || n1 > 100 || n2 < 2 || n2 > 100) {
+        alert("請輸入介於 2 至 100 之間的有效正整數！");
+        return;
+      }
+      
+      gameMode = 'multi'; // Custom rounds are local versus by default
+      currentRound = 1;
+      maxRounds = 1; // 1 round custom fight
+      scores.guardian = 0;
+      scores.marauder = 0;
+      window.roundHistory = []; // Reset history
+      
+      document.getElementById('score-g').textContent = '0';
+      document.getElementById('score-m').textContent = '0';
+      
+      loadRound(n1, n2);
+      
+      document.getElementById('screen-lobby').style.display = 'none';
+      document.getElementById('screen-arena').style.display = 'grid';
+      document.getElementById('btn-restart-lobby').style.display = 'block';
+      
+      // Reset layout
+      document.querySelector('#panel-marauder .team-name').textContent = '汲取方';
+      document.querySelector('#panel-marauder .team-desc').textContent = '汲取能量至 0%';
+      document.getElementById('marauder-controls').style.display = 'flex';
+      document.getElementById('ai-bubble-msg').style.display = 'none';
+    }
+
+    function loadRound(n1Val, n2Val) {
+      num1 = n1Val;
+      num2 = n2Val;
+      
+      commonFactors = getCommonFactors(num1, num2);
+      gcfValue = commonFactors[commonFactors.length - 1];
+      
+      // Clear game board state
+      energyVal = 50;
+      lockedFactors = {};
+      
+      // Clear skills
+      activeSkills.guardianShield = false;
+      activeSkills.marauderFreeze = false;
+      activeSkills.guardianFreeze = false;
+      activeSkills.marauderShield = false;
+      
+      // Clear freeze visual classes
+      document.getElementById('panel-guardian').classList.remove('has-freeze', 'has-shield');
+      document.getElementById('panel-marauder').classList.remove('has-freeze', 'has-shield');
+      
+      // Cancel timers
+      for (let k in timers) {
+        if (timers[k]) clearInterval(timers[k]);
+        timers[k] = null;
+      }
+      
+      // Reset inputs
+      document.getElementById('input-g').value = '';
+      document.getElementById('input-g').disabled = false;
+      document.getElementById('input-m').value = '';
+      document.getElementById('input-m').disabled = false;
+      
+      // Reset skill badge texts
+      document.getElementById('skill-g').innerHTML = '<span>🛡️ 神聖護盾：未觸發</span>';
+      document.getElementById('skill-m').innerHTML = gameMode === 'ai' ? '<span>🔮 暗影冰凍：未觸發 (AI技能)</span>' : '<span>🔮 暗影冰凍：未觸發</span>';
+      
+      // Update sky dome display
+      document.getElementById('round-lbl').textContent = maxRounds === 1 ? `自訂天空戰役` : `戰役第 ${currentRound} 輪 / 共 ${maxRounds} 輪`;
+      document.getElementById('sky-n1').textContent = num1;
+      document.getElementById('sky-n2').textContent = num2;
+      
+      // Populate factors list in UI
+      const factorsGrid = document.getElementById('factors-grid');
+      factorsGrid.innerHTML = '';
+      commonFactors.forEach(factor => {
+        const badge = document.createElement('span');
+        badge.className = `factor-badge${factor === gcfValue ? ' is-gcf' : ''}`;
+        badge.id = `badge-${factor}`;
+        badge.textContent = '?';
+        factorsGrid.appendChild(badge);
+      });
+      
+      // Reset logs panel
+      document.getElementById('round-log').innerHTML = `<div style="color: var(--text-muted); text-align: center; font-weight: bold; width: 100%;">戰局即時快報 (天空對戰數字：${num1} & ${num2})</div>`;
+      
+      // Sync energy bar UI
+      updateEnergyBarUI();
+      
+      // Sync dynamic SVG plant
+      updatePlantSVG();
+      
+      // Start AI timer if needed
+      if (gameMode === 'ai') {
+        triggerAIThinking();
+      }
+    }
+
+    // --- INTERACTIVE MECHANICS ---
+    
+    function submitFactor(side) {
+      initAudio(); // Ensure Audio Context starts on click
+      
+      // Check freeze state
+      if (side === 'guardian' && activeSkills.marauderFreeze) {
+        playSound('incorrect');
+        return;
+      }
+      if (side === 'marauder' && activeSkills.guardianFreeze) {
+        playSound('incorrect');
+        return;
+      }
+      
+      const inputId = side === 'guardian' ? 'input-g' : 'input-m';
+      const inputEl = document.getElementById(inputId);
+      const val = parseInt(inputEl.value);
+      
+      if (isNaN(val) || val <= 0) {
+        shakeInput(inputEl);
+        playSound('incorrect');
+        return;
+      }
+      
+      // Validate common factor
+      if (!commonFactors.includes(val)) {
+        // Incorrect: trigger shake penalty
+        shakeInput(inputEl);
+        playSound('incorrect');
+        addLog(side, `輸入非公因數數字 [ ${val} ]，產生反衝力，失去控制 1.5 秒！`);
+        
+        // Lock player out for 1.5s
+        inputEl.disabled = true;
+        const btn = inputEl.nextElementSibling;
+        if (btn) btn.disabled = true;
+        
+        setTimeout(() => {
+          inputEl.disabled = false;
+          if (btn) btn.disabled = false;
+          inputEl.focus();
+        }, 1500);
+        
+        inputEl.value = '';
+        return;
+      }
+      
+      // Validate locked status
+      if (lockedFactors[val]) {
+        shakeInput(inputEl);
+        playSound('incorrect');
+        addLog(side, `數字 [ ${val} ] 已經被對手搶先鎖定囉！`);
+        inputEl.value = '';
+        return;
+      }
+      
+      // Correct! Perform game action
+      registerCorrectFactor(side, val);
+      inputEl.value = '';
+      if (gameMode !== 'ai' || side === 'guardian') {
+        inputEl.focus();
+      }
+    }
+
+    function shakeInput(el) {
+      el.classList.add('input-error-shake');
+      setTimeout(() => el.classList.remove('input-error-shake'), 400);
+    }
+
+    function registerCorrectFactor(side, val) {
+      // Mark as locked
+      lockedFactors[val] = side;
+      
+      // Update factor badge UI
+      const badge = document.getElementById(`badge-${val}`);
+      if (badge) {
+        badge.classList.add(side === 'guardian' ? 'locked-guardian' : 'locked-marauder');
+        badge.textContent = val;
+      }
+      // Determine energy impact
+      let energyImpact = 10; // Every factor has a base value of 10 points
+      const isGCF = (val === gcfValue);
+      let gcfText = "";
+      
+      if (isGCF) {
+        energyImpact = 20; // GCF gets a bonus (total 20 points)
+        gcfText = " [最大公因數 GCF 能量脈衝 +10 點！] ";
+        playSound('gcf');
+        triggerScreenShake();
+      } else {
+        playSound('correct');
+      }
+      
+      // Apply Holy Shield penalty to opponent if active
+      let actualImpact = energyImpact;
+      if (side === 'guardian' && activeSkills.marauderShield) {
+        actualImpact = Math.max(1, Math.round(energyImpact * 0.5));
+        addLog('marauder', `🛡️ 神聖護盾阻擋！將守護方的生命能量衝擊折半 (自 ${energyImpact} 減至 ${actualImpact} 點)！`);
+      } else if (side === 'marauder' && activeSkills.guardianShield) {
+        actualImpact = Math.max(1, Math.round(energyImpact * 0.5));
+        addLog('guardian', `🛡️ 神聖護盾阻擋！將汲取方的暗影侵蝕能量折半 (自 ${energyImpact} 減至 ${actualImpact} 點)！`);
+      }
+      
+      // Move Energy Bar
+      // Guardians inject positive energy towards 100%, Marauders drain energy towards 0%
+      const energyChange = (side === 'guardian') ? actualImpact : -actualImpact;
+      
+      // The energy scale translates: each point is worth roughly 1.8% of the core's capacity
+      const scaleFactor = 1.8; 
+      energyVal += energyChange * scaleFactor;
+      
+      // Cap energyVal between 0 and 100
+      energyVal = Math.min(100, Math.max(0, energyVal));
+      
+      // Trigger floating text animation
+      triggerFloatingText(side, isGCF ? `GCF PULSE +${actualImpact}⚡` : `+${actualImpact} 點`, side === 'guardian' ? 120 : 280);
+      
+      // Log event
+      addLog(side, `搶下公因數 [ ${val} ]，${side === 'guardian' ? '注入' : '汲取'}了 ${actualImpact} 點${side === 'guardian' ? '生命' : '暗影'}能量！${gcfText}`);
+      
+      // Trigger GCF special active skill
+      if (isGCF) {
+        triggerGCFSkill(side);
+      }
+      
+      // Update UI & visualizer
+      updateEnergyBarUI();
+      updatePlantSVG();
+      
+      // Check win condition
+      if (checkWinCondition()) {
+        return;
+      }
+      
+      // If AI mode, recalculate AI next move
+      if (gameMode === 'ai') {
+        triggerAIThinking();
+      }
+    }
+
+    function triggerGCFSkill(side) {
+      if (side === 'guardian') {
+        // Guardians activate Holy Shield (🛡️)
+        activeSkills.guardianShield = true;
+        document.getElementById('panel-guardian').classList.add('has-shield');
+        playSound('shield');
+        
+        let timeLeft = 3.0;
+        document.getElementById('skill-g').innerHTML = `<span>🛡️ 聖光護盾生效中：3.0s (減免對手拉力)</span>`;
+        
+        if (timers.gShield) clearInterval(timers.gShield);
+        timers.gShield = setInterval(() => {
+          timeLeft -= 0.1;
+          if (timeLeft <= 0) {
+            clearInterval(timers.gShield);
+            activeSkills.guardianShield = false;
+            document.getElementById('panel-guardian').classList.remove('has-shield');
+            document.getElementById('skill-g').innerHTML = `<span>🛡️ 神聖護盾：已失效</span>`;
+          } else {
+            document.getElementById('skill-g').innerHTML = `<span>🛡️ 聖光護盾生效中：${timeLeft.toFixed(1)}s</span>`;
+          }
+        }, 100);
+      } else {
+        // Marauders activate Shadow Freeze (❄️)
+        activeSkills.marauderFreeze = true;
+        document.getElementById('panel-guardian').classList.add('has-freeze');
+        document.getElementById('input-g').disabled = true;
+        playSound('freeze');
+        
+        let timeLeft = 2.5;
+        document.getElementById('freeze-timer-g').textContent = `剩餘 2.5 秒`;
+        document.getElementById('skill-m').innerHTML = `<span>🔮 暗影冰凍生效中：2.5s (凍結對手)</span>`;
+        
+        if (timers.mFreeze) clearInterval(timers.mFreeze);
+        timers.mFreeze = setInterval(() => {
+          timeLeft -= 0.1;
+          if (timeLeft <= 0) {
+            clearInterval(timers.mFreeze);
+            activeSkills.marauderFreeze = false;
+            document.getElementById('panel-guardian').classList.remove('has-freeze');
+            document.getElementById('input-g').disabled = false;
+            document.getElementById('skill-m').innerHTML = `<span>🔮 暗影冰凍：已失效</span>`;
+          } else {
+            document.getElementById('freeze-timer-g').textContent = `剩餘 ${timeLeft.toFixed(1)} 秒`;
+            document.getElementById('skill-m').innerHTML = `<span>🔮 暗影冰凍生效中：${timeLeft.toFixed(1)}s</span>`;
+          }
+        }, 100);
+      }
+    }
+
+    // --- SCREEN EFFECTS ---
+    
+    function triggerScreenShake() {
+      const container = document.body;
+      container.classList.add('shake');
+      setTimeout(() => container.classList.remove('shake'), 400);
+    }
+
+    function triggerFloatingText(side, text, xPos) {
+      const container = document.getElementById('visualizer-container');
+      const floatEl = document.createElement('div');
+      floatEl.className = `float-msg ${side}-msg${text.includes('GCF') ? ' gcf-msg' : ''}`;
+      floatEl.style.left = `${xPos}px`;
+      floatEl.style.top = `80px`;
+      floatEl.textContent = text;
+      container.appendChild(floatEl);
+      
+      // Cleanup
+      setTimeout(() => floatEl.remove(), 1200);
+    }
+
+    // --- LOGGING ---
+    function addLog(side, message) {
+      const logBox = document.getElementById('round-log');
+      const item = document.createElement('div');
+      item.className = `log-item ${side === 'guardian' ? 'guardians' : 'marauders'}`;
+      
+      const timeStr = new Date().toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      item.innerHTML = `<span>[${timeStr}] ${side === 'guardian' ? '🛡️ 守護方' : '🔮 汲取方'}: ${message}</span>`;
+      
+      logBox.appendChild(item);
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    // --- UI SYNCS ---
+    
+    function updateEnergyBarUI() {
+      const fillG = document.getElementById('bar-fill-g');
+      const fillM = document.getElementById('bar-fill-m');
+      const pointer = document.getElementById('bar-pointer');
+      const statusText = document.getElementById('energy-status-text');
+      
+      fillG.style.right = `${100 - energyVal}%`;
+      fillM.style.left = `${energyVal}%`;
+      pointer.style.left = `${energyVal}%`;
+      
+      const diff = Math.abs(energyVal - 50);
+      const roundedPoints = Math.round(diff * 0.55);
+      
+      if (energyVal === 50) {
+        statusText.textContent = "目前能量雙方勢均力敵，處於完美共生平衡";
+        statusText.style.color = 'var(--text-color)';
+      } else if (energyVal > 50) {
+        statusText.textContent = `偏向守護方：生命之光強勢淨化中 +${roundedPoints} 點！`;
+        statusText.style.color = 'var(--color-guardian)';
+      } else {
+        statusText.textContent = `偏向汲取方：暗影能量強勢侵蝕中 +${roundedPoints} 點！`;
+        statusText.style.color = 'var(--color-marauder)';
+      }
+    }
+
+    function interpolateColor(color1, color2, factor) {
+      const c1 = parseHex(color1);
+      const c2 = parseHex(color2);
+      const r = Math.round(c1.r + (c2.r - c1.r) * factor);
+      const g = Math.round(c1.g + (c2.g - c1.g) * factor);
+      const b = Math.round(c1.b + (c2.b - c1.b) * factor);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+    
+    function parseHex(hex) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) {
+        hex = hex.split('').map(c => c + c).join('');
+      }
+      const num = parseInt(hex, 16);
+      return {
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255
+      };
+    }
+
+    function updatePlantSVG() {
+      const stem = document.getElementById('plant-stem');
+      const ropeG = document.getElementById('rope-g');
+      const ropeM = document.getElementById('rope-m');
+      
+      // Calculate growth height based on energyVal (0% -> 35px, 50% -> 80px, 100% -> 115px)
+      const h = energyVal <= 0 ? 35 : (45 + (energyVal / 100) * 70);
+      
+      // Leans to the right when shadow is strong (energy < 50), stands straight when healthy
+      const droopX = Math.max(0, 50 - energyVal) * 0.9;
+      
+      // Draw stem: starting at (0,0) [which is absolute 200, 240] curving to (droopX, -h)
+      stem.setAttribute('d', `M 0 0 C 0 -20, ${droopX * 0.3} ${-h * 0.6}, ${droopX} ${-h}`);
+      
+      // Absolute coordinates of the plant core
+      const coreAbsX = 200 + droopX;
+      const coreAbsY = 240 - h;
+      
+      // Update energy beams (left & right) connecting to the core
+      ropeG.setAttribute('d', `M 50 180 Q ${125 + droopX * 0.3} ${180 + (coreAbsY - 180) * 0.5} ${coreAbsX} ${coreAbsY}`);
+      ropeM.setAttribute('d', `M 350 180 Q ${275 + droopX * 0.3} ${180 + (coreAbsY - 180) * 0.5} ${coreAbsX} ${coreAbsY}`);
+      
+      // Dynamic beam thickness and opacity based on energy concentration
+      const thicknessG = 1.5 + (energyVal / 100) * 6.5;
+      const opacityG = 0.2 + (energyVal / 100) * 0.8;
+      ropeG.setAttribute('stroke-width', thicknessG);
+      ropeG.style.opacity = opacityG;
+      
+      const thicknessM = 1.5 + ((100 - energyVal) / 100) * 6.5;
+      const opacityM = 0.2 + ((100 - energyVal) / 100) * 0.8;
+      ropeM.setAttribute('stroke-width', thicknessM);
+      ropeM.style.opacity = opacityM;
+      
+      // Update plant core position
+      const core = document.getElementById('plant-core');
+      core.setAttribute('cx', droopX);
+      core.setAttribute('cy', -h);
+      
+      const innerCore = core.nextElementSibling;
+      innerCore.setAttribute('cx', droopX);
+      innerCore.setAttribute('cy', -h);
+      
+      // Determine plant colors and filters based on energy level
+      let leafColor = '#81C784';
+      let stemColor = '#4CAF50';
+      let coreColor = '#D4AF37';
+      let shadowGlow = '#FFD54F';
+      let coreFilter = '';
+      
+      if (energyVal >= 100) {
+        // Ultimate Blooming State - Radiating intense light (守護方勝利散發光芒)
+        leafColor = '#81C784';
+        stemColor = '#2E7D32';
+        coreColor = '#FFF59D'; // Brilliant yellow-white
+        shadowGlow = '#FFD54F';
+        coreFilter = 'drop-shadow(0px 0px 25px #FFD54F) drop-shadow(0px 0px 10px #FFFFFF)'; // Double glow!
+      } else if (energyVal <= 0) {
+        // Ultimate Withered State (汲取方勝利植物枯萎)
+        leafColor = '#8D6E63'; // Dry brown leaf
+        stemColor = '#5D4037'; // Dead wood brown stem
+        coreColor = '#3E2723'; // Completely shriveled dead core
+        shadowGlow = 'transparent';
+        coreFilter = 'none'; // No glow, dead
+      } else if (energyVal >= 50) {
+        const ratio = (energyVal - 50) / 50; // 0 to 1
+        leafColor = interpolateColor('#81C784', '#66BB6A', ratio);
+        stemColor = interpolateColor('#4CAF50', '#2E7D32', ratio);
+        coreColor = interpolateColor('#D4AF37', '#FFD54F', ratio);
+        shadowGlow = '#FFD54F';
+        coreFilter = `drop-shadow(0px 0px ${4 + (energyVal/100)*8}px ${shadowGlow})`;
+      } else {
+        const ratio = (50 - energyVal) / 50; // 0 to 1
+        leafColor = interpolateColor('#81C784', '#6A1B9A', ratio); // dark purple
+        stemColor = interpolateColor('#4CAF50', '#4A148C', ratio); // deep indigo stem
+        coreColor = interpolateColor('#D4AF37', '#311B92', ratio); // dark shadow core
+        shadowGlow = '#7B1FA2';
+        coreFilter = `drop-shadow(0px 0px ${4 + (energyVal/100)*8}px ${shadowGlow})`;
+      }
+      
+      stem.setAttribute('stroke', stemColor);
+      core.setAttribute('fill', coreColor);
+      core.setAttribute('filter', coreFilter);
+      
+      // Shrink core when withered, grow when healthy
+      const coreR = 8 + (energyVal / 100) * 12;
+      core.setAttribute('r', coreR);
+      innerCore.setAttribute('r', coreR / 2);
+      
+      // Update leaves
+      const leaves = document.querySelectorAll('#svg-plant-group path:not(#plant-stem)');
+      const leaf1 = leaves[0];
+      const leaf2 = leaves[1];
+      
+      const midX1 = droopX * 0.3;
+      const midY1 = -h * 0.35;
+      const midX2 = droopX * 0.6;
+      const midY2 = -h * 0.65;
+      
+      if (leaf1) {
+        leaf1.setAttribute('d', `M ${midX1} ${midY1} Q ${midX1 - 25} ${midY1 - 10}, ${midX1 - 15} ${midY1 + 15} Q ${midX1 - 5} ${midY1 + 10}, ${midX1} ${midY1}`);
+        leaf1.setAttribute('fill', leafColor);
+      }
+      if (leaf2) {
+        leaf2.setAttribute('d', `M ${midX2} ${midY2} Q ${midX2 + 25} ${midY2 - 10}, ${midX2 + 15} ${midY2 + 15} Q ${midX2 + 5} ${midY2 + 10}, ${midX2} ${midY2}`);
+        leaf2.setAttribute('fill', leafColor);
+      }
+    }
+
+    // --- GAME RULE & WIN CHECK ---
+    
+    function checkWinCondition() {
+      // 必須等所有公因數均被解鎖，才判定回合結束，讓學生完整完成公因數練習
+      const allLocked = commonFactors.every(factor => lockedFactors[factor] !== undefined);
+      if (!allLocked) {
+        return false; // 還有公因數未被解鎖，繼續遊戲，學生可繼續輸入並觀察植物狀態
+      }
+      
+      let roundWinner = null;
+      if (energyVal > 50) {
+        roundWinner = 'guardian';
+      } else if (energyVal < 50) {
+        roundWinner = 'marauder';
+      } else {
+        roundWinner = 'draw';
+      }
+      
+      resolveRoundEnd(roundWinner);
+      return true;
+    }
+
+    function resolveRoundEnd(winner) {
+      if (aiTimer) {
+        clearTimeout(aiTimer);
+        aiTimer = null;
+      }
+      
+      // Save round history
+      if (!window.roundHistory) window.roundHistory = [];
+      window.roundHistory.push({
+        roundNum: currentRound,
+        num1: num1,
+        num2: num2,
+        factors: [...commonFactors],
+        winner: winner
+      });
+      
+      const modal = document.getElementById('result-modal');
+      const title = document.getElementById('modal-title');
+      const desc = document.getElementById('modal-desc');
+      const icon = document.getElementById('modal-icon');
+      
+      const svgGlowingPlant = `
+        <svg width="90" height="90" viewBox="0 0 100 100" style="filter: drop-shadow(0px 0px 8px #FFD54F);">
+          <circle cx="50" cy="50" r="30" fill="rgba(255, 213, 79, 0.15)"></circle>
+          <circle cx="28" cy="32" r="2.5" fill="#FFF59D"></circle>
+          <circle cx="72" cy="38" r="2" fill="#FFF59D"></circle>
+          <circle cx="50" cy="18" r="2.5" fill="#FFD54F"></circle>
+          <circle cx="33" cy="62" r="2" fill="#FFD54F"></circle>
+          <circle cx="68" cy="65" r="1.5" fill="#FFD54F"></circle>
+          <path d="M 50 80 Q 50 52 50 38" fill="none" stroke="#2E7D32" stroke-width="5" stroke-linecap="round"></path>
+          <path d="M 50 62 Q 32 58 38 46 Q 48 52 50 62" fill="#81C784"></path>
+          <path d="M 50 50 Q 68 46 62 34 Q 52 40 50 50" fill="#81C784"></path>
+          <circle cx="50" cy="33" r="10" fill="#FFF59D" stroke="#FFD54F" stroke-width="2"></circle>
+          <circle cx="50" cy="33" r="4.5" fill="#FFF"></circle>
+        </svg>
+      `;
+
+      const svgWitheredPlant = `
+        <svg width="90" height="90" viewBox="0 0 100 100">
+          <path d="M 45 80 Q 48 62 68 52" fill="none" stroke="#5D4037" stroke-width="5" stroke-linecap="round"></path>
+          <path d="M 47 68 Q 32 72 34 80 Q 42 76 47 68" fill="#8D6E63"></path>
+          <path d="M 58 58 Q 72 68 66 78 Q 61 68 58 58" fill="#8D6E63"></path>
+          <circle cx="68" cy="52" r="7" fill="#3E2723" stroke="#5D4037" stroke-width="1.5"></circle>
+          <circle cx="68" cy="52" r="2.5" fill="#2D1510"></circle>
+        </svg>
+      `;
+      
+      if (winner === 'guardian') {
+        scores.guardian++;
+        document.getElementById('score-g').textContent = scores.guardian;
+        icon.innerHTML = svgGlowingPlant;
+        title.textContent = '守護方 獲勝！';
+        title.style.color = 'var(--color-guardian)';
+        desc.innerHTML = `在本輪對戰中，<b>守護方</b>成功注入生命能量，共生植物散發出璀璨的生命之光！<br>
+        天空數字：<b>${num1} & ${num2}</b> 的公因數為：<b>{ ${commonFactors.join(', ')} }</b>，最大公因數為 <b>${gcfValue}</b>！`;
+        playSound('win');
+      } else if (winner === 'marauder') {
+        scores.marauder++;
+        document.getElementById('score-m').textContent = scores.marauder;
+        icon.innerHTML = svgWitheredPlant;
+        title.textContent = gameMode === 'ai' ? 'AI軍團 獲勝！' : '汲取方 獲勝！';
+        title.style.color = 'var(--color-marauder)';
+        desc.innerHTML = `在本輪對戰中，<b>汲取方</b>將生命能量完全汲取，植物萎縮枯萎！<br>
+        天空數字：<b>${num1} & ${num2}</b> 的公因數為：<b>{ ${commonFactors.join(', ')} }</b>，最大公因數為 <b>${gcfValue}</b>！`;
+        playSound('lose');
+      } else {
+        icon.innerHTML = '⚖️';
+        title.textContent = '戰局完美平手！';
+        title.style.color = 'var(--text-color)';
+        desc.innerHTML = `雙方的能量傳輸極其平衡，所有公因數皆已揭曉！<br>
+        天空數字：<b>${num1} & ${num2}</b> 的公因數為：<b>{ ${commonFactors.join(', ')} }</b>！`;
+        playSound('win');
+      }
+      
+      setTimeout(() => {
+        modal.classList.add('active');
+      }, 800);
+    }
+
+    function closeResultModal() {
+      document.getElementById('result-modal').classList.remove('active');
+      
+      currentRound++;
+      if (currentRound > maxRounds) {
+        showTournamentEnd();
+      } else {
+        const nextRoundConfig = roundSequence[currentRound - 1];
+        loadRound(nextRoundConfig.n1, nextRoundConfig.n2);
+      }
+    }
+
+    function showTournamentEnd() {
+      const modal = document.getElementById('result-modal');
+      const title = document.getElementById('modal-title');
+      const desc = document.getElementById('modal-desc');
+      const icon = document.getElementById('modal-icon');
+      
+      const svgGlowingPlant = `
+        <svg width="90" height="90" viewBox="0 0 100 100" style="filter: drop-shadow(0px 0px 8px #FFD54F);">
+          <circle cx="50" cy="50" r="30" fill="rgba(255, 213, 79, 0.15)"></circle>
+          <circle cx="28" cy="32" r="2.5" fill="#FFF59D"></circle>
+          <circle cx="72" cy="38" r="2" fill="#FFF59D"></circle>
+          <circle cx="50" cy="18" r="2.5" fill="#FFD54F"></circle>
+          <circle cx="33" cy="62" r="2" fill="#FFD54F"></circle>
+          <circle cx="68" cy="65" r="1.5" fill="#FFD54F"></circle>
+          <path d="M 50 80 Q 50 52 50 38" fill="none" stroke="#2E7D32" stroke-width="5" stroke-linecap="round"></path>
+          <path d="M 50 62 Q 32 58 38 46 Q 48 52 50 62" fill="#81C784"></path>
+          <path d="M 50 50 Q 68 46 62 34 Q 52 40 50 50" fill="#81C784"></path>
+          <circle cx="50" cy="33" r="10" fill="#FFF59D" stroke="#FFD54F" stroke-width="2"></circle>
+          <circle cx="50" cy="33" r="4.5" fill="#FFF"></circle>
+        </svg>
+      `;
+
+      const svgWitheredPlant = `
+        <svg width="90" height="90" viewBox="0 0 100 100">
+          <path d="M 45 80 Q 48 62 68 52" fill="none" stroke="#5D4037" stroke-width="5" stroke-linecap="round"></path>
+          <path d="M 47 68 Q 32 72 34 80 Q 42 76 47 68" fill="#8D6E63"></path>
+          <path d="M 58 58 Q 72 68 66 78 Q 61 68 58 58" fill="#8D6E63"></path>
+          <circle cx="68" cy="52" r="7" fill="#3E2723" stroke="#5D4037" stroke-width="1.5"></circle>
+          <circle cx="68" cy="52" r="2.5" fill="#2D1510"></circle>
+        </svg>
+      `;
+      
+      title.style.color = 'var(--text-color)';
+      
+      let loreText = "";
+      let soundToPlay = 'win';
+      
+      if (scores.guardian > scores.marauder) {
+        icon.innerHTML = svgGlowingPlant;
+        title.textContent = '👑 守護方 奪得最終總冠軍！';
+        loreText = `最終比數 <b>${scores.guardian} : ${scores.marauder}</b>！<br>
+        守護方展現卓越的心算與部署，讓生命之光強勢淨化森林，成功守護了整座共生生態！`;
+        soundToPlay = 'win';
+      } else if (scores.marauder > scores.guardian) {
+        icon.innerHTML = svgWitheredPlant;
+        title.textContent = gameMode === 'ai' ? '👑 AI軍團 奪得最終總冠軍！' : '👑 汲取方 奪得最終總冠軍！';
+        loreText = `最終比數 <b>${scores.guardian} : ${scores.marauder}</b>！<br>
+        汲取方攻勢猛烈，將植物能量完全吸乾，森林陷入枯萎與暗影之中！`;
+        soundToPlay = 'lose';
+      } else {
+        icon.innerHTML = '⚖️';
+        title.textContent = '👑 雙方戰成平手，共享和諧生態！';
+        loreText = `最終比數 <b>${scores.guardian} : ${scores.marauder}</b>！<br>
+        雙方均勢抗衡，數學力量勢均力敵，共同維持了生態的完美平衡！`;
+        soundToPlay = 'win';
+      }
+      
+      // Build round history table
+      let historyHtml = '<div style="margin-top: 12px; padding: 8px 12px; background: rgba(255,255,255,0.75); border-radius: 10px; text-align: left; font-size: 0.8rem; border: 1px solid rgba(0,0,0,0.06); color: var(--text-color);">';
+      historyHtml += '<h4 style="margin-bottom: 6px; text-align: center; color: var(--text-color); font-weight: 800; font-size: 0.85rem;">📋 本屆戰役 3 局對決歷史紀錄</h4>';
+      if (window.roundHistory && window.roundHistory.length > 0) {
+        window.roundHistory.forEach(r => {
+          let winText = "";
+          if (r.winner === 'guardian') {
+            winText = '<span style="color: var(--color-guardian); font-weight: 800;">守護方勝</span>';
+          } else if (r.winner === 'marauder') {
+            winText = '<span style="color: var(--color-marauder); font-weight: 800;">汲取方勝</span>';
+          } else {
+            winText = '<span style="color: var(--text-muted); font-weight: 800;">雙方平手</span>';
+          }
+          historyHtml += `<div style="margin-bottom: 6px; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 4px; line-height: 1.4;">` +
+                         `<b>第 ${r.roundNum} 局</b>：天空對戰數字 <b>{${r.num1}, ${r.num2}}</b><br>` +
+                         `公因數為 <b>{ ${r.factors.join(', ')} }</b> (${winText})` +
+                         `</div>`;
+        });
+      } else {
+        historyHtml += '<div style="text-align: center; color: var(--text-muted);">無歷史紀錄</div>';
+      }
+      historyHtml += '</div>';
+      
+      desc.innerHTML = loreText + historyHtml;
+      playSound(soundToPlay);
+      
+      const btn = document.querySelector('.btn-modal');
+      btn.textContent = "返回遊戲大廳";
+      btn.onclick = function() {
+        modal.classList.remove('active');
+        showLobby();
+        btn.textContent = "開啟下一輪對決";
+        btn.onclick = closeResultModal;
+      };
+      
+      modal.classList.add('active');
+    }
+
+
+    // --- INTELLIGENT AI SYSTEM ---
+    
+    function triggerAIThinking() {
+      if (gameMode !== 'ai') return;
+      if (aiTimer) clearTimeout(aiTimer);
+      
+      const remaining = commonFactors.filter(f => lockedFactors[f] === undefined);
+      if (remaining.length === 0) return;
+      
+      const bubble = document.getElementById('ai-bubble-msg');
+      bubble.style.display = 'block';
+      bubble.textContent = "AI 正在努力心算中...";
+      
+      const isGCFUp = remaining.includes(gcfValue);
+      let thinkTime = 2000 + Math.random() * 2000;
+      
+      if (isGCFUp) {
+        thinkTime = 1500 + Math.random() * 1200; 
+      }
+      
+      aiTimer = setTimeout(() => {
+        let chosen = null;
+        
+        if (isGCFUp && Math.random() < 0.65) {
+          chosen = gcfValue;
+        } else {
+          chosen = remaining[Math.floor(Math.random() * remaining.length)];
+        }
+        
+        if (chosen) {
+          bubble.textContent = `AI 搶答了公因數：${chosen}！`;
+          setTimeout(() => {
+            if (lockedFactors[chosen] === undefined) {
+              registerCorrectFactor('marauder', chosen);
+            }
+          }, 300);
+        }
+      }, thinkTime);
+    }
+
+  </script>
+</body>
+</html>

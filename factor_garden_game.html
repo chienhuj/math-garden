@@ -1,0 +1,3157 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌱 發芽魔法 - 因數學習遊戲</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Outfit:wght@300;400;600;800&display=swap');
+
+    :root {
+      /* Morandi Palette - Premium Minimalist & Soft Tones */
+      --bg-color: #E6ECE9;              /* Morandi Soft Sage */
+      --panel-bg: rgba(248, 250, 249, 0.85); /* Frosted Morandi White */
+      --panel-border: rgba(255, 255, 255, 0.6);
+      --shadow-color: rgba(76, 94, 85, 0.12);
+      
+      /* Colors */
+      --text-primary: #2B3D34;          /* Deep Forest Grey */
+      --text-secondary: #6A7C72;        /* Soft Sage Slate */
+      --text-light: #8E9F95;
+      
+      --color-basic: #5C9E7A;           /* Morandi Green */
+      --color-basic-hover: #488261;
+      --color-advanced: #5C8EA8;        /* Morandi Steel Blue for Advanced */
+      --color-advanced-hover: #46758E;
+      --color-challenge: #D18D6C;       /* Morandi Warm Terracotta */
+      --color-challenge-hover: #BA7756;
+      
+      --color-success: #6CA680;
+      --color-danger: #D98880;
+      --color-glow: rgba(108, 166, 128, 0.4);
+      --color-connector: #B8C7C0;
+      
+      --transition-smooth: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Particle Canvas Background */
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 50%, #EFF4F2 0%, #DCE5E1 100%);
+    }
+
+    /* Floating container */
+    .game-container {
+      width: 100%;
+      max-width: 1100px;
+      min-height: 720px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1.5px solid var(--panel-border);
+      border-radius: 24px;
+      box-shadow: 0 12px 40px var(--shadow-color);
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Header Styling */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(43, 61, 52, 0.1);
+      z-index: 5;
+    }
+
+    .title-group h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-group p {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+
+    .hud-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    /* Badge & Button styling */
+    .badge {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .badge.basic { background-color: var(--color-basic); }
+    .badge.advanced { background-color: var(--color-advanced); }
+    .badge.challenge { background-color: var(--color-challenge); }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background-color: var(--color-basic);
+      color: white;
+      box-shadow: 0 4px 12px rgba(92, 158, 122, 0.25);
+    }
+    .btn-primary:hover {
+      background-color: var(--color-basic-hover);
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      background-color: transparent;
+      border: 1.5px solid var(--text-secondary);
+      color: var(--text-primary);
+    }
+    .btn-secondary:hover {
+      background-color: rgba(43, 61, 52, 0.05);
+    }
+
+    /* Screen Management */
+    .screen {
+      display: none;
+      flex-direction: column;
+      flex-grow: 1;
+      animation: fadeIn 0.5s ease;
+    }
+    .screen.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* LOBBY SCREEN */
+    .lobby-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px 10px;
+      flex-grow: 1;
+    }
+
+    .lobby-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .lobby-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      margin-bottom: 15px;
+      color: var(--text-primary);
+    }
+
+    .lobby-desc {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 650px;
+      margin-bottom: 40px;
+      line-height: 1.7;
+      font-weight: 500;
+    }
+
+    .modes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      width: 100%;
+      max-width: 950px;
+      justify-content: center;
+    }
+
+    @media (max-width: 900px) {
+      .modes-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .mode-card {
+      background: white;
+      border: 1.5px solid rgba(43, 61, 52, 0.08);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.02);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mode-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(76, 94, 85, 0.08);
+    }
+
+    .mode-card.basic-card:hover { border-color: var(--color-basic); }
+    .mode-card.advanced-card:hover { border-color: var(--color-advanced); }
+    .mode-card.challenge-card:hover { border-color: var(--color-challenge); }
+
+    .mode-card .icon {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+    }
+
+    .mode-card h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: var(--text-primary);
+    }
+
+    .mode-card p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 20px;
+      flex-grow: 1;
+      font-weight: 500;
+    }
+
+    .mode-btn {
+      width: 100%;
+      text-align: center;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: var(--transition-smooth);
+    }
+
+    .basic-card .mode-btn {
+      background-color: rgba(92, 158, 122, 0.1);
+      color: var(--color-basic);
+    }
+    .basic-card:hover .mode-btn {
+      background-color: var(--color-basic);
+      color: white;
+    }
+
+    .advanced-card .mode-btn {
+      background-color: rgba(92, 142, 168, 0.1);
+      color: var(--color-advanced);
+    }
+    .advanced-card:hover .mode-btn {
+      background-color: var(--color-advanced);
+      color: white;
+    }
+
+    .challenge-card .mode-btn {
+      background-color: rgba(209, 141, 108, 0.1);
+      color: var(--color-challenge);
+    }
+    .challenge-card:hover .mode-btn {
+      background-color: var(--color-challenge);
+      color: white;
+    }
+
+    /* GAMEPLAY SCREEN */
+    .gameplay-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 30px;
+      flex-grow: 1;
+    }
+
+    @media (max-width: 850px) {
+      .gameplay-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left Panel: Botanical Dome */
+    .dome-panel {
+      background: white;
+      border-radius: 20px;
+      border: 1px solid rgba(43, 61, 52, 0.05);
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.01);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .dome-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .round-indicator {
+      font-weight: 700;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .round-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .round-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #D6E0DB;
+      transition: var(--transition-smooth);
+    }
+    .round-dot.active {
+      background-color: var(--color-basic);
+      transform: scale(1.2);
+    }
+    .round-dot.completed {
+      background-color: var(--text-primary);
+    }
+
+    .target-bubble {
+      background: linear-gradient(135deg, #F0F4F2 0%, #E1EBE7 100%);
+      padding: 10px 25px;
+      border-radius: 50px;
+      border: 1px solid rgba(43, 61, 52, 0.1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+      text-align: center;
+      margin-top: 5px;
+      animation: pulseTarget 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseTarget {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    .target-bubble span {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-secondary);
+      letter-spacing: 1px;
+    }
+
+    .target-bubble h2 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--text-primary);
+      margin-top: -2px;
+    }
+
+    /* SVG Garden Glass Dome Visualizer */
+    .dome-visualizer {
+      width: 100%;
+      max-width: 480px;
+      height: 380px;
+      margin: 15px 0;
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 80%, #F5F7F6 0%, #E8ECEB 100%);
+      border: 1px solid rgba(43, 61, 52, 0.08);
+      box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.02);
+    }
+
+    .dome-visualizer::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.02) 100%);
+      pointer-events: none;
+    }
+
+    .dome-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .dome-feedback {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-align: center;
+      min-height: 24px;
+      margin-top: 5px;
+      transition: var(--transition-smooth);
+    }
+    .dome-feedback.success { color: var(--color-success); }
+    .dome-feedback.error { color: var(--color-danger); animation: shake 0.4s ease; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    /* Left side shake effect for the whole dome panel */
+    .dome-panel.shake {
+      animation: shakePanel 0.4s ease;
+    }
+
+    @keyframes shakePanel {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    /* Right Panel: Controls & Input */
+    .control-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Timer section */
+    .timer-section {
+      background: white;
+      border-radius: 16px;
+      padding: 15px 20px;
+      border: 1px solid rgba(43, 61, 52, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.01);
+    }
+
+    .timer-title {
+      font-weight: 700;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .timer-bar-container {
+      flex-grow: 1;
+      height: 10px;
+      background-color: #E2E8E5;
+      border-radius: 5px;
+      margin-left: 20px;
+      margin-right: 15px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .timer-bar {
+      height: 100%;
+      width: 0%;
+      background-color: var(--color-success);
+      border-radius: 5px;
+      transition: width 0.1s linear, background-color 0.4s ease;
+    }
+
+    .timer-text {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: var(--text-primary);
+      min-width: 90px;
+      text-align: right;
+    }
+
+    /* Scaffolding Pairing list */
+    .pairing-box {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid rgba(43, 61, 52, 0.05);
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pairing-box h3 {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+      border-bottom: 1px solid rgba(43,61,52,0.05);
+      padding-bottom: 8px;
+    }
+
+    .pairing-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      max-height: 160px;
+      flex-grow: 1;
+    }
+
+    .pairing-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      background: #F4F7F5;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: var(--transition-smooth);
+    }
+    .pairing-row.completed {
+      background: rgba(108, 166, 128, 0.12);
+      color: var(--color-basic-hover);
+    }
+
+    .pairing-node {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: white;
+      border: 1.5px solid var(--text-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text-secondary);
+      transition: var(--transition-smooth);
+    }
+    .pairing-node.found {
+      background: var(--color-success);
+      color: white;
+      border-color: var(--color-success);
+      box-shadow: 0 2px 8px rgba(108, 166, 128, 0.3);
+    }
+    .pairing-node.center-square {
+      border-radius: 8px;
+      background: #ECE0D8;
+      border-color: #C0A899;
+      color: #7A6150;
+    }
+    .pairing-node.center-square.found {
+      background: var(--color-challenge);
+      color: white;
+      border-color: var(--color-challenge);
+      box-shadow: 0 2px 8px rgba(209, 141, 108, 0.3);
+    }
+
+    .pairing-line {
+      flex-grow: 1;
+      height: 2px;
+      background-color: var(--text-light);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pairing-row.completed .pairing-line {
+      background-color: var(--color-success);
+    }
+    .pairing-line::after {
+      content: '×';
+      position: absolute;
+      background: #F4F7F5;
+      padding: 0 6px;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+    .pairing-row.completed .pairing-line::after {
+      background: #EFF6F2;
+      color: var(--color-success);
+      font-weight: 900;
+    }
+
+    .single-square-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      background: #ECE0D8;
+      color: #7A6150;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .single-square-row.completed {
+      background: rgba(209, 141, 108, 0.15);
+      color: var(--color-challenge-hover);
+    }
+
+    /* Input & On-screen Keypad section */
+    .input-section {
+      background: white;
+      border-radius: 20px;
+      border: 1px solid rgba(43, 61, 52, 0.05);
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.01);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .input-box {
+      flex-grow: 1;
+      height: 48px;
+      border-radius: 12px;
+      border: 2px solid rgba(43, 61, 52, 0.15);
+      padding: 0 15px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: 'Outfit', sans-serif;
+      text-align: center;
+      outline: none;
+      transition: var(--transition-smooth);
+    }
+    .input-box:focus {
+      border-color: var(--color-basic);
+      box-shadow: 0 0 0 3px var(--color-glow);
+    }
+
+    /* On-Screen Keypad */
+    .keypad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .keypad-btn {
+      height: 46px;
+      border-radius: 10px;
+      background: #F0F4F2;
+      border: 1px solid rgba(43, 61, 52, 0.05);
+      color: var(--text-primary);
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-smooth);
+      user-select: none;
+    }
+    .keypad-btn:hover {
+      background: #E1EBE7;
+      transform: scale(1.02);
+    }
+    .keypad-btn:active {
+      transform: scale(0.98);
+    }
+    .keypad-btn.action-btn {
+      background: #E2E8E5;
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+    }
+    .keypad-btn.enter-btn {
+      grid-column: span 3;
+      background: var(--color-basic);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 700;
+      box-shadow: 0 4px 10px rgba(92,158,122,0.2);
+    }
+    .keypad-btn.enter-btn:hover {
+      background: var(--color-basic-hover);
+    }
+
+    /* CELEBRATION SCREEN */
+    .celebration-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px 10px;
+      flex-grow: 1;
+      width: 100%;
+    }
+
+    .success-badge {
+      font-size: 3.5rem;
+      margin-bottom: 10px;
+      animation: bounce 1.2s cubic-bezier(0.25, 1, 0.5, 1) infinite alternate;
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-12px); }
+    }
+
+    .celebration-title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+    }
+
+    .celebration-desc {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin-bottom: 25px;
+      font-weight: 500;
+    }
+
+    /* Plant illustration award card */
+    .award-card {
+      width: 100%;
+      max-width: 750px;
+      background: white;
+      border-radius: 20px;
+      border: 1.5px solid rgba(43, 61, 52, 0.08);
+      padding: 20px;
+      box-shadow: 0 8px 30px rgba(76, 94, 85, 0.08);
+      margin-bottom: 25px;
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 20px;
+      align-items: center;
+      text-align: left;
+    }
+
+    @media (max-width: 600px) {
+      .award-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+    }
+
+    .award-image-box {
+      width: 100%;
+      height: 200px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+      background: #F5F7F6;
+      border: 1px solid rgba(43, 61, 52, 0.06);
+    }
+
+    .award-info h4 {
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    
+    .award-type-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 12px;
+    }
+    .award-type-badge.basic { background-color: var(--color-basic); }
+    .award-type-badge.advanced { background-color: var(--color-advanced); }
+    .award-type-badge.evolved { background-color: var(--color-challenge); }
+
+    .award-info p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      font-weight: 500;
+    }
+
+    /* History table */
+    .history-card {
+      width: 100%;
+      max-width: 750px;
+      background: white;
+      border-radius: 16px;
+      border: 1px solid rgba(43, 61, 52, 0.05);
+      padding: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.02);
+      margin-bottom: 25px;
+      text-align: left;
+    }
+
+    .history-card h3 {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 15px;
+      color: var(--text-primary);
+      border-bottom: 1px solid rgba(43, 61, 52, 0.05);
+      padding-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .history-table th {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      padding: 10px;
+      border-bottom: 1.5px solid rgba(43, 61, 52, 0.08);
+      text-align: center;
+    }
+
+    .history-table td {
+      padding: 12px 10px;
+      font-size: 0.95rem;
+      border-bottom: 1px solid rgba(43, 61, 52, 0.04);
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .history-target {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      background: #F0F4F2;
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: inline-block;
+    }
+
+    .history-pairs {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .history-pair-badge {
+      background: rgba(108, 166, 128, 0.12);
+      color: var(--color-basic-hover);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      border: 1px solid rgba(108, 166, 128, 0.2);
+    }
+
+    /* Modal dialog overlays */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(43, 61, 52, 0.4);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .dialog-box {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 440px;
+      width: 90%;
+      text-align: left;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .overlay.active .dialog-box {
+      transform: scale(1);
+    }
+
+    .dialog-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .dialog-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: var(--text-primary);
+      text-align: center;
+    }
+
+    .dialog-desc {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      line-height: 1.6;
+      font-weight: 500;
+    }
+    
+    .dialog-tip {
+      background-color: #FFF9C4;
+      border-left: 4px solid #FBC02D;
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 0.88rem;
+      color: #7F6F00;
+      font-weight: 600;
+      line-height: 1.5;
+      margin-bottom: 25px;
+    }
+
+    /* Responsive adjustment for shorter screens (tablets, Chromebooks) */
+    @media (max-height: 820px) {
+      .game-container {
+        min-height: auto !important;
+        padding: 15px 20px;
+      }
+      header {
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+      }
+      .gameplay-layout {
+        gap: 15px;
+      }
+      .dome-panel {
+        padding: 12px 15px;
+      }
+      .dome-visualizer {
+        height: 270px;
+        margin: 8px 0;
+      }
+      .target-bubble {
+        padding: 5px 20px;
+      }
+      .target-bubble h2 {
+        font-size: 1.8rem;
+      }
+      .control-panel {
+        gap: 12px;
+      }
+      .timer-section {
+        padding: 8px 15px;
+      }
+      .pairing-box {
+        padding: 12px 15px;
+      }
+      .pairing-grid {
+        max-height: 120px;
+      }
+      .pairing-row {
+        padding: 4px 8px;
+        font-size: 0.9rem;
+      }
+      .pairing-node {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+      }
+      .input-section {
+        padding: 12px 15px;
+        gap: 10px;
+      }
+      .input-box {
+        height: 38px;
+        font-size: 1rem;
+      }
+      .keypad-btn {
+        height: 36px;
+        font-size: 1rem;
+      }
+      .keypad-btn.enter-btn {
+        font-size: 0.95rem;
+      }
+      .celebration-layout {
+        padding: 10px;
+      }
+      .victory-award-card {
+        padding: 10px;
+      }
+      .award-image-box {
+        height: 120px;
+      }
+    }
+  </style>
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <!-- Firebase Realtime Database -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+
+  <!-- Animated floating particles -->
+  <canvas id="particle-canvas"></canvas>
+
+  <div class="game-container">
+    
+    <!-- Header of the platform -->
+    <header>
+      <div class="title-group">
+        <h1>🌱 發芽魔法</h1>
+        <p>國小數學五年級因數</p>
+      </div>
+      <div class="hud-group" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <span class="badge basic" id="hud-mode-badge">基礎關</span>
+        <button class="btn btn-secondary" id="btn-config-db" onclick="openConfigModal()" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px;">
+          ⚙️ 連線設定
+        </button>
+        <button class="btn btn-secondary" id="btn-back-lobby" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px; display: none;">
+          發芽魔法選單
+        </button>
+        <button class="btn btn-secondary" id="btn-back-portal" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px;">
+          回到共生花園大廳
+        </button>
+      </div>
+    </header>
+
+    <!-- SCREEN 0: LOBBY -->
+    <section id="screen-lobby" class="screen active">
+      <div class="lobby-layout">
+        <div class="lobby-icon">✨</div>
+        <h2 class="lobby-title">培育你的因數共生花園</h2>
+        <p class="lobby-desc">
+          當你輸入一個神奇數字的「因數」時，植物的葉子就會開始生長。<br>
+          試著找出所有的因數，並觀察因數出現的規律。
+        </p>
+
+        <div class="modes-grid">
+          <!-- Card: Basic Mode -->
+          <div class="mode-card basic-card" onclick="startGame('basic')">
+            <div class="icon">🌱</div>
+            <h3>基礎關</h3>
+            <p>
+              沒有時間限制，讓你能靜下心來思考。每次隨機挑選3個2～30的目標數字，找齊對應因數，培植出開花植物。
+            </p>
+            <div class="mode-btn">開始培育</div>
+          </div>
+
+          <!-- Card: Advanced Mode -->
+          <div class="mode-card advanced-card" onclick="startGame('advanced')">
+            <div class="icon">⚡</div>
+            <h3>進階關</h3>
+            <p>
+              加入時間壓力，每題限時30秒。每次隨機挑選3個20～50的目標數字，找齊對應因數，培植出開花植物。
+            </p>
+            <div class="mode-btn">開始限時挑戰</div>
+          </div>
+
+          <!-- Card: Challenge Mode (Offline) -->
+          <div class="mode-card challenge-card" onclick="startGame('challenge')">
+            <div class="icon">⏱️</div>
+            <h3>挑戰關</h3>
+            <p>
+              加入時間累計，考驗因數心算速度。每次隨機挑選3個只有4個因數的數字(2~60)，找齊對應因數，培植出開花植物。
+            </p>
+            <div class="mode-btn">開始心算挑戰</div>
+          </div>
+        </div>
+
+        <!-- Card: Multiplayer Mode -->
+        <div class="mode-card challenge-card" style="width: 100%; max-width: 840px; margin-top: 25px; border-color: rgba(209, 141, 108, 0.3); background: linear-gradient(135deg, white 0%, #FAF6F4 100%); padding: 20px;" onclick="startGame('multiplayer')">
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 15px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 15px; text-align: left;">
+              <span style="font-size: 2.2rem;">👥</span>
+              <div>
+                <h3 style="margin: 0 0 5px 0; font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">
+                  挑戰關（多人合作連線版）
+                </h3>
+                <p style="margin: 0; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5;">
+                  合作共生，一人輸入一個因數，試著在最短時間內完成植物的夢幻進化。（需配合 Firebase 連線設定）
+                </p>
+              </div>
+            </div>
+            <div class="mode-btn" style="width: auto; padding: 8px 20px; background-color: var(--color-challenge); color: white; margin: 0;">進入分組連線</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 1: GAMEPLAY -->
+    <section id="screen-game" class="screen">
+      <div class="gameplay-layout">
+        
+        <!-- Left Panel: Sprouting Garden Dome -->
+        <div class="dome-panel" id="main-dome-panel">
+          <div class="dome-header">
+            <div class="round-indicator">
+              <span>進度：</span>
+              <div class="round-dots" id="progress-dots">
+                <span class="round-dot active"></span>
+                <span class="round-dot"></span>
+                <span class="round-dot"></span>
+              </div>
+            </div>
+            <div class="round-indicator">
+              <span id="factors-found-counter">已找出因數：0 / 0</span>
+            </div>
+          </div>
+
+          <!-- Big display of Target Number -->
+          <div class="target-bubble">
+            <span>目標數字 Target</span>
+            <h2 id="target-number-display">--</h2>
+          </div>
+
+          <!-- SVG Sprout Canvas -->
+          <div class="dome-visualizer">
+            <svg class="dome-svg" id="plant-svg" viewBox="0 0 500 380">
+              <!-- Visualized content will be generated dynamically by JS -->
+            </svg>
+          </div>
+
+          <!-- Prompt message -->
+          <div class="dome-feedback" id="feedback-message">
+            在右側輸入正確的因數，讓小樹發芽吧！
+          </div>
+        </div>
+
+        <!-- Right Panel: Scaffolding, Inputs & Keypad -->
+        <div class="control-panel">
+          
+          <!-- Timer (Conditional for stopwatch or countdown) -->
+          <div class="timer-section" id="timer-section-ui" style="display: none;">
+            <div class="timer-title">
+              <span id="timer-title-text">⏱️ 計時器</span>
+            </div>
+            <div class="timer-bar-container">
+              <div class="timer-bar" id="countdown-bar"></div>
+            </div>
+            <span class="timer-text" id="countdown-text">30</span>
+          </div>
+
+          <!-- Scaffolding list of U-shape factor pairs -->
+          <div class="pairing-box">
+            <h3 id="pairing-box-title">因數成對紀錄</h3>
+            <div class="pairing-grid" id="pairing-grid-container">
+              <!-- Dynamic pairing rows generated by JS -->
+            </div>
+          </div>
+
+          <!-- Input section and custom keyboard -->
+          <div class="input-section">
+            <div class="input-row">
+              <input type="text" class="input-box" id="factor-input" placeholder="輸入一個因數" readonly>
+            </div>
+            
+            <div class="keypad-grid">
+              <button class="keypad-btn" onclick="pressKey('7')">7</button>
+              <button class="keypad-btn" onclick="pressKey('8')">8</button>
+              <button class="keypad-btn" onclick="pressKey('9')">9</button>
+              
+              <button class="keypad-btn" onclick="pressKey('4')">4</button>
+              <button class="keypad-btn" onclick="pressKey('5')">5</button>
+              <button class="keypad-btn" onclick="pressKey('6')">6</button>
+              
+              <button class="keypad-btn" onclick="pressKey('1')">1</button>
+              <button class="keypad-btn" onclick="pressKey('2')">2</button>
+              <button class="keypad-btn" onclick="pressKey('3')">3</button>
+              
+              <button class="keypad-btn action-btn" onclick="pressKey('0')">0</button>
+              <button class="keypad-btn action-btn" onclick="pressKey('back')">⌫</button>
+              <button class="keypad-btn action-btn" onclick="pressKey('clear')">清除</button>
+              
+              <button class="keypad-btn enter-btn" id="btn-submit-factor" onclick="submitFactor()">確認輸入 (Enter)</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: CELEBRATION & SUMMARY -->
+    <section id="screen-celebration" class="screen">
+      <div class="celebration-layout">
+        <div class="success-badge">🏆</div>
+        <h2 class="celebration-title" id="celebration-title-text">培育成功！</h2>
+        <p class="celebration-desc" id="celebration-desc-text">
+          恭喜你完成 3 株植物的挑戰！這是你努力培育的成果：
+        </p>
+
+        <!-- Evolved Plant Award Card -->
+        <div class="award-card" id="victory-award-card">
+          <div class="award-image-box" id="victory-plant-svg-holder">
+            <!-- Plant SVG code will go here -->
+          </div>
+          <div class="award-info">
+            <span class="award-type-badge basic" id="victory-plant-badge">基礎類型</span>
+            <h4 id="victory-plant-name">植物名稱</h4>
+            <p id="victory-plant-lore">植物傳說描述...</p>
+          </div>
+        </div>
+
+        <!-- Summary Record Table -->
+        <div class="history-card">
+          <h3>
+            <span>📋</span> 培育植物因數紀錄總覽
+          </h3>
+          <div id="celebration-multiplayer-info" style="display: none; justify-content: space-between; margin-bottom: 12px; font-size: 0.95rem; color: var(--text-secondary); background: rgba(225, 235, 231, 0.4); padding: 8px 15px; border-radius: 8px; font-weight: 500;">
+            <span>🚪 遊戲室：<strong id="celebration-room-id" style="color: var(--color-challenge);">--</strong></span>
+            <span>👥 組員名單：<strong id="celebration-member-list">--</strong></span>
+          </div>
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th width="15%">關卡</th>
+                <th width="25%">目標數字</th>
+                <th width="60%">所有因數 (由小到大排列)</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <button class="btn btn-primary" id="btn-celebration-retry" onclick="returnLobby()">
+          <span>🌱</span> 再培育一次
+        </button>
+      </div>
+    </section>
+
+    <!-- SCREEN 1.5: MULTIPLAYER WAITING ROOM -->
+    <section id="screen-room-waiting" class="screen">
+      <div class="lobby-layout" style="padding: 20px; flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <div class="lobby-icon">🚪</div>
+        <h2 class="lobby-title" id="waiting-room-title">連線遊戲室: --</h2>
+        <p class="lobby-desc" style="margin-bottom: 20px;">
+          等待所有組員點選準備。全員準備就緒後，將同步開始挑戰！
+        </p>
+
+        <!-- Player List panel -->
+        <div class="history-card" style="width: 100%; max-width: 500px; margin-bottom: 30px; border: 1px solid rgba(43,61,52,0.1); border-radius: 16px; padding: 20px; background: white;">
+          <h3 style="font-size: 1.1rem; font-weight: 800; border-bottom: 1px solid rgba(43,61,52,0.05); padding-bottom: 8px; margin-bottom: 12px;">
+            <span>👥</span> 成員列表 (<span id="waiting-player-count">0</span> 人)
+          </h3>
+          <div id="waiting-players-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 200px; overflow-y: auto; padding: 5px 0;">
+            <!-- Dynamically populated players with status -->
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 15px; width: 100%; max-width: 500px;">
+          <button class="btn btn-secondary" id="btn-leave-room" onclick="leaveRoom()" style="flex: 1; justify-content: center;">
+            離開房間
+          </button>
+          <button class="btn btn-primary" id="btn-ready-toggle" onclick="toggleReady()" style="flex: 2; justify-content: center; background-color: var(--color-challenge); box-shadow: 0 4px 12px rgba(209,141,108,0.25);">
+            準備好了 (Ready)
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Timeout Modal Overlay (Used in Advanced Mode) -->
+    <div class="overlay" id="overlay-timeout">
+      <div class="dialog-box">
+        <div class="dialog-icon">💧</div>
+        <h3 class="dialog-title">時間到！培育能量乾涸</h3>
+        <p class="dialog-desc" id="timeout-reason-text">
+          很遺憾，在 30 秒的限時內未能找齊所有因數，植物稍微乾枯了...
+        </p>
+        <div class="dialog-tip" id="timeout-recommendation-box">
+          <!-- Objective recommendations go here -->
+        </div>
+        <button class="btn btn-primary" onclick="retryCurrentNumber()" style="background-color: var(--color-advanced); box-shadow: 0 4px 12px rgba(92,142,168,0.25); width: 100%; justify-content: center;">
+          重新挑戰此關卡
+        </button>
+      </div>
+    </div>
+
+    <!-- Firebase Configuration Modal -->
+    <div class="overlay" id="overlay-config">
+      <div class="dialog-box" style="max-width: 480px;">
+        <div class="dialog-icon">⚙️</div>
+        <h3 class="dialog-title">Firebase 連線設定</h3>
+        <p class="dialog-desc">
+          請填入您的 Firebase 專案配置金鑰以啟用多人連線功能。設定會儲存於您的瀏覽器中。
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">API Key (apiKey)</label>
+            <input type="text" id="cfg-apiKey" class="input-box" style="width:100%; text-align:left; height:38px; font-size:0.9rem;" placeholder="AIzaSy...">
+          </div>
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">Database URL (databaseURL)</label>
+            <input type="text" id="cfg-databaseURL" class="input-box" style="width:100%; text-align:left; height:38px; font-size:0.9rem;" placeholder="https://[YOUR_DB].firebaseio.com">
+          </div>
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">Project ID (projectId)</label>
+            <input type="text" id="cfg-projectId" class="input-box" style="width:100%; text-align:left; height:38px; font-size:0.9rem;" placeholder="my-math-project">
+          </div>
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">App ID (appId)</label>
+            <input type="text" id="cfg-appId" class="input-box" style="width:100%; text-align:left; height:38px; font-size:0.9rem;" placeholder="1:123456:web:abcd...">
+          </div>
+        </div>
+        <div style="display: flex; gap: 15px;">
+          <button class="btn btn-secondary" onclick="closeConfigModal()" style="flex: 1; justify-content: center;">取消</button>
+          <button class="btn btn-primary" onclick="saveConfigAndConnect()" style="flex: 1.5; justify-content: center;">儲存設定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Join Room Modal -->
+    <div class="overlay" id="overlay-room-join">
+      <div class="dialog-box">
+        <div class="dialog-icon">🚪</div>
+        <h3 class="dialog-title">進入多人連線合作關卡</h3>
+        <p class="dialog-desc">
+          請輸入您的座位號碼/姓名以及分配好的小組遊戲室編號。
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px;">
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">您的座位號碼與姓名</label>
+            <input type="text" id="join-player-name" class="input-box" style="width: 100%; text-align: center;" placeholder="例如：15號小明" maxlength="15">
+          </div>
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">遊戲室編號 (小組代碼)</label>
+            <input type="text" id="join-room-id" class="input-box" style="width: 100%; text-align: center;" placeholder="例如：101" maxlength="10">
+          </div>
+        </div>
+        <div style="display: flex; gap: 15px;">
+          <button class="btn btn-secondary" onclick="closeRoomJoinModal()" style="flex: 1; justify-content: center;">取消</button>
+          <button class="btn btn-primary" id="btn-confirm-join" onclick="confirmJoinRoom()" style="flex: 1.5; justify-content: center; background-color: var(--color-challenge); box-shadow: 0 4px 12px rgba(209,141,108,0.25);">進入房間</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sync Countdown Overlay -->
+    <div class="overlay" id="overlay-countdown" style="background: rgba(43, 61, 52, 0.75);">
+      <div style="text-align: center; color: white;">
+        <div id="countdown-number" style="font-size: 8rem; font-weight: 900; font-family: 'Outfit', sans-serif; text-shadow: 0 0 20px rgba(255,255,255,0.4);">3</div>
+        <div style="font-size: 1.5rem; font-weight: 700; margin-top: 15px; color: #E1EBE7;">連線挑戰即將開始...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Web Audio API Sound Synthesizer
+    const AudioSynth = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      },
+      playTone(freq, type, duration, delay) {
+        if (!this.ctx) return;
+        setTimeout(() => {
+          try {
+            let osc = this.ctx.createOscillator();
+            let gain = this.ctx.createGain();
+            osc.type = type || 'sine';
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + duration);
+          } catch (e) {
+            console.error(e);
+          }
+        }, delay * 1000);
+      },
+      playSuccess() {
+        this.init();
+        this.playTone(523.25, 'sine', 0.15, 0);    // C5
+        this.playTone(659.25, 'sine', 0.2, 0.08);  // E5
+      },
+      playError() {
+        this.init();
+        this.playTone(220, 'sawtooth', 0.25, 0);   // A3
+      },
+      playAlert() {
+        this.init();
+        this.playTone(440, 'triangle', 0.12, 0);   // A4
+        this.playTone(440, 'triangle', 0.12, 0.1); // A4
+      },
+      playPerfect() {
+        this.init();
+        this.playTone(523.25, 'sine', 0.12, 0);    // C5
+        this.playTone(659.25, 'sine', 0.12, 0.06);  // E5
+        this.playTone(783.99, 'sine', 0.12, 0.12); // G5
+        this.playTone(1046.5, 'sine', 0.3, 0.18);  // C6
+      }
+    };
+
+    // PLANT ILLUSTRATIONS DATABASE
+    const PLANT_DATABASE = [
+      {
+        id: "coriander",
+        name: "香菜",
+        lore: "香氣獨特且清爽的綠色植物，常用於料理調味，能帶來活力與清新的空氣氣息。",
+        advancedName: "巨葉翠綠香菜",
+        advancedLore: "培育出比普通香菜大上數倍的翠綠巨葉香菜！樹體極其繁茂茁壯，散發著成倍的清新香氣，象徵小組默契灌溉的結果。",
+        evolvedName: "翡翠星屑香菜",
+        evolvedLore: "大進化的神木級香菜，葉片如翡翠般半透明，散發出能讓人精神集中、心算加倍專注的亮綠星塵微光。",
+        drawSVG: (type) => {
+          if (type === 'basic') {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #FCF9F2 0%, #F5EDE0 100%);"><path d="M 120 195 C 112 145 118 105 120 70" fill="none" stroke="#4E342E" stroke-width="2.5" stroke-linecap="round"/><path d="M 119 150 C 95 138 82 125 76 110" fill="none" stroke="#4E342E" stroke-width="2" stroke-linecap="round"/><path d="M 120 130 C 145 120 158 112 165 95" fill="none" stroke="#4E342E" stroke-width="2" stroke-linecap="round"/><path d="M 120 70 C 105 60 100 80 120 50 C 140 80 135 60 120 70" fill="#81C784" opacity="0.85"/><path d="M 76 110 C 62 100 58 120 76 90 C 94 120 90 100 76 110" fill="#81C784" opacity="0.85"/><path d="M 165 95 C 151 85 147 105 165 75 C 183 105 179 85 165 95" fill="#81C784" opacity="0.85"/><path d="M 120 70 C 105 60 100 80 120 50 C 140 80 135 60 120 70 Z" fill="none" stroke="#3E2723" stroke-width="1.5" stroke-linejoin="round"/><path d="M 76 110 C 62 100 58 120 76 90 C 94 120 90 100 76 110 Z" fill="none" stroke="#3E2723" stroke-width="1.5" stroke-linejoin="round"/><path d="M 165 95 C 151 85 147 105 165 75 C 183 105 179 85 165 95 Z" fill="none" stroke="#3E2723" stroke-width="1.5" stroke-linejoin="round"/><circle cx="115" cy="110" r="1.5" fill="#3E2723"/><circle cx="123" cy="110" r="1.5" fill="#3E2723"/><path d="M 117 114 Q 119 117 121 114" fill="none" stroke="#3E2723" stroke-width="1.2" stroke-linecap="round"/><g transform="translate(160, 140) scale(0.7)"><path d="M0 0 C-10 -15 -18 -5 0 0 C-10 15 -18 5 0 0" fill="#FFE082" stroke="#4E342E" stroke-width="1.2"/><path d="M0 0 C10 -15 18 -5 0 0 C10 15 18 5 0 0" fill="#FFD54F" stroke="#4E342E" stroke-width="1.2"/><line x1="0" y1="-5" x2="0" y2="8" stroke="#4E342E" stroke-width="1.5"/></g></svg>`;
+          } else if (type === 'advanced') {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #E8F5E9 0%, #C8E6C9 100%);"><rect x="10" y="10" width="220" height="220" fill="none" stroke="#2E7D32" stroke-width="2" rx="16" stroke-dasharray="8,4" opacity="0.5"/><path d="M 30 15 L 45 35 M 120 10 L 120 40 M 210 15 L 195 35" stroke="#FFD54F" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/><path d="M 120 200 C 110 135 120 95 120 50" fill="none" stroke="#4E342E" stroke-width="5" stroke-linecap="round"/><path d="M 120 145 C 80 130 65 110 55 90" fill="none" stroke="#4E342E" stroke-width="3.5" stroke-linecap="round"/><path d="M 120 120 C 160 105 175 90 185 70" fill="none" stroke="#4E342E" stroke-width="3.5" stroke-linecap="round"/><path d="M 120 165 C 150 155 170 140 180 120" fill="none" stroke="#4E342E" stroke-width="3.5" stroke-linecap="round"/><path d="M 120 50 C 95 35 85 65 120 15 C 155 65 145 35 120 50 Z" fill="#4CAF50" stroke="#1B5E20" stroke-width="1.8"/><path d="M 55 90 C 30 75 20 105 55 60 C 90 105 80 75 55 90 Z" fill="#4CAF50" stroke="#1B5E20" stroke-width="1.8"/><path d="M 185 70 C 160 55 150 85 185 35 C 220 85 210 55 185 70 Z" fill="#4CAF50" stroke="#1B5E20" stroke-width="1.8"/><path d="M 180 120 C 160 105 150 130 180 95 C 210 130 200 105 180 120 Z" fill="#81C784" stroke="#1B5E20" stroke-width="1.5"/><circle cx="120" cy="15" r="5" fill="#FFF" stroke="#FFD54F" stroke-width="2"/><circle cx="55" cy="60" r="4" fill="#FFF" stroke="#FFD54F" stroke-width="2"/><circle cx="185" cy="35" r="4" fill="#FFF" stroke="#FFD54F" stroke-width="2"/><g transform="translate(65, 145) scale(0.75)"><circle cx="0" cy="0" r="6" fill="#E57373" stroke="#3E2723" stroke-width="1"/><circle cx="4" cy="-3" r="1.5" fill="#3E2723"/><circle cx="-1.5" cy="-1.5" r="0.8" fill="#3E2723"/><circle cx="1.5" cy="1.5" r="0.8" fill="#3E2723"/></g><g transform="translate(145, 150) scale(0.75)"><path d="M0 0 C-8 -12 -14 -4 0 0 C-8 12 -14 4 0 0" fill="#FFD54F" stroke="#3E2723" stroke-width="1"/><path d="M0 0 C8 -12 14 -4 0 0 C8 12 14 4 0 0" fill="#FFB74D" stroke="#3E2723" stroke-width="1"/></g></svg>`;
+          } else {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #1A3026 0%, #0F1F17 100%);"><rect x="10" y="10" width="220" height="220" fill="none" stroke="#00E676" stroke-width="1.5" rx="16" opacity="0.3" filter="drop-shadow(0 0 4px #00E676)"/><circle cx="120" cy="120" r="85" fill="none" stroke="rgba(0, 230, 118, 0.15)" stroke-width="1" stroke-dasharray="8,4"/><path d="M 40 120 C 120 70 120 170 200 120" fill="none" stroke="rgba(0, 229, 255, 0.2)" stroke-width="1.5" filter="drop-shadow(0 0 5px #00E5FF)"/><path d="M 120 200 C 115 140 120 90 120 60" fill="none" stroke="#00E676" stroke-width="5.5" stroke-linecap="round" filter="drop-shadow(0 0 8px #00E676)"/><path d="M 120 150 C 85 135 75 115 70 100" fill="none" stroke="#00B0FF" stroke-width="3.5" stroke-linecap="round" filter="drop-shadow(0 0 6px #00B0FF)"/><path d="M 120 130 C 155 115 165 95 170 80" fill="none" stroke="#00E5FF" stroke-width="3.5" stroke-linecap="round" filter="drop-shadow(0 0 6px #00E5FF)"/><g filter="drop-shadow(0 0 10px rgba(0,230,118,0.5))"><path d="M 120 60 C 100 45 90 75 120 30 C 150 75 140 45 120 60 Z" fill="url(#grad-leaf-emerald)"/><path d="M 70 100 C 50 85 40 115 70 70 C 100 115 90 85 70 100 Z" fill="url(#grad-leaf-emerald)"/><path d="M 170 80 C 150 65 140 95 170 50 C 200 95 190 65 170 80 Z" fill="url(#grad-leaf-emerald)"/></g><path d="M 115 25 L 120 15 L 125 25 Z" fill="#FFE082" filter="drop-shadow(0 0 5px #FFE082)"/><circle cx="120" cy="12" r="3" fill="#FFF" filter="drop-shadow(0 0 6px #FFF)"/><circle cx="95" cy="80" r="3.5" fill="#00E5FF" filter="drop-shadow(0 0 4px #00E5FF)"/><circle cx="145" cy="110" r="2.5" fill="#FFF" opacity="0.9"/><circle cx="110" cy="145" r="4.5" fill="#FFE082" filter="drop-shadow(0 0 5px #FFE082)"/><circle cx="150" cy="55" r="3" fill="#B388FF" filter="drop-shadow(0 0 4px #B388FF)"/><defs><linearGradient id="grad-leaf-emerald" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00E676" stop-opacity="0.9"/><stop offset="50%" stop-color="#00B0FF" stop-opacity="0.8"/><stop offset="100%" stop-color="#1A3026" stop-opacity="0.4"/></linearGradient></defs></svg>`;
+          }
+        }
+      },
+      {
+        id: "chili",
+        name: "辣椒",
+        lore: "辛辣且色彩鮮豔的灌木植物，果實紅艷，具有驅寒、暖胃的強烈熱力。",
+        advancedName: "巨型豐收辣椒",
+        advancedLore: "培育出茁壯茂密的辣椒木！樹上掛滿了火紅的辣椒果實，熱力滿溢，溫暖了整個因數花園，展現精算合作的力量。",
+        evolvedName: "烈焰熔岩辣椒",
+        evolvedLore: "在因數的極限能量下，進化成如岩漿般流動的超級辣椒，散發著永不熄滅的溫暖烈焰，融化所有困難。",
+        drawSVG: (type) => {
+          if (type === 'basic') {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #FDF5F2 0%, #F5E0D5 100%);"><path d="M 120 45 C 115 65 125 75 120 85" fill="none" stroke="#4E342E" stroke-width="2.5" stroke-linecap="round"/><path d="M 120 85 C 105 85 98 120 120 200 C 145 120 135 85 120 85 Z" fill="#EF5350" stroke="#3E2723" stroke-width="1.8" stroke-linejoin="round"/><path d="M 98 85 C 108 92 132 92 142 85 C 135 75 120 78 120 78 C 120 78 105 75 98 85 Z" fill="#66BB6A" stroke="#3E2723" stroke-width="1.5" stroke-linejoin="round"/><circle cx="115" cy="110" r="1.5" fill="#3E2723"/><circle cx="123" cy="110" r="1.5" fill="#3E2723"/><path d="M 117 114 Q 119 117 121 114" fill="none" stroke="#3E2723" stroke-width="1.2" stroke-linecap="round"/><g transform="translate(60, 100) scale(0.6)"><path d="M 0 -10 L 0 10 M -10 0 L 10 0" stroke="#FFB74D" stroke-width="2" stroke-linecap="round"/></g></svg>`;
+          } else if (type === 'advanced') {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #FFF9C4 0%, #F5F2D0 100%);"><rect x="10" y="10" width="220" height="220" fill="none" stroke="#FBC02D" stroke-width="2" rx="16" stroke-dasharray="8,4" opacity="0.5"/><path d="M 40 15 L 55 35 M 120 10 L 120 40 M 200 15 L 185 35" stroke="#FFA726" stroke-width="2.5" opacity="0.7"/><path d="M 120 200 C 115 130 125 95 120 70" fill="none" stroke="#4E342E" stroke-width="5.5" stroke-linecap="round"/><path d="M 120 110 C 90 105 70 85 60 70" fill="none" stroke="#4E342E" stroke-width="3" stroke-linecap="round"/><path d="M 120 95 C 150 90 170 70 180 55" fill="none" stroke="#4E342E" stroke-width="3" stroke-linecap="round"/><g transform="translate(120, 70)"><path d="M 0 0 C -15 0 -25 35 -5 105 C 15 35 5 0 0 0 Z" fill="#EF5350" stroke="#3E2723" stroke-width="1.8"/><path d="M -22 0 C -12 7 12 7 22 0 C 15 -10 0 -7 0 -7 Z" fill="#66BB6A" stroke="#3E2723" stroke-width="1.2"/></g><g transform="translate(60, 70) scale(0.8) rotate(-15)"><path d="M 0 0 C -15 0 -25 35 -5 105 C 15 35 5 0 0 0 Z" fill="#E53935" stroke="#3E2723" stroke-width="1.8"/><path d="M -22 0 C -12 7 12 7 22 0 Z" fill="#4CAF50" stroke="#3E2723" stroke-width="1.2"/></g><g transform="translate(180, 55) scale(0.8) rotate(15)"><path d="M 0 0 C -15 0 -25 35 -5 105 C 15 35 5 0 0 0 Z" fill="#E53935" stroke="#3E2723" stroke-width="1.8"/><path d="M -22 0 C -12 7 12 7 22 0 Z" fill="#4CAF50" stroke="#3E2723" stroke-width="1.2"/></g></svg>`;
+          } else {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #3E0C11 0%, #1F0205 100%);"><rect x="10" y="10" width="220" height="220" fill="none" stroke="#FF3D00" stroke-width="1.5" rx="16" opacity="0.3" filter="drop-shadow(0 0 4px #FF3D00)"/><circle cx="120" cy="135" r="62" fill="none" stroke="#FF9100" stroke-width="1.5" stroke-dasharray="6,6" opacity="0.7" filter="drop-shadow(0 0 8px #FF9100)"/><path d="M 120 40 C 120 65 125 75 120 85" fill="none" stroke="#00E676" stroke-width="4.5" stroke-linecap="round" filter="drop-shadow(0 0 5px #00E676)"/><path d="M 120 85 C 95 85 80 145 120 210 C 160 145 145 85 120 85 Z" fill="url(#grad-chili-fire)" filter="drop-shadow(0 0 15px #FF1744)"/><path d="M 105 110 Q 112 140 120 180" fill="none" stroke="#FFEA00" stroke-width="3" opacity="0.85" filter="drop-shadow(0 0 3px #FFEA00)"/><path d="M 92 85 C 105 96 135 96 148 85 C 140 70 120 74 120 74 C 120 74 100 70 92 85 Z" fill="#00E676" filter="drop-shadow(0 0 5px #00E676)"/><defs><linearGradient id="grad-chili-fire" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FF1744"/><stop offset="70%" stop-color="#D50000"/><stop offset="100%" stop-color="#FFEA00"/></linearGradient></defs></svg>`;
+          }
+        }
+      },
+      {
+        id: "shellginger",
+        name: "月桃",
+        lore: "本土芬芳茂盛的民俗植物，葉片巨大帶有清香，花朵成串如珍珠懸掛。",
+        advancedName: "巨葉珍珠月桃",
+        advancedLore: "培育出極其寬大茂密的大葉片，成串懸掛的花苞如珍珠般大氣美麗，香氣四溢，代表心算探究的成果。",
+        evolvedName: "月之霓虹玉桃",
+        evolvedLore: "結合了因數對稱美感與精華能量大進化，成串的花瓣變成了散發魔力彩色霓虹仙玉，能驅散黑夜。",
+        drawSVG: (type) => {
+          if (type === 'basic') {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #F4FAF5 0%, #E0EFE4 100%);"><path d="M 70 205 C 95 175 110 115 120 55" fill="none" stroke="#4E342E" stroke-width="2.5" stroke-linecap="round"/><path d="M 120 55 C 135 85 145 120 152 160" fill="none" stroke="#4E342E" stroke-width="2" stroke-linecap="round"/><path d="M 88 155 C 55 125 45 90 52 75 C 75 90 88 115 88 155 Z" fill="#81C784" stroke="#3E2723" stroke-width="1.5" stroke-linejoin="round"/><path d="M 112 115 C 145 95 155 60 150 45 C 130 60 118 85 112 115 Z" fill="#81C784" stroke="#3E2723" stroke-width="1.5" stroke-linejoin="round"/><g transform="translate(132, 75)"><circle cx="0" cy="0" r="9" fill="#FFF" stroke="#E57373" stroke-width="1.5"/><circle cx="0" cy="0" r="3" fill="#FFCDD2"/><circle cx="12" cy="18" r="10" fill="#FFF" stroke="#E57373" stroke-width="1.5"/><circle cx="12" cy="18" r="3" fill="#FFCDD2"/><circle cx="18" cy="38" r="11" fill="#FFF" stroke="#E57373" stroke-width="1.5"/><circle cx="18" cy="38" r="3" fill="#FFCDD2"/><circle cx="20" cy="60" r="9.5" fill="#FFF" stroke="#FFE082" stroke-width="1.5"/><circle cx="20" cy="60" r="3.5" fill="#FFE082"/></g></svg>`;
+          } else if (type === 'advanced') {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #E0F7FA 0%, #B2EBF2 100%);"><rect x="10" y="10" width="220" height="220" fill="none" stroke="#00838F" stroke-width="2" rx="16" stroke-dasharray="8,4" opacity="0.5"/><path d="M 40 15 L 55 35 M 120 10 L 120 40 M 200 15 L 185 35" stroke="#00ACC1" stroke-width="2.5" opacity="0.7"/><path d="M 70 205 C 95 175 110 115 120 50" fill="none" stroke="#4E342E" stroke-width="5.5" stroke-linecap="round"/><path d="M 120 50 C 140 80 155 120 165 160" fill="none" stroke="#4E342E" stroke-width="3" stroke-linecap="round"/><path d="M 88 155 C 45 125 30 80 40 60 C 70 80 88 115 88 155 Z" fill="#4CAF50" stroke="#1B5E20" stroke-width="1.8" stroke-linejoin="round"/><path d="M 112 115 C 155 90 165 50 160 30 C 135 50 118 85 112 115 Z" fill="#4CAF50" stroke="#1B5E20" stroke-width="1.8" stroke-linejoin="round"/><g transform="translate(132, 60) scale(1.35)"><circle cx="0" cy="0" r="9" fill="#FFF" stroke="#E57373" stroke-width="1.5"/><circle cx="0" cy="0" r="3" fill="#FFCDD2"/><circle cx="10" cy="15" r="10" fill="#FFF" stroke="#E57373" stroke-width="1.5"/><circle cx="10" cy="15" r="3" fill="#FFCDD2"/><circle cx="15" cy="32" r="11" fill="#FFF" stroke="#E57373" stroke-width="1.5"/><circle cx="15" cy="32" r="3" fill="#FFCDD2"/><circle cx="17" cy="50" r="9.5" fill="#FFF" stroke="#FFE082" stroke-width="1.5"/><circle cx="17" cy="50" r="3.5" fill="#FFE082"/></g></svg>`;
+          } else {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #100C2E 0%, #050215 100%);"><rect x="10" y="10" width="220" height="220" fill="none" stroke="#E0F7FA" stroke-width="1.5" rx="16" opacity="0.3" filter="drop-shadow(0 0 4px #80DEEA)"/><path d="M 70 200 C 95 170 110 110 120 50" fill="none" stroke="#00E676" stroke-width="4.5" stroke-linecap="round" filter="drop-shadow(0 0 5px #00E676)"/><path d="M 120 50 C 140 80 155 120 162 160" fill="none" stroke="#00E5FF" stroke-width="3" filter="drop-shadow(0 0 5px #00E5FF)"/><path d="M 88 155 C 55 125 45 90 52 75 C 75 90 88 115 88 155 Z" fill="url(#grad-leaf-neon-blue)" filter="drop-shadow(0 0 8px #00B0FF)"/><path d="M 112 115 C 145 95 155 60 150 45 C 130 60 118 85 112 115 Z" fill="url(#grad-leaf-neon-blue)" filter="drop-shadow(0 0 8px #00B0FF)"/><g transform="translate(132, 70)" filter="drop-shadow(0 0 12px #FF4081)"><circle cx="0" cy="0" r="11" fill="url(#grad-flower-crystal)" stroke="#FFF" stroke-width="1.5"/><circle cx="12" cy="22" r="13" fill="url(#grad-flower-crystal-purple)" stroke="#FFF" stroke-width="1.5"/><circle cx="20" cy="48" r="14.5" fill="url(#grad-flower-crystal)" stroke="#FFF" stroke-width="1.5"/><circle cx="22" cy="74" r="12" fill="url(#grad-flower-crystal-gold)" stroke="#FFF" stroke-width="1.5"/></g><defs><linearGradient id="grad-leaf-neon-blue" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00E5FF"/><stop offset="100%" stop-color="#1A237E" stop-opacity="0.3"/></linearGradient><radialGradient id="grad-flower-crystal" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#FFF"/><stop offset="70%" stop-color="#FF4081"/><stop offset="100%" stop-color="#880E4F"/></radialGradient><radialGradient id="grad-flower-crystal-purple" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#FFF"/><stop offset="75%" stop-color="#9C27B0"/><stop offset="100%" stop-color="#4A148C"/></radialGradient><radialGradient id="grad-flower-crystal-gold" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#FFF"/><stop offset="75%" stop-color="#FFB300"/><stop offset="100%" stop-color="#FF6F00"/></radialGradient></defs></svg>`;
+          }
+        }
+      },
+      {
+        id: "firethorn",
+        name: "火刺木",
+        lore: "又稱狀元紅，枝條帶刺，入秋時整株結滿密密麻麻、喜慶飽滿的紅色小果實。",
+        advancedName: "十代繁星狀元紅",
+        advancedLore: "小樹發育為茁壯粗大的狀元紅！密密麻麻的紅色果實繁茂無比，象徵小組心算心有靈犀的豐碩果實。",
+        evolvedName: "赤影鳳凰刺木",
+        evolvedLore: "樹上的紅色小珠果在神祕因數極光下進化為蘊含鳳凰烈羽的發光小果實，光彩照人，驅邪避災。",
+        drawSVG: (type) => {
+          if (type === 'basic') {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #FCF6EC 0%, #F5E7CF 100%);"><path d="M 35 185 C 90 170 140 150 195 110" fill="none" stroke="#5D4037" stroke-width="4.5" stroke-linecap="round"/><path d="M 105 160 C 115 130 98 100 88 85" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/><path d="M 148 140 C 168 115 195 105 205 95" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/><g transform="translate(5, 5)"><circle cx="165" cy="100" r="6" fill="#FF7043" stroke="#4E342E" stroke-width="1"/><circle cx="177" cy="108" r="6.5" fill="#FF7043" stroke="#4E342E" stroke-width="1"/><circle cx="168" cy="115" r="5.5" fill="#FF7043" stroke="#4E342E" stroke-width="1"/><circle cx="182" cy="98" r="6" fill="#FF7043" stroke="#4E342E" stroke-width="1"/><circle cx="85" cy="85" r="6" fill="#FF7043" stroke="#4E342E" stroke-width="1"/><circle cx="95" cy="75" r="6.5" fill="#FF7043" stroke="#4E342E" stroke-width="1"/><circle cx="78" cy="80" r="5.5" fill="#FF7043" stroke="#4E342E" stroke-width="1"/></g><g transform="translate(110, 120)"><ellipse cx="0" cy="0" rx="14" ry="10" fill="#81D4FA" stroke="#4E342E" stroke-width="1.2"/><circle cx="8" cy="-4" r="7" fill="#81D4FA" stroke="#4E342E" stroke-width="1.2"/><circle cx="10" cy="-6" r="1.2" fill="#3E2723"/><polygon points="15,-6 18,-4 15,-2" fill="#FFA726"/></g></svg>`;
+          } else if (type === 'advanced') {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #FFF3E0 0%, #FFE0B2 100%);"><rect x="10" y="10" width="220" height="220" fill="none" stroke="#FF9800" stroke-width="2" rx="16" stroke-dasharray="8,4" opacity="0.5"/><path d="M 40 15 L 55 35 M 120 10 L 120 40 M 200 15 L 185 35" stroke="#F57C00" stroke-width="2.5" opacity="0.7"/><path d="M 35 185 C 95 170 140 140 205 95" fill="none" stroke="#4E342E" stroke-width="6.5" stroke-linecap="round"/><path d="M 105 160 C 115 125 98 90 88 75" fill="none" stroke="#4E342E" stroke-width="4.5" stroke-linecap="round"/><path d="M 148 135 C 170 105 200 95 215 80" fill="none" stroke="#4E342E" stroke-width="4.5" stroke-linecap="round"/><g transform="translate(10, 10)"><circle cx="165" cy="80" r="7" fill="#FF5722" stroke="#3E2723" stroke-width="1"/><circle cx="177" cy="88" r="7.5" fill="#FF5722" stroke="#3E2723" stroke-width="1"/><circle cx="168" cy="95" r="6.5" fill="#FF7043" stroke="#3E2723" stroke-width="1"/><circle cx="85" cy="65" r="7" fill="#FF5722" stroke="#3E2723" stroke-width="1"/><circle cx="95" cy="55" r="7.5" fill="#FF5722" stroke="#3E2723" stroke-width="1"/><circle cx="78" cy="60" r="6.5" fill="#FF7043" stroke="#3E2723" stroke-width="1"/></g><g transform="translate(95, 110)"><ellipse cx="0" cy="0" rx="14" ry="10" fill="#81D4FA" stroke="#4E342E" stroke-width="1.2"/><circle cx="8" cy="-4" r="7" fill="#81D4FA" stroke="#4E342E" stroke-width="1.2"/><circle cx="10" cy="-6" r="1.2" fill="#3E2723"/><polygon points="15,-6 18,-4 15,-2" fill="#FFA726"/></g><g transform="translate(135, 125) scale(0.8) scale(1, -1) rotate(-10)"><ellipse cx="0" cy="0" rx="14" ry="10" fill="#81D4FA" stroke="#4E342E" stroke-width="1.2"/><circle cx="8" cy="-4" r="7" fill="#81D4FA" stroke="#4E342E" stroke-width="1.2"/></g></svg>`;
+          } else {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #4A0E00 0%, #1F0500 100%);"><rect x="10" y="10" width="220" height="220" fill="none" stroke="#FF5722" stroke-width="1.5" rx="16" opacity="0.3" filter="drop-shadow(0 0 4px #FF5722)"/><path d="M 30 180 C 100 120 180 80 220 80" fill="none" stroke="url(#grad-phoenix-wing)" stroke-width="8" opacity="0.45" filter="drop-shadow(0 0 10px #FF5722)"/><path d="M 35 185 Q 115 165 195 110" fill="none" stroke="#795548" stroke-width="5.5" stroke-linecap="round"/><g filter="drop-shadow(0 0 12px #FF3D00)"><circle cx="170" cy="105" r="7.5" fill="#FFEA00"/><circle cx="170" cy="105" r="14" fill="none" stroke="#FF5722" stroke-width="1.2" stroke-dasharray="3,2" opacity="0.8"/><circle cx="182" cy="113" r="8" fill="#FF3D00"/><circle cx="90" cy="90" r="7.5" fill="#FF3D00"/><circle cx="100" cy="80" r="7" fill="#FFEA00"/></g><defs><linearGradient id="grad-phoenix-wing" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#FF3D00"/><stop offset="50%" stop-color="#FF9100"/><stop offset="100%" stop-color="#FFE082" stop-opacity="0"/></linearGradient></defs></svg>`;
+          }
+        }
+      },
+      {
+        id: "michelia",
+        name: "烏心石",
+        lore: "台灣原生特有喬木，質地極為堅硬如石，常作為砧板材料，花朵潔白帶雅香。",
+        advancedName: "神木級烏心石",
+        advancedLore: "在心算能量的灌溉下，烏心石以驚人速度長成一株挺拔雄偉的巨型神木！樹上綻放出芬芳的白色花朵，香氣撲鼻。",
+        evolvedName: "萬代黑金魂石木",
+        evolvedLore: "樹幹木質化為如黑曜石般泛著金屬光澤的黑金魂石木，散發能鎮靜靈魂、消除百種心算雜念的幽香。",
+        drawSVG: (type) => {
+          if (type === 'basic') {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #F8F8F8 0%, #EDEDED 100%);"><path d="M 120 205 L 120 100" fill="none" stroke="#4E342E" stroke-width="7" stroke-linecap="round"/><path d="M 120 145 C 95 130 85 115 75 105" fill="none" stroke="#4E342E" stroke-width="4.5" stroke-linecap="round"/><path d="M 120 125 C 145 110 155 95 165 85" fill="none" stroke="#4E342E" stroke-width="4.5" stroke-linecap="round"/><ellipse cx="68" cy="98" rx="14" ry="7.5" fill="#81C784" stroke="#4E342E" stroke-width="1.2" transform="rotate(-20 68 98)"/><ellipse cx="172" cy="78" rx="14" ry="7.5" fill="#81C784" stroke="#4E342E" stroke-width="1.2" transform="rotate(20 172 78)"/><g transform="translate(120, 92)" stroke="#4E342E" stroke-width="1.2" stroke-linejoin="round"><circle cx="0" cy="0" r="7" fill="#FFD54F" stroke="none"/><path d="M 0 -7 C -4 -17 4 -17 0 -7 Z" fill="#FFF"/><path d="M 0 7 C -4 17 4 17 0 7 Z" fill="#FFF"/><path d="M -7 0 C -17 -4 -17 4 -7 0 Z" fill="#FFF"/><path d="M 7 0 C 17 -4 17 4 7 0 Z" fill="#FFF"/></g></svg>`;
+          } else if (type === 'advanced') {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #F1F8E9 0%, #DCEDC8 100%);"><rect x="10" y="10" width="220" height="220" fill="none" stroke="#689F38" stroke-width="2" rx="16" stroke-dasharray="8,4" opacity="0.5"/><path d="M 120 205 L 120 85" fill="none" stroke="#4E342E" stroke-width="10" stroke-linecap="round"/><path d="M 120 140 C 90 125 75 110 65 95" fill="none" stroke="#4E342E" stroke-width="6" stroke-linecap="round"/><path d="M 120 120 C 150 105 165 90 175 75" fill="none" stroke="#4E342E" stroke-width="6" stroke-linecap="round"/><ellipse cx="58" cy="85" rx="18" ry="9.5" fill="#4CAF50" stroke="#1B5E20" stroke-width="1.5" transform="rotate(-20 58 85)"/><ellipse cx="182" cy="65" rx="18" ry="9.5" fill="#4CAF50" stroke="#1B5E20" stroke-width="1.5" transform="rotate(20 182 65)"/><g transform="translate(120, 80) scale(1.3)" stroke="#4E342E" stroke-width="1.2" stroke-linejoin="round"><circle cx="0" cy="0" r="7" fill="#FFD54F" stroke="none"/><path d="M 0 -7 C -4 -17 4 -17 0 -7 Z" fill="#FFF"/><path d="M 0 7 C -4 17 4 17 0 7 Z" fill="#FFF"/><path d="M -7 0 C -17 -4 -17 4 -7 0 Z" fill="#FFF"/><path d="M 7 0 C 17 -4 17 4 7 0 Z" fill="#FFF"/></g></svg>`;
+          } else {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #1A2126 0%, #0D1114 100%);"><rect x="10" y="10" width="220" height="220" fill="none" stroke="#FFE082" stroke-width="1.5" rx="16" opacity="0.3" filter="drop-shadow(0 0 4px #FFE082)"/><circle cx="120" cy="90" r="32" fill="none" stroke="#00E5FF" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.7" filter="drop-shadow(0 0 8px #00E5FF)"/><path d="M 120 205 L 120 100" fill="none" stroke="#212121" stroke-width="11" stroke-linecap="round"/><path d="M 120 145 C 95 130 85 115 75 105" fill="none" stroke="#212121" stroke-width="7" stroke-linecap="round"/><ellipse cx="68" cy="98" rx="14" ry="7.5" fill="#00E676" filter="drop-shadow(0 0 5px #00E676)" transform="rotate(-20 68 98)"/><ellipse cx="172" cy="78" rx="14" ry="7.5" fill="#00E676" filter="drop-shadow(0 0 5px #00E676)" transform="rotate(20 172 78)"/><g transform="translate(120, 92)" filter="drop-shadow(0 0 10px #FFF)"><circle cx="0" cy="0" r="9" fill="#FFD54F"/><circle cx="0" cy="0" r="3" fill="#FFF"/></g></svg>`;
+          }
+        }
+      },
+      {
+        id: "nightshade",
+        name: "龍葵",
+        lore: "路旁常見的野草植物，春天開小白花，秋天結出晶瑩紫黑色的小果實（黑甜仔）。",
+        advancedName: "巨瞳繁星龍葵",
+        advancedLore: "小植物發育為茂密蓬勃的龍葵叢！黑亮晶瑩的果實碩大無比，睜著閃亮亮的大眼睛，散發出福氣與祥和氣氛。",
+        evolvedName: "紫夜星瞳龍葵",
+        evolvedLore: "果實進化為如同黑夜星空般深邃的神秘星瞳，閃爍著冷冽霓虹星芒，具有驅散雜念的強大能量。",
+        drawSVG: (type) => {
+          if (type === 'basic') {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #FAF5FC 0%, #EEE0F5 100%);"><path d="M 120 205 C 110 135 125 95 120 65" fill="none" stroke="#4E342E" stroke-width="2.5" stroke-linecap="round"/><path d="M 115 130 C 85 110 75 95 85 85" fill="none" stroke="#4E342E" stroke-width="2" stroke-linecap="round"/><path d="M 85 85 C 65 85 55 60 85 60 C 105 60 95 85 85 85 Z" fill="#81C784" stroke="#3E2723" stroke-width="1.5" stroke-linejoin="round"/><g transform="translate(120, 65)"><circle cx="-14" cy="18" r="10.5" fill="#311B92" stroke="#1A237E" stroke-width="1.5"/><ellipse cx="-16" cy="16" rx="2.5" ry="3.5" fill="#FFF"/><ellipse cx="-12" cy="16" rx="2.5" ry="3.5" fill="#FFF"/><circle cx="-15.5" cy="16.5" r="1" fill="#000"/><circle cx="-11.5" cy="16.5" r="1" fill="#000"/><circle cx="14" cy="18" r="10.5" fill="#311B92" stroke="#1A237E" stroke-width="1.5"/><ellipse cx="12" cy="16" rx="2.5" ry="3.5" fill="#FFF"/><ellipse cx="16" cy="16" rx="2.5" ry="3.5" fill="#FFF"/></g></svg>`;
+          } else if (type === 'advanced') {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #F3E5F5 0%, #E1BEE7 100%);"><rect x="10" y="10" width="220" height="220" fill="none" stroke="#8E24AA" stroke-width="2" rx="16" stroke-dasharray="8,4" opacity="0.5"/><path d="M 120 205 C 110 135 125 95 120 50" fill="none" stroke="#4E342E" stroke-width="5" stroke-linecap="round"/><path d="M 120 140 C 90 120 80 105 90 90" fill="none" stroke="#4E342E" stroke-width="3" stroke-linecap="round"/><path d="M 90 90 C 70 90 60 65 90 65 C 110 65 100 90 90 90 Z" fill="#4CAF50" stroke="#1B5E20" stroke-width="1.8" stroke-linejoin="round"/><g transform="translate(120, 50) scale(1.35)"><circle cx="-14" cy="18" r="10.5" fill="#311B92" stroke="#1A237E" stroke-width="1.5"/><ellipse cx="-16" cy="16" rx="2.5" ry="3.5" fill="#FFF"/><ellipse cx="-12" cy="16" rx="2.5" ry="3.5" fill="#FFF"/><circle cx="14" cy="18" r="10.5" fill="#311B92" stroke="#1A237E" stroke-width="1.5"/></g></svg>`;
+          } else {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #0F0924 0%, #03010A 100%);"><rect x="10" y="10" width="220" height="220" fill="none" stroke="#7B1FA2" stroke-width="1.5" rx="16" opacity="0.3" filter="drop-shadow(0 0 4px #7B1FA2)"/><path d="M 120 205 C 110 135 125 95 120 65" fill="none" stroke="#00E676" stroke-width="4" stroke-linecap="round" filter="drop-shadow(0 0 5px #00E676)"/><path d="M 115 130 C 85 110 75 95 85 85" fill="none" stroke="#00B0FF" stroke-width="3"/><path d="M 85 85 C 65 85 55 60 85 60 C 105 60 95 85 85 85 Z" fill="url(#grad-leaf-cosmic)" filter="drop-shadow(0 0 6px #7B1FA2)"/><g transform="translate(120, 65)" filter="drop-shadow(0 0 15px #7B1FA2)"><circle cx="-14" cy="18" r="12" fill="url(#grad-cosmic-berry)"/><circle cx="14" cy="18" r="12" fill="url(#grad-cosmic-berry)"/><circle cx="0" cy="35" r="14.5" fill="url(#grad-cosmic-berry)"/></g><defs><linearGradient id="grad-leaf-cosmic" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#E040FB"/><stop offset="100%" stop-color="#1A237E" stop-opacity="0.3"/></linearGradient><radialGradient id="grad-cosmic-berry" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#E1BEE7"/><stop offset="70%" stop-color="#4A148C"/><stop offset="100%" stop-color="#02010A"/></radialGradient></defs></svg>`;
+          }
+        }
+      },
+      {
+        id: "cornus",
+        name: "茱萸",
+        lore: "古老避邪的吉祥植物，重陽登高插茱萸折枝以辟邪，秋天果實火紅飽滿。",
+        advancedName: "避邪千瑞茱萸",
+        advancedLore: "茱萸長成一株無比茂密茁壯的辟邪巨木！枝頭掛滿金紅交織的飽滿果實，象徵小組心算團結的正氣成果。",
+        evolvedName: "避邪九重陽茱萸",
+        evolvedLore: "枝葉在大進化的能量中洗禮，茱萸小紅果進化為散發溫潤純金祥瑞之光的九重聖果，能退避一切雜念惡氣。",
+        drawSVG: (type) => {
+          if (type === 'basic') {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #FCFAF0 0%, #F3ECBD 100%);"><path d="M 120 205 L 120 80" fill="none" stroke="#5D4037" stroke-width="4.5" stroke-linecap="round"/><path d="M 120 145 C 95 125 78 115 65 105" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/><path d="M 120 125 C 145 110 162 95 175 85" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/><ellipse cx="120" cy="70" rx="7.5" ry="12" fill="#D84315" stroke="#3E2723" stroke-width="1.5"/><ellipse cx="60" cy="98" rx="7.5" ry="12" fill="#D84315" stroke="#3E2723" stroke-width="1.5" transform="rotate(-25 60 98)"/><ellipse cx="180" cy="78" rx="7.5" ry="12" fill="#D84315" stroke="#3E2723" stroke-width="1.5" transform="rotate(25 180 78)"/></svg>`;
+          } else if (type === 'advanced') {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #FFFDE7 0%, #FFF9C4 100%);"><rect x="10" y="10" width="220" height="220" fill="none" stroke="#FBC02D" stroke-width="2" rx="16" stroke-dasharray="8,4" opacity="0.5"/><path d="M 120 205 L 120 70" fill="none" stroke="#5D4037" stroke-width="5.5" stroke-linecap="round"/><path d="M 120 145 C 95 125 78 115 65 105" fill="none" stroke="#5D4037" stroke-width="4" stroke-linecap="round"/><path d="M 120 120 C 145 105 162 90 175 75" fill="none" stroke="#5D4037" stroke-width="4" stroke-linecap="round"/><g transform="translate(0, 5) scale(1.3) translate(-27, -15)"><ellipse cx="120" cy="70" rx="7.5" ry="12" fill="#D84315" stroke="#3E2723" stroke-width="1.5"/><ellipse cx="60" cy="98" rx="7.5" ry="12" fill="#D84315" stroke="#3E2723" stroke-width="1.5" transform="rotate(-25 60 98)"/><ellipse cx="180" cy="78" rx="7.5" ry="12" fill="#D84315" stroke="#3E2723" stroke-width="1.5" transform="rotate(25 180 78)"/></g></svg>`;
+          } else {
+            return `<svg viewBox="0 0 240 240" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background: radial-gradient(circle, #3E2F00 0%, #1A1300 100%);"><rect x="10" y="10" width="220" height="220" fill="none" stroke="#FFC107" stroke-width="1.5" rx="16" opacity="0.3" filter="drop-shadow(0 0 4px #FFC107)"/><path d="M 120 205 L 120 80" fill="none" stroke="#5D4037" stroke-width="5.5" stroke-linecap="round"/><g filter="drop-shadow(0 0 15px #FFEB3B)"><ellipse cx="120" cy="70" rx="9" ry="15" fill="url(#grad-fruit-divine)"/><ellipse cx="60" cy="98" rx="9" ry="15" fill="url(#grad-fruit-divine)" transform="rotate(-25 60 98)"/><ellipse cx="180" cy="78" rx="9" ry="15" fill="url(#grad-fruit-divine)" transform="rotate(25 180 78)"/></g><defs><linearGradient id="grad-fruit-divine" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFF59D"/><stop offset="50%" stop-color="#FFD54F"/><stop offset="100%" stop-color="#FF8F00"/></linearGradient></defs></svg>`;
+          }
+        }
+      }
+    ];
+
+    // Particles system on Canvas
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor() {
+        this.reset();
+        this.y = Math.random() * canvas.height;
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + 20;
+        this.size = Math.random() * 4 + 2;
+        this.speedY = Math.random() * 0.8 + 0.3;
+        this.speedX = Math.random() * 0.6 - 0.3;
+        this.opacity = Math.random() * 0.5 + 0.2;
+        this.color = Math.random() > 0.5 ? '#81C784' : '#FFD54F';
+      }
+      update() {
+        this.y -= this.speedY;
+        this.x += this.speedX;
+        if (this.y < -10) {
+          this.reset();
+        }
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = this.opacity;
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = this.color;
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    for (let i = 0; i < 40; i++) {
+      particles.push(new Particle());
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+
+    // GAME LOGIC
+    let gameMode = 'basic'; // basic, advanced, challenge
+    let roundIndex = 0;     // 0, 1, 2
+    let roundTargets = [];  // Array of 3 target numbers
+    let currentTarget = 0;
+    
+    let allFactors = [];    // Sorted factors of the current number
+    let factorPairs = [];   // Array of pairs [f_i, f_{k-i+1}] or [f_mid, f_mid]
+    let foundFactors = new Set();
+    
+    // Timer Variables
+    let countdownTime = 30; // 30 seconds countdown for Advanced Mode
+    let countdownValue = 30;
+    
+    let challengeStartTime = null; // count-up timer for Challenge Mode
+    let elapsedTimerInterval = null;
+    let totalElapsedSeconds = 0;
+    
+    // History Record of current game session
+    let gameHistory = [];
+
+    // Firebase state variables
+    let firebaseConfig = null;
+    let database = null;
+    let currentRoomRef = null;
+    let currentPlayerRef = null;
+    let roomListener = null;
+    let playersListener = null;
+    let myPlayerId = null;
+    let myPlayerName = '';
+    let myRoomId = '';
+    let isReady = false;
+    let hasCleanedStaleRoom = false;
+    
+    // Multiplayer status
+    let multiplayerTurnSequence = [];
+    let multiplayerCurrentTurnIdx = 0;
+    let myIndexInTurn = -1;
+
+    // Pools of target numbers
+    const basicPool = [8, 9, 12, 14, 15, 16, 18, 20, 24, 25, 28, 30];
+    const advancedPool = [20, 24, 28, 32, 35, 36, 40, 42, 45, 48, 50];
+    
+    // Challenge Mode target pool: exactly 4 factors between 2 and 60
+    const challengePool = [6, 8, 10, 14, 15, 21, 22, 26, 27, 33, 34, 35, 38, 39, 46, 51, 55, 57, 58];
+
+    // Keyboard support
+    window.addEventListener('keydown', (e) => {
+      if (document.getElementById('screen-game').classList.contains('active')) {
+        if (e.key >= '0' && e.key <= '9') {
+          pressKey(e.key);
+        } else if (e.key === 'Backspace') {
+          pressKey('back');
+        } else if (e.key === 'Enter') {
+          submitFactor();
+        } else if (e.key === 'Escape') {
+          pressKey('clear');
+        }
+      }
+    });
+
+    function showLobby() {
+      document.getElementById('screen-lobby').classList.add('active');
+      document.getElementById('screen-game').classList.remove('active');
+      document.getElementById('screen-celebration').classList.remove('active');
+      document.getElementById('screen-room-waiting').classList.remove('active');
+      
+      document.getElementById('hud-mode-badge').style.display = 'none';
+      stopTimer();
+
+      // 更新頂部按鈕狀態
+      document.getElementById('btn-back-lobby').style.display = 'none';
+      document.getElementById('btn-back-portal').style.display = 'inline-block';
+      document.getElementById('btn-config-db').style.display = 'inline-block';
+    }
+
+    function startGame(mode) {
+      AudioSynth.init();
+      gameMode = mode;
+      roundIndex = 0;
+      gameHistory = [];
+      challengeStartTime = null;
+      totalElapsedSeconds = 0;
+      
+      const badge = document.getElementById('hud-mode-badge');
+      badge.style.display = 'inline-block';
+      
+      // 更新頂部按鈕狀態
+      document.getElementById('btn-back-lobby').style.display = 'inline-block';
+      document.getElementById('btn-back-portal').style.display = 'inline-block';
+      document.getElementById('btn-config-db').style.display = 'none';
+      
+      if (mode === 'basic') {
+        badge.innerText = '基礎關';
+        badge.className = 'badge basic';
+        document.getElementById('timer-section-ui').style.display = 'none';
+        
+        // Select 3 random unique targets
+        roundTargets = selectTargets(basicPool, [9, 16, 25]);
+      } else if (mode === 'advanced') {
+        badge.innerText = '進階關';
+        badge.className = 'badge advanced';
+        document.getElementById('timer-section-ui').style.display = 'flex';
+        document.getElementById('timer-title-text').innerText = '⏰ 倒數計時';
+        
+        roundTargets = selectTargets(advancedPool, [36]);
+      } else if (mode === 'challenge') {
+        badge.innerText = '挑戰關';
+        badge.className = 'badge challenge';
+        document.getElementById('timer-section-ui').style.display = 'flex';
+        document.getElementById('timer-title-text').innerText = '⏱️ 累計時間';
+        
+        // Select 3 unique targets with exactly 4 factors
+        roundTargets = selectTargets(challengePool, [8, 27]);
+      } else if (mode === 'multiplayer') {
+        // 多人連線模式：確認連線設定
+        if (!database) {
+          alert("請先點擊大廳右上角的「⚙️ 連線設定」，填入您的 Firebase 專案配置金鑰以啟用多人連線功能！相關步驟請參考專案目錄下的 firebase_setup_guide.md 檔案。");
+          openConfigModal();
+          return;
+        }
+        openRoomJoinModal();
+        return;
+      }
+
+      document.getElementById('screen-lobby').classList.remove('active');
+      document.getElementById('screen-game').classList.add('active');
+      document.getElementById('screen-celebration').classList.remove('active');
+
+      loadRound();
+    }
+
+    // --- FIREBASE MULTIPLAYER FUNCTIONALITY ---
+    // --- FIREBASE MULTIPLAYER CONFIGURATION ---
+    const DEFAULT_FIREBASE_CONFIG = {
+      apiKey: "AIzaSyDeLX5En1KptQznJHzsstsQr0j90WFtekY",
+      databaseURL: "https://math-garden-class-default-rtdb.firebaseio.com",
+      projectId: "math-garden-class",
+      appId: "1:1062230339831:web:0abc2d10e2e113249f23f2"
+    };
+
+    function loadFirebaseConfig() {
+      const saved = localStorage.getItem('factor_garden_firebase_config');
+      if (saved) {
+        try {
+          firebaseConfig = JSON.parse(saved);
+        } catch (e) {
+          console.error("Failed to parse firebase config", e);
+          localStorage.removeItem('factor_garden_firebase_config');
+        }
+      }
+
+      // 班級專案預設值
+      if (!firebaseConfig) {
+        firebaseConfig = DEFAULT_FIREBASE_CONFIG;
+        document.getElementById('btn-config-db').innerText = '🟢 班級資料庫已連線';
+        document.getElementById('btn-config-db').style.color = '#4CAF50';
+      } else {
+        document.getElementById('btn-config-db').innerText = '🟢 自訂連線已設定';
+        document.getElementById('btn-config-db').style.color = '#5C9E7A';
+      }
+
+      if (firebaseConfig && firebaseConfig.apiKey) {
+        try {
+          if (firebase.apps.length === 0) {
+            firebase.initializeApp(firebaseConfig);
+          }
+          database = firebase.database();
+        } catch (err) {
+          console.error("Firebase initialization failed", err);
+        }
+      }
+    }
+
+    function openConfigModal() {
+      if (firebaseConfig) {
+        document.getElementById('cfg-apiKey').value = firebaseConfig.apiKey || '';
+        document.getElementById('cfg-databaseURL').value = firebaseConfig.databaseURL || '';
+        document.getElementById('cfg-projectId').value = firebaseConfig.projectId || '';
+        document.getElementById('cfg-appId').value = firebaseConfig.appId || '';
+      }
+      document.getElementById('overlay-config').classList.add('active');
+    }
+
+    function closeConfigModal() {
+      document.getElementById('overlay-config').classList.remove('active');
+    }
+
+    function saveConfigAndConnect() {
+      const apiKey = document.getElementById('cfg-apiKey').value.trim();
+      const databaseURL = document.getElementById('cfg-databaseURL').value.trim();
+      const projectId = document.getElementById('cfg-projectId').value.trim();
+      const appId = document.getElementById('cfg-appId').value.trim();
+
+      if (!apiKey || !databaseURL || !projectId || !appId) {
+        alert("請填寫所有配置欄位！");
+        return;
+      }
+
+      const newConfig = { apiKey, databaseURL, projectId, appId };
+      localStorage.setItem('factor_garden_firebase_config', JSON.stringify(newConfig));
+      closeConfigModal();
+      
+      alert("設定已儲存！網頁將重新載入以連接資料庫。");
+      window.location.reload();
+    }
+
+    function openRoomJoinModal() {
+      const savedName = localStorage.getItem('factor_garden_player_name');
+      if (savedName) {
+        document.getElementById('join-player-name').value = savedName;
+      }
+      document.getElementById('overlay-room-join').classList.add('active');
+    }
+
+    function closeRoomJoinModal() {
+      document.getElementById('overlay-room-join').classList.remove('active');
+      showLobby();
+    }
+
+    function confirmJoinRoom() {
+      const name = document.getElementById('join-player-name').value.trim();
+      const room = document.getElementById('join-room-id').value.trim();
+
+      if (!name || !room) {
+        alert("請填寫姓名/座號與遊戲室編號！");
+        return;
+      }
+
+      if (!database) {
+        alert("資料庫尚未連接，請先點選右上角齒輪設定連線！");
+        return;
+      }
+
+      myPlayerName = name;
+      myRoomId = room.toLowerCase().replace(/[^a-z0-9]/g, ''); // keep alphanumeric
+      localStorage.setItem('factor_garden_player_name', name);
+      
+      document.getElementById('overlay-room-join').classList.remove('active');
+      joinFirebaseRoom(myRoomId, myPlayerName);
+    }
+
+    function joinFirebaseRoom(roomId, playerName) {
+      const badge = document.getElementById('hud-mode-badge');
+      badge.style.display = 'inline-block';
+      badge.innerText = `連線挑戰`;
+      badge.className = 'badge challenge';
+      
+      // 更新頂部按鈕狀態
+      document.getElementById('btn-back-lobby').style.display = 'inline-block';
+      document.getElementById('btn-back-portal').style.display = 'inline-block';
+      document.getElementById('btn-config-db').style.display = 'none';
+      
+      document.getElementById('screen-lobby').classList.remove('active');
+      document.getElementById('screen-game').classList.remove('active');
+      document.getElementById('screen-celebration').classList.remove('active');
+      document.getElementById('screen-room-waiting').classList.add('active');
+      
+      document.getElementById('waiting-room-title').innerText = `連線遊戲室: ${roomId.toUpperCase()}`;
+      document.getElementById('btn-ready-toggle').innerText = "準備好了 (Ready)";
+      document.getElementById('btn-ready-toggle').style.backgroundColor = "var(--color-challenge)";
+      isReady = false;
+      hasCleanedStaleRoom = false;
+
+      currentRoomRef = database.ref(`rooms/${roomId}`);
+      
+      // Clean player name to be database path safe (remove Firebase forbidden chars: . $ # [ ] /)
+      const safePlayerKey = playerName.replace(/[\.\$\#\[\]\/]/g, '_');
+      myPlayerId = safePlayerKey;
+      currentPlayerRef = database.ref(`rooms/${roomId}/players/${myPlayerId}`);
+      
+      // Clear previous listeners if any
+      stopFirebaseListeners();
+
+      // Set player joined presence
+      currentPlayerRef.set({
+        name: playerName,
+        ready: false,
+        joinedAt: firebase.database.ServerValue.TIMESTAMP
+      });
+
+      // Remove player node automatically on disconnect
+      currentPlayerRef.onDisconnect().remove();
+
+      // Listen to player presence changes in wait room
+      playersListener = database.ref(`rooms/${roomId}/players`).on('value', (snapshot) => {
+        const players = snapshot.val();
+        updatePlayersListUI(players);
+      });
+
+      // Listen to room status, rounds and current target changes
+      roomListener = currentRoomRef.on('value', (snapshot) => {
+        const roomData = snapshot.val();
+        if (!roomData) return;
+        handleRoomStateChange(roomData);
+      });
+    }
+
+    function updatePlayersListUI(players) {
+      const container = document.getElementById('waiting-players-list');
+      container.innerHTML = '';
+      if (!players) {
+        document.getElementById('waiting-player-count').innerText = '0';
+        return;
+      }
+
+      const keys = Object.keys(players);
+      document.getElementById('waiting-player-count').innerText = keys.length;
+
+      keys.forEach(key => {
+        const p = players[key];
+        const row = document.createElement('div');
+        row.className = 'pairing-row';
+        row.style.justifyContent = 'space-between';
+        row.style.background = '#F4F7F5';
+        row.style.padding = '8px 15px';
+        row.style.borderRadius = '10px';
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.innerText = p.name;
+        nameSpan.style.fontWeight = '700';
+        
+        const statusSpan = document.createElement('span');
+        if (p.ready) {
+          statusSpan.innerHTML = '🟢 已準備';
+          statusSpan.style.color = 'var(--color-success)';
+        } else {
+          statusSpan.innerHTML = '🔴 未準備';
+          statusSpan.style.color = 'var(--color-danger)';
+        }
+        statusSpan.style.fontWeight = '700';
+        
+        row.appendChild(nameSpan);
+        row.appendChild(statusSpan);
+        container.appendChild(row);
+      });
+    }
+
+    function toggleReady() {
+      if (!currentPlayerRef) return;
+      isReady = !isReady;
+      currentPlayerRef.update({ ready: isReady });
+      
+      const btn = document.getElementById('btn-ready-toggle');
+      if (isReady) {
+        btn.innerText = "取消準備 (Cancel)";
+        btn.style.backgroundColor = "var(--text-secondary)";
+      } else {
+        btn.innerText = "準備好了 (Ready)";
+        btn.style.backgroundColor = "var(--color-challenge)";
+      }
+    }
+
+    function leaveRoom() {
+      stopTimer();
+      stopFirebaseListeners();
+      
+      if (currentPlayerRef) {
+        currentPlayerRef.remove();
+      }
+      
+      currentRoomRef = null;
+      currentPlayerRef = null;
+      myPlayerId = null;
+      myRoomId = '';
+      
+      showLobby();
+    }
+
+    function stopFirebaseListeners() {
+      if (database && myRoomId) {
+        database.ref(`rooms/${myRoomId}/players`).off('value', playersListener);
+        database.ref(`rooms/${myRoomId}`).off('value', roomListener);
+      }
+    }
+
+    let lastRoomStatus = 'lobby';
+    let countdownTimer = null;
+
+    function handleRoomStateChange(roomData) {
+      try {
+        const status = roomData.status || 'lobby';
+        
+        // 自行清理舊關卡殘留狀態：僅在進入房間時執行一次
+        if (!hasCleanedStaleRoom) {
+          hasCleanedStaleRoom = true;
+          const playerKeys = Object.keys(roomData.players || {});
+          if (playerKeys.length === 1 && playerKeys[0] === myPlayerId && status !== 'lobby') {
+            currentRoomRef.update({
+              status: 'lobby',
+              roundTargets: null,
+              currentTarget: null,
+              roundIndex: null,
+              currentTurnIdx: null,
+              turnSequence: null,
+              foundFactors: null,
+              history: null,
+              totalTime: null,
+              awardPlantIndex: null
+            });
+            return;
+          }
+        }
+        
+        if (status === 'playing') {
+          gameMode = 'challenge';
+          roundTargets = roomData.roundTargets || [];
+          currentTarget = roomData.currentTarget || 0;
+          roundIndex = roomData.roundIndex || 0;
+          
+          // 更新畫面上的目標數字與關卡 HUD
+          document.getElementById('target-number-display').innerText = currentTarget;
+          
+          const dots = document.getElementById('progress-dots').children;
+          for (let i = 0; i < dots.length; i++) {
+            dots[i].className = 'round-dot';
+            if (i < roundIndex) dots[i].classList.add('completed');
+            else if (i === roundIndex) {
+              dots[i].classList.add('active');
+              dots[i].style.backgroundColor = 'var(--color-challenge)';
+            }
+          }
+          
+          multiplayerTurnSequence = roomData.turnSequence || [];
+          multiplayerCurrentTurnIdx = roomData.currentTurnIdx || 0;
+          myIndexInTurn = multiplayerTurnSequence.indexOf(myPlayerId);
+          
+          if (roomData.gameStart) {
+            challengeStartTime = roomData.gameStart;
+          }
+          
+          // 同步過往題目的歷史紀錄，確保結算時能印出 3 關的資料
+          gameHistory = roomData.history || [];
+          
+          // Sync factors state
+          foundFactors.clear();
+          if (roomData.foundFactors) {
+            Object.keys(roomData.foundFactors).forEach(f => {
+              foundFactors.add(parseInt(f));
+            });
+          }
+          
+          allFactors = [];
+          for (let i = 1; i <= currentTarget; i++) {
+            if (currentTarget % i === 0) {
+              allFactors.push(i);
+            }
+          }
+          
+          factorPairs = [];
+          let left = 0;
+          let right = allFactors.length - 1;
+          while (left <= right) {
+            if (left === right) {
+              factorPairs.push({
+                pair: [allFactors[left]],
+                isSquareCenter: true,
+                completed: foundFactors.has(allFactors[left])
+              });
+            } else {
+              factorPairs.push({
+                pair: [allFactors[left], allFactors[right]],
+                isSquareCenter: false,
+                completed: foundFactors.has(allFactors[left]) && foundFactors.has(allFactors[right])
+              });
+            }
+            left++;
+            right--;
+          }
+          factorPairs.sort((a, b) => a.pair[0] - b.pair[0]);
+          
+          updateFactorsHUD();
+          renderPairingGrid();
+          renderSVGPlant();
+          
+          if (lastRoomStatus !== 'playing') {
+            document.getElementById('screen-room-waiting').classList.remove('active');
+            document.getElementById('screen-game').classList.add('active');
+            document.getElementById('timer-section-ui').style.display = 'flex';
+            document.getElementById('timer-title-text').innerText = '⏱️ 累計時間';
+            document.getElementById('factor-input').value = '';
+            
+            startTimer();
+          }
+          
+          // Render turn ownership
+          const activePlayerKey = multiplayerTurnSequence[multiplayerCurrentTurnIdx];
+          const isMyTurn = (activePlayerKey === myPlayerId);
+          
+          const submitBtn = document.getElementById('btn-submit-factor');
+          const inputField = document.getElementById('factor-input');
+          
+          if (isMyTurn) {
+            inputField.placeholder = "輪到你了！請輸入一個因數";
+            inputField.style.borderColor = "var(--color-challenge)";
+            submitBtn.innerText = "確認輸入 (Enter)";
+            submitBtn.disabled = false;
+            submitBtn.style.backgroundColor = "var(--color-challenge)";
+            setFeedback("輪到你囉！請輸入一個因數。", "success");
+          } else {
+            let activePlayerName = "隊友";
+            if (roomData.players && roomData.players[activePlayerKey]) {
+              activePlayerName = roomData.players[activePlayerKey].name;
+            }
+            inputField.placeholder = `等待 ${activePlayerName} 輸入...`;
+            inputField.style.borderColor = "rgba(43, 61, 52, 0.15)";
+            submitBtn.innerText = `等待 ${activePlayerName}`;
+            submitBtn.disabled = true;
+            submitBtn.style.backgroundColor = "var(--text-secondary)";
+            setFeedback(`目前輪到 ${activePlayerName} 輸入因數。`, "info");
+          }
+        } else if (status === 'countdown') {
+        if (lastRoomStatus !== 'countdown') {
+          triggerRoomCountdown(roomData.countdownStart);
+        }
+      } else if (status === 'finished') {
+        if (lastRoomStatus !== 'finished') {
+          stopTimer();
+          
+          gameHistory = roomData.history || [];
+          const plantIdx = roomData.awardPlantIndex !== undefined ? roomData.awardPlantIndex : 0;
+          const plant = PLANT_DATABASE[plantIdx];
+          
+          document.getElementById('screen-game').classList.remove('active');
+          document.getElementById('screen-celebration').classList.add('active');
+          
+          const title = document.getElementById('celebration-title-text');
+          const desc = document.getElementById('celebration-desc-text');
+          
+          title.innerText = '✨ 挑戰關卡夢幻大進化！';
+          desc.innerHTML = `合作共生大成功！你們達成了最終夢幻植物進化！<br><span style="font-size: 1.25rem; font-weight: 800; color: var(--color-challenge-hover);">⏱️ 總計闖關時間：${roomData.totalTime || 0} 秒</span>`;
+          
+          // 顯示多人連線室名稱與成員名單
+          document.getElementById('celebration-multiplayer-info').style.display = 'flex';
+          document.getElementById('celebration-room-id').innerText = myRoomId.toUpperCase();
+          
+          const playerNames = Object.values(roomData.players || {}).map(p => p.name);
+          document.getElementById('celebration-member-list').innerText = playerNames.join('、');
+          
+          // 隱藏下方的「再培育一次」按鈕
+          document.getElementById('btn-celebration-retry').style.display = 'none';
+          
+          const awardSvgHolder = document.getElementById('victory-plant-svg-holder');
+          const awardBadge = document.getElementById('victory-plant-badge');
+          const awardName = document.getElementById('victory-plant-name');
+          const awardLore = document.getElementById('victory-plant-lore');
+          
+          awardSvgHolder.innerHTML = plant.drawSVG('evolved');
+          awardBadge.innerText = '夢幻傳奇類型';
+          awardBadge.className = 'award-type-badge evolved';
+          awardName.innerText = plant.evolvedName;
+          awardLore.innerText = plant.evolvedLore;
+          
+          const tbody = document.getElementById('history-table-body');
+          tbody.innerHTML = '';
+          
+          gameHistory.forEach(item => {
+            const tr = document.createElement('tr');
+            let factorsHTML = item.factors.map(f => {
+              return `<span class="history-pair-badge">${f}</span>`;
+            }).join(' ');
+
+            tr.innerHTML = `
+              <td>第 ${item.round} 題</td>
+              <td><span class="history-target">${item.target}</span></td>
+              <td><div class="history-pairs">${factorsHTML}</div></td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      }
+      
+      if (status === 'lobby') {
+        checkAllPlayersReady(roomData);
+      }
+            lastRoomStatus = status;
+      } catch (err) {
+        alert("handleRoomStateChange 錯誤: " + err.message + "\n" + err.stack);
+      }
+    }
+
+    function checkAllPlayersReady(roomData) {
+      try {
+        if (!roomData.players) return;
+        const playerIds = Object.keys(roomData.players).sort();
+        if (playerIds.length === 0) return;
+        
+        let allReady = true;
+        playerIds.forEach(id => {
+          if (!roomData.players[id].ready) allReady = false;
+        });
+        
+        if (allReady) {
+          // 依字母排序選擇第一個玩家作為 Host
+          const hostId = playerIds[0];
+          if (hostId === myPlayerId) {
+            currentRoomRef.update({
+              status: 'countdown',
+              countdownStart: firebase.database.ServerValue.TIMESTAMP
+            }).catch(err => {
+              alert("無法更新狀態至 countdown: " + err.message);
+            });
+          }
+        }
+      } catch (e) {
+        alert("checkAllPlayersReady 錯誤: " + e.message);
+      }
+    }
+
+    function triggerRoomCountdown(dbStartTime) {
+      document.getElementById('overlay-countdown').classList.add('active');
+      const numDiv = document.getElementById('countdown-number');
+      
+      let c = 3;
+      numDiv.innerText = c;
+      AudioSynth.playTone(440, 'sine', 0.1, 0);
+      
+      if (countdownTimer) clearInterval(countdownTimer);
+      
+      countdownTimer = setInterval(() => {
+        c--;
+        if (c > 0) {
+          numDiv.innerText = c;
+          AudioSynth.playTone(440, 'sine', 0.1, 0);
+        } else if (c === 0) {
+          numDiv.innerText = "START!";
+          AudioSynth.playTone(880, 'sine', 0.3, 0);
+        } else {
+          clearInterval(countdownTimer);
+          document.getElementById('overlay-countdown').classList.remove('active');
+          
+          if (currentRoomRef) {
+            currentRoomRef.once('value', (snap) => {
+              try {
+                const rData = snap.val();
+                if (rData && rData.status === 'countdown') {
+                  const playerIds = Object.keys(rData.players || {}).sort();
+                  const hostId = playerIds[0]; // 字母排序選擇 Host 確保各端一致
+                  
+                  if (hostId === myPlayerId) {
+                    const targets = selectTargets(challengePool, [8, 27]);
+                    const shuffledPlayers = [...playerIds].sort(() => Math.random() - 0.5);
+                    
+                    currentRoomRef.update({
+                      status: 'playing',
+                      roundTargets: targets,
+                      currentTarget: targets[0],
+                      roundIndex: 0,
+                      currentTurnIdx: 0,
+                      turnSequence: shuffledPlayers,
+                      foundFactors: null,
+                      history: null,
+                      gameStart: firebase.database.ServerValue.TIMESTAMP
+                    }).catch(err => {
+                      alert("啟動遊戲寫入資料庫失敗: " + err.message);
+                    });
+                  }
+                }
+              } catch (e) {
+                alert("倒數結束啟動遊戲錯誤: " + e.message);
+              }
+            });
+          }
+        }
+      }, 1000);
+    }
+
+    function selectTargets(pool, squarePool) {
+      let selected = [];
+      let poolCopy = [...pool];
+      
+      // Try to pick one signature number if exists in pool
+      let squareCandidates = poolCopy.filter(n => squarePool.includes(n));
+      if (squareCandidates.length > 0) {
+        let picked = squareCandidates[Math.floor(Math.random() * squareCandidates.length)];
+        selected.push(picked);
+        poolCopy = poolCopy.filter(n => n !== picked);
+      }
+
+      while (selected.length < 3 && poolCopy.length > 0) {
+        let idx = Math.floor(Math.random() * poolCopy.length);
+        selected.push(poolCopy[idx]);
+        poolCopy.splice(idx, 1);
+      }
+      
+      return selected.sort(() => Math.random() - 0.5);
+    }
+
+    function loadRound() {
+      currentTarget = roundTargets[roundIndex];
+      foundFactors.clear();
+      
+      const inputField = document.getElementById('factor-input');
+      const submitBtn = document.getElementById('btn-submit-factor');
+      inputField.value = '';
+      inputField.placeholder = "請輸入一個因數";
+      inputField.style.borderColor = "";
+      submitBtn.disabled = false;
+      submitBtn.innerText = "確認輸入 (Enter)";
+      submitBtn.style.backgroundColor = "";
+      
+      // Calculate factors
+      allFactors = [];
+      for (let i = 1; i <= currentTarget; i++) {
+        if (currentTarget % i === 0) {
+          allFactors.push(i);
+        }
+      }
+      
+      // Create U-shape Pairs
+      factorPairs = [];
+      let len = allFactors.length;
+      
+      let left = 0;
+      let right = len - 1;
+      while (left <= right) {
+        if (left === right) {
+          factorPairs.push({
+            pair: [allFactors[left]],
+            isSquareCenter: true,
+            completed: false
+          });
+        } else {
+          factorPairs.push({
+            pair: [allFactors[left], allFactors[right]],
+            isSquareCenter: false,
+            completed: false
+          });
+        }
+        left++;
+        right--;
+      }
+      
+      factorPairs.sort((a, b) => a.pair[0] - b.pair[0]);
+
+      // Update UI displays
+      document.getElementById('target-number-display').innerText = currentTarget;
+      
+      const dots = document.getElementById('progress-dots').children;
+      for (let i = 0; i < dots.length; i++) {
+        dots[i].className = 'round-dot';
+        if (i < roundIndex) dots[i].classList.add('completed');
+        else if (i === roundIndex) {
+          dots[i].classList.add('active');
+          if (gameMode === 'basic') dots[i].style.backgroundColor = 'var(--color-basic)';
+          else if (gameMode === 'advanced') dots[i].style.backgroundColor = 'var(--color-advanced)';
+          else dots[i].style.backgroundColor = 'var(--color-challenge)';
+        }
+      }
+
+      updateFactorsHUD();
+      renderPairingGrid();
+      renderSVGPlant();
+      
+      setFeedback("請輸入因數，開始培育！", "info");
+
+      // Start timer based on mode
+      startTimer();
+    }
+
+    function updateFactorsHUD() {
+      document.getElementById('factors-found-counter').innerText = 
+        `已找出因數：${foundFactors.size} / ${allFactors.length}`;
+    }
+
+    function setFeedback(msg, type) {
+      const fb = document.getElementById('feedback-message');
+      fb.innerText = msg;
+      fb.className = 'dome-feedback ' + type;
+    }
+
+    // Render Scaffolding Pairing list
+    function renderPairingGrid() {
+      const container = document.getElementById('pairing-grid-container');
+      container.innerHTML = '';
+      
+      factorPairs.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = 'pairing-row';
+        if (item.completed) {
+          row.classList.add('completed');
+        }
+        
+        if (item.isSquareCenter) {
+          row.className = 'single-square-row';
+          if (item.completed) row.classList.add('completed');
+          
+          const f = item.pair[0];
+          const isFound = foundFactors.has(f);
+          
+          row.innerHTML = `
+            <span>完全平方根：</span>
+            <div class="pairing-node center-square ${isFound ? 'found' : ''}">
+              ${isFound ? f : '?'}
+            </div>
+            <span>(單獨不對稱)</span>
+          `;
+        } else {
+          const f1 = item.pair[0];
+          const f2 = item.pair[1];
+          const found1 = foundFactors.has(f1);
+          const found2 = foundFactors.has(f2);
+          
+          row.innerHTML = `
+            <div class="pairing-node ${found1 ? 'found' : ''}">${found1 ? f1 : '?'}</div>
+            <div class="pairing-line"></div>
+            <div class="pairing-node ${found2 ? 'found' : ''}">${found2 ? f2 : '?'}</div>
+          `;
+        }
+        container.appendChild(row);
+      });
+    }
+
+    // SVG Drawing coordinates using parabolic mapping:
+    // x = 100 + 300 * t
+    // y = 100 + 720 * t * (1 - t)
+    function getCurveCoords(t) {
+      const x = 100 + 300 * t;
+      const y = 100 + 720 * t * (1 - t);
+      return { x, y };
+    }
+
+    // Render SVG plant inside the glass dome
+    // Maps factors: small ones from left-top downwards, large ones from right-top downwards!
+    function renderSVGPlant() {
+      const svg = document.getElementById('plant-svg');
+      svg.innerHTML = '';
+      
+      // 1. Draw Glass Dome Background reflection or grid
+      const domeRef = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      domeRef.setAttribute("d", "M 50 380 A 200 200 0 0 1 450 380");
+      domeRef.setAttribute("fill", "none");
+      domeRef.setAttribute("stroke", "rgba(255, 255, 255, 0.4)");
+      domeRef.setAttribute("stroke-width", "3");
+      svg.appendChild(domeRef);
+
+      // 2. Draw Soil Pot at bottom center
+      const pot = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      pot.setAttribute("d", "M 220 375 L 280 375 L 288 340 L 212 340 Z");
+      pot.setAttribute("fill", "#7A6960");
+      pot.setAttribute("stroke", "#2B3D34");
+      pot.setAttribute("stroke-width", "2");
+      svg.appendChild(pot);
+      
+      const soilLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      soilLine.setAttribute("x1", "205");
+      soilLine.setAttribute("y1", "340");
+      soilLine.setAttribute("x2", "295");
+      soilLine.setAttribute("y2", "340");
+      soilLine.setAttribute("stroke", "#5C4F46");
+      soilLine.setAttribute("stroke-width", "4");
+      soilLine.setAttribute("stroke-linecap", "round");
+      svg.appendChild(soilLine);
+
+      // 3. Draw central stem going straight up from pot to parabola vertex bottom
+      const centerBottom = getCurveCoords(0.5); // x=250, y=280
+      const stem = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      stem.setAttribute("d", `M 250 340 L 250 ${centerBottom.y}`);
+      stem.setAttribute("fill", "none");
+      stem.setAttribute("stroke", "#5C9E7A");
+      stem.setAttribute("stroke-width", "7");
+      stem.setAttribute("stroke-linecap", "round");
+      svg.appendChild(stem);
+
+      // 4. Draw Parabolic Curve Branches (dashed when incomplete, solid as plants grow)
+      const uStem = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      uStem.setAttribute("d", "M 100 100 Q 250 460 400 100");
+      uStem.setAttribute("fill", "none");
+      uStem.setAttribute("stroke", "rgba(92, 158, 122, 0.4)");
+      uStem.setAttribute("stroke-width", "5");
+      uStem.setAttribute("stroke-dasharray", "4 4");
+      svg.appendChild(uStem);
+      
+      // Calculate layout values for factors on the curve
+      let factorCount = allFactors.length;
+      let numPairs = Math.floor(factorCount / 2);
+      
+      let nodes = []; // List of all factor nodes to draw
+      
+      // Outer limit for t: from 0.08 to 0.45
+      let minT = 0.05;
+      let maxT = 0.42;
+      
+      // Generate coordinates for all factor pairs
+      factorPairs.forEach((item, idx) => {
+        if (item.isSquareCenter) {
+          const coords = getCurveCoords(0.5);
+          nodes.push({
+            factor: item.pair[0],
+            x: coords.x,
+            y: coords.y,
+            t: 0.5,
+            isCenter: true,
+            isLeft: false,
+            pairIndex: idx
+          });
+        } else {
+          // Left & Right symmetric pair
+          // Map idx=0 (outermost, e.g. 1 & N) to maxT (top ends)
+          // Map idx=numPairs-1 (innermost) to minT (bottom center)
+          let tOffset = maxT;
+          if (numPairs > 1) {
+            tOffset = maxT - (idx * (maxT - minT) / (numPairs - 1));
+          }
+          
+          let tLeft = 0.5 - tOffset;
+          let tRight = 0.5 + tOffset;
+          
+          const cLeft = getCurveCoords(tLeft);
+          const cRight = getCurveCoords(tRight);
+          
+          nodes.push({
+            factor: item.pair[0],
+            x: cLeft.x,
+            y: cLeft.y,
+            t: tLeft,
+            isCenter: false,
+            isLeft: true,
+            pairIndex: idx
+          });
+          
+          nodes.push({
+            factor: item.pair[1],
+            x: cRight.x,
+            y: cRight.y,
+            t: tRight,
+            isCenter: false,
+            isLeft: false,
+            pairIndex: idx
+          });
+
+          // Draw U-shape connection line in background
+          const connectorPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          let dist = 250 - cLeft.x;
+          let yControl = cLeft.y + dist * 0.5;
+          connectorPath.setAttribute("d", `M ${cLeft.x} ${cLeft.y} Q 250 ${yControl} ${cRight.x} ${cRight.y}`);
+          connectorPath.setAttribute("fill", "none");
+          
+          if (item.completed) {
+            connectorPath.setAttribute("stroke", "#81C784");
+            connectorPath.setAttribute("stroke-width", "3");
+            connectorPath.setAttribute("filter", "drop-shadow(0px 0px 4px rgba(129, 199, 132, 0.7))");
+          } else {
+            connectorPath.setAttribute("stroke", "rgba(184, 199, 192, 0.35)");
+            connectorPath.setAttribute("stroke-width", "1.5");
+            connectorPath.setAttribute("stroke-dasharray", "3 3");
+          }
+          svg.appendChild(connectorPath);
+        }
+      });
+
+      // Draw all nodes
+      nodes.forEach(node => {
+        const isFound = foundFactors.has(node.factor);
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("transform", `translate(${node.x}, ${node.y})`);
+        
+        if (isFound) {
+          // Draw leaf shape pointing outwards
+          const t = node.t;
+          const dx = 300;
+          const dy = 720 - 1440 * t;
+          
+          let angle = 0;
+          let textXOffset = 23;
+          let textYOffset = -12;
+          
+          if (node.isCenter) {
+            angle = 90; // point straight down
+            textXOffset = 0;
+            textYOffset = 22;
+          } else if (node.isLeft) {
+            angle = 210 - (0.5 - t) * 60; 
+            let rad = angle * Math.PI / 180;
+            textXOffset = Math.cos(rad) * 23;
+            textYOffset = Math.sin(rad) * 23;
+          } else {
+            angle = -30 + (t - 0.5) * 60;
+            let rad = angle * Math.PI / 180;
+            textXOffset = Math.cos(rad) * 23;
+            textYOffset = Math.sin(rad) * 23;
+          }
+          
+          const leaf = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          leaf.setAttribute("d", "M 0 0 C 15 -14, 32 -10, 42 0 C 32 10, 15 14, 0 0");
+          leaf.setAttribute("fill", "#6CA680");
+          leaf.setAttribute("stroke", "#2B3D34");
+          leaf.setAttribute("stroke-width", "2");
+          leaf.setAttribute("transform", `rotate(${angle})`);
+          
+          leaf.innerHTML = `<animateTransform attributeName="transform" type="scale" from="0" to="1" dur="0.4s" additive="sum" fill="freeze" keyTimes="0;1" keySplines="0.25 1 0.5 1" calcMode="spline" />`;
+          g.appendChild(leaf);
+          
+          const joint = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          joint.setAttribute("cx", "0");
+          joint.setAttribute("cy", "0");
+          joint.setAttribute("r", "4");
+          joint.setAttribute("fill", "#488261");
+          g.appendChild(joint);
+
+          // Render white badge holding numbers so they stay horizontal
+          const badgeG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          badgeG.setAttribute("transform", `translate(${textXOffset}, ${textYOffset})`);
+          
+          const badgeCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          badgeCircle.setAttribute("cx", "0");
+          badgeCircle.setAttribute("cy", "0");
+          badgeCircle.setAttribute("r", "13");
+          badgeCircle.setAttribute("fill", "#FFFFFF");
+          badgeCircle.setAttribute("stroke", "#2B3D34");
+          badgeCircle.setAttribute("stroke-width", "1.5");
+          badgeCircle.setAttribute("filter", "drop-shadow(0px 2px 4px rgba(0,0,0,0.1))");
+          badgeG.appendChild(badgeCircle);
+          
+          const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          text.setAttribute("x", "0");
+          text.setAttribute("y", "0");
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("dominant-baseline", "central");
+          text.setAttribute("fill", "#2B3D34");
+          text.setAttribute("font-weight", "900");
+          text.setAttribute("font-size", "11.5");
+          text.setAttribute("font-family", "'Outfit', sans-serif");
+          text.textContent = node.factor;
+          badgeG.appendChild(text);
+          
+          g.appendChild(badgeG);
+          
+        } else {
+          // Unfound placeholder
+          const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          circle.setAttribute("cx", "0");
+          circle.setAttribute("cy", "0");
+          circle.setAttribute("r", "12");
+          circle.setAttribute("fill", "#F2F5F3");
+          circle.setAttribute("stroke", "#B8C7C0");
+          circle.setAttribute("stroke-width", "1.5");
+          circle.setAttribute("stroke-dasharray", "3 2");
+          g.appendChild(circle);
+          
+          const qText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          qText.setAttribute("x", "0");
+          qText.setAttribute("y", "0");
+          qText.setAttribute("text-anchor", "middle");
+          qText.setAttribute("dominant-baseline", "central");
+          qText.setAttribute("fill", "#8E9F95");
+          qText.setAttribute("font-size", "10");
+          qText.setAttribute("font-weight", "700");
+          qText.textContent = "?";
+          g.appendChild(qText);
+        }
+        
+        svg.appendChild(g);
+      });
+      
+      // Render flowers at endpoints on success
+      if (foundFactors.size === allFactors.length) {
+        drawFlower(svg, 100, 100);
+        drawFlower(svg, 400, 100);
+      }
+    }
+
+    function drawFlower(svg, x, y) {
+      const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      g.setAttribute("transform", `translate(${x}, ${y})`);
+      
+      for (let i = 0; i < 5; i++) {
+        const petal = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        let angle = (i * 72) * Math.PI / 180;
+        let px = Math.cos(angle) * 8;
+        let py = Math.sin(angle) * 8;
+        
+        petal.setAttribute("cx", px);
+        petal.setAttribute("cy", py);
+        petal.setAttribute("r", "6");
+        petal.setAttribute("fill", "#FFD54F"); // Gold petals
+        petal.setAttribute("stroke", "#E0A800");
+        petal.setAttribute("stroke-width", "1");
+        g.appendChild(petal);
+      }
+      
+      const pistil = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      pistil.setAttribute("cx", "0");
+      pistil.setAttribute("cy", "0");
+      pistil.setAttribute("r", "5");
+      pistil.setAttribute("fill", "#FFFFFF");
+      pistil.setAttribute("stroke", "#D18D6C");
+      pistil.setAttribute("stroke-width", "1");
+      g.appendChild(pistil);
+      
+      g.innerHTML += `<animateTransform attributeName="transform" type="scale" from="0" to="1.2" dur="0.5s" additive="sum" fill="freeze" keyTimes="0;0.8;1" values="0;1.3;1" />`;
+      
+      svg.appendChild(g);
+    }
+
+    // Numeric keypad actions
+    function pressKey(key) {
+      const input = document.getElementById('factor-input');
+      if (key === 'clear') {
+        input.value = '';
+      } else if (key === 'back') {
+        input.value = input.value.slice(0, -1);
+      } else {
+        if (input.value.length < 5) {
+          input.value += key;
+        }
+      }
+    }
+
+    // Form submit verification
+    // Form submit verification
+    function submitFactor() {
+      const input = document.getElementById('factor-input');
+      const valStr = input.value.trim();
+      input.value = ''; // clear input
+      
+      if (!valStr) return;
+      
+      const val = parseInt(valStr);
+      
+      // --- MULTIPLAYER MODE ---
+      if (currentPlayerRef) {
+        const activePlayerKey = multiplayerTurnSequence[multiplayerCurrentTurnIdx];
+        if (activePlayerKey !== myPlayerId) {
+          AudioSynth.playError();
+          setFeedback("現在不是你的回合喔！請等待隊友輸入。", "error");
+          shakeInput();
+          return;
+        }
+
+        if (currentTarget % val === 0) {
+          if (foundFactors.has(val)) {
+            AudioSynth.playAlert();
+            setFeedback(`因數 ${val} 已經找過囉！`, "error");
+            shakeInput();
+          } else {
+            AudioSynth.playSuccess();
+            foundFactors.add(val);
+            
+            if (foundFactors.size === allFactors.length) {
+              if (roundIndex === 2) {
+                let elapsed = Math.round((Date.now() - challengeStartTime) / 1000);
+                let sortedFactorsList = [...allFactors].sort((a, b) => a - b);
+                const historyNode = [...gameHistory];
+                historyNode.push({
+                  round: roundIndex + 1,
+                  target: currentTarget,
+                  factors: sortedFactorsList
+                });
+                
+                currentRoomRef.update({
+                  status: 'finished',
+                  history: historyNode,
+                  awardPlantIndex: Math.floor(Math.random() * PLANT_DATABASE.length),
+                  totalTime: elapsed
+                });
+              } else {
+                let sortedFactorsList = [...allFactors].sort((a, b) => a - b);
+                const historyNode = [...gameHistory];
+                historyNode.push({
+                  round: roundIndex + 1,
+                  target: currentTarget,
+                  factors: sortedFactorsList
+                });
+                
+                const nextShuffled = [...multiplayerTurnSequence].sort(() => Math.random() - 0.5);
+                
+                currentRoomRef.update({
+                  roundIndex: roundIndex + 1,
+                  currentTarget: roundTargets[roundIndex + 1],
+                  foundFactors: null,
+                  currentTurnIdx: 0,
+                  turnSequence: nextShuffled,
+                  history: historyNode
+                }).catch(err => {
+                  alert("切換至下一關寫入資料庫失敗: " + err.message);
+                });
+              }
+            } else {
+              let nextIdx = (multiplayerCurrentTurnIdx + 1) % multiplayerTurnSequence.length;
+              const updates = {};
+              updates[`foundFactors/${val}`] = true;
+              updates['currentTurnIdx'] = nextIdx;
+              currentRoomRef.update(updates);
+            }
+          }
+        } else {
+          AudioSynth.playError();
+          setFeedback(`不正確！${currentTarget} 不能被 ${val} 整除。`, "error");
+          shakeDome();
+          shakeInput();
+        }
+        return;
+      }
+      
+      // --- SINGLE PLAYER / OFFLINE MODE ---
+      if (currentTarget % val === 0) {
+        if (foundFactors.has(val)) {
+          AudioSynth.playAlert();
+          setFeedback(`因數 ${val} 已經找過囉！`, "error");
+          shakeInput();
+        } else {
+          foundFactors.add(val);
+          AudioSynth.playSuccess();
+          
+          updatePairStatus(val);
+          updateFactorsHUD();
+          renderPairingGrid();
+          renderSVGPlant();
+          
+          setFeedback(`成功輸入因數 ${val}！`, "success");
+          
+          if (foundFactors.size === allFactors.length) {
+            handleRoundSuccess();
+          }
+        }
+      } else {
+        AudioSynth.playError();
+        setFeedback(`不正確！${currentTarget} 不能被 ${val} 整除。`, "error");
+        shakeDome();
+        shakeInput();
+      }
+    }
+
+    function shakeInput() {
+      const input = document.getElementById('factor-input');
+      input.style.animation = 'shake 0.4s ease';
+      setTimeout(() => input.style.animation = '', 400);
+    }
+
+    function shakeDome() {
+      const dome = document.getElementById('main-dome-panel');
+      dome.classList.add('shake');
+      setTimeout(() => dome.classList.remove('shake'), 400);
+    }
+
+    function updatePairStatus(val) {
+      factorPairs.forEach(item => {
+        if (item.pair.includes(val)) {
+          let complete = true;
+          item.pair.forEach(f => {
+            if (!foundFactors.has(f)) complete = false;
+          });
+          item.completed = complete;
+        }
+      });
+    }
+
+    function handleRoundSuccess() {
+      stopRoundTimer();
+      AudioSynth.playPerfect();
+      
+      // Save history record: sorted factors
+      let sortedFactorsList = [...allFactors].sort((a, b) => a - b);
+      
+      gameHistory.push({
+        round: roundIndex + 1,
+        target: currentTarget,
+        factors: sortedFactorsList
+      });
+
+      // Pause to show flower blooming, then proceed
+      setTimeout(() => {
+        roundIndex++;
+        if (roundIndex < 3) {
+          loadRound();
+        } else {
+          finishGame();
+        }
+      }, 2000);
+    }
+
+    function finishGame() {
+      stopTimer();
+      document.getElementById('screen-game').classList.remove('active');
+      document.getElementById('screen-celebration').classList.add('active');
+      
+      const title = document.getElementById('celebration-title-text');
+      const desc = document.getElementById('celebration-desc-text');
+      
+      // Select a random plant from database
+      const randomPlantIdx = Math.floor(Math.random() * PLANT_DATABASE.length);
+      const plant = PLANT_DATABASE[randomPlantIdx];
+      
+      // DOM endpoints for plant award card
+      const awardSvgHolder = document.getElementById('victory-plant-svg-holder');
+      const awardBadge = document.getElementById('victory-plant-badge');
+      const awardName = document.getElementById('victory-plant-name');
+      const awardLore = document.getElementById('victory-plant-lore');
+      
+      if (gameMode === 'basic') {
+        title.innerText = '🌱 基礎關卡培育完成！';
+        desc.innerHTML = '恭喜你！成功培育了 3 株因數植物！對稱發芽的 U 型規律能幫助你更有效率地學習因數。';
+        
+        // Award Basic Plant Card
+        awardSvgHolder.innerHTML = plant.drawSVG('basic');
+        awardBadge.innerText = '基礎手繪類型';
+        awardBadge.className = 'award-type-badge basic';
+        awardName.innerText = plant.name;
+        awardLore.innerText = plant.lore;
+        
+      } else if (gameMode === 'advanced') {
+        title.innerText = '⚡ 進階關卡進化完成！';
+        desc.innerHTML = `恭喜你！在 30 秒倒數壓力下成功將 3 株進階植物進化！心算技巧非常卓越！`;
+        
+        // Award Advanced Plant Card
+        awardSvgHolder.innerHTML = plant.drawSVG('advanced');
+        awardBadge.innerText = '進階進化類型';
+        awardBadge.className = 'award-type-badge advanced';
+        awardName.innerText = plant.advancedName;
+        awardLore.innerText = plant.advancedLore;
+        
+      } else {
+        title.innerText = '✨ 挑戰關卡夢幻大進化！';
+        desc.innerHTML = `合作共生大成功！在累計 stopwatch 時間下，你達成了最終夢幻植物進化！<br><span style="font-size: 1.25rem; font-weight: 800; color: var(--color-challenge-hover);">⏱️ 總計闖關時間：${totalElapsedSeconds} 秒</span>`;
+        
+        // Award Dream Evolved Plant Card
+        awardSvgHolder.innerHTML = plant.drawSVG('evolved');
+        awardBadge.innerText = '夢幻傳奇類型';
+        awardBadge.className = 'award-type-badge evolved';
+        awardName.innerText = plant.evolvedName;
+        awardLore.innerText = plant.evolvedLore;
+      }
+
+      // Populate history table
+      const tbody = document.getElementById('history-table-body');
+      tbody.innerHTML = '';
+      
+      gameHistory.forEach(item => {
+        const tr = document.createElement('tr');
+        let factorsHTML = item.factors.map(f => {
+          return `<span class="history-pair-badge">${f}</span>`;
+        }).join(' ');
+
+        tr.innerHTML = `
+          <td>第 ${item.round} 題</td>
+          <td><span class="history-target">${item.target}</span></td>
+          <td><div class="history-pairs">${factorsHTML}</div></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      
+      // 單人版下隱藏多人連線資訊，並顯示再培育一次按鈕
+      document.getElementById('celebration-multiplayer-info').style.display = 'none';
+      document.getElementById('btn-celebration-retry').style.display = 'inline-block';
+    }
+
+    // TIMER ACTIONS (Countdown for Advanced, Stopwatch for Challenge)
+    let countdownInterval = null;
+    
+    function startTimer() {
+      stopTimer();
+      
+      if (gameMode === 'advanced') {
+        // 60 seconds countdown per target number
+        countdownValue = countdownTime;
+        updateCountdownUI();
+        
+        countdownInterval = setInterval(() => {
+          countdownValue--;
+          updateCountdownUI();
+          
+          if (countdownValue <= 0) {
+            stopTimer();
+            handleTimeout();
+          }
+        }, 1000);
+      } else if (gameMode === 'challenge') {
+        // Cumulative count-up stopwatch
+        if (!challengeStartTime) {
+          challengeStartTime = Date.now();
+        }
+        elapsedTimerInterval = setInterval(() => {
+          let elapsed = (Date.now() - challengeStartTime) / 1000;
+          totalElapsedSeconds = elapsed.toFixed(1);
+          document.getElementById('countdown-text').innerText = totalElapsedSeconds + ' 秒';
+          
+          let barPct = (elapsed % 60) / 60 * 100;
+          document.getElementById('countdown-bar').style.width = barPct + '%';
+        }, 100);
+      }
+    }
+
+    function stopTimer() {
+      // Stop countdown
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+      // Stop stopwatch
+      if (elapsedTimerInterval) {
+        clearInterval(elapsedTimerInterval);
+        elapsedTimerInterval = null;
+      }
+    }
+
+    function stopRoundTimer() {
+      if (gameMode === 'advanced') {
+        stopTimer(); // Stop countdown for current round
+      }
+      // Stopwatch in Challenge Mode does NOT stop between rounds!
+    }
+
+    function updateCountdownUI() {
+      const text = document.getElementById('countdown-text');
+      const bar = document.getElementById('countdown-bar');
+      
+      text.innerText = countdownValue + ' 秒';
+      let pct = (countdownValue / countdownTime) * 100;
+      bar.style.width = pct + '%';
+      
+      if (pct > 50) {
+        bar.style.backgroundColor = 'var(--color-success)';
+      } else if (pct > 20) {
+        bar.style.backgroundColor = '#E5C158'; // Yellow
+      } else {
+        bar.style.backgroundColor = 'var(--color-danger)'; // Red
+        if (countdownValue > 0) AudioSynth.playTone(330, 'sine', 0.05, 0);
+      }
+    }
+
+    // Timeout (Advanced Mode Failure check)
+    function handleTimeout() {
+      AudioSynth.playError();
+      
+      // Update timeout text and build customized recommendations (客觀建議)
+      const desc = document.getElementById('timeout-reason-text');
+      desc.innerText = `很遺憾，在 30 秒的限時內未能找齊 ${currentTarget} 的所有因數。植物有一點點乾枯了...`;
+      
+      const tipBox = document.getElementById('timeout-recommendation-box');
+      tipBox.innerHTML = generateObjectiveTip(currentTarget);
+      
+      document.getElementById('overlay-timeout').classList.add('active');
+    }
+
+    function generateObjectiveTip(num) {
+      let tips = `<strong>💡 找 ${num} 因數的引導：</strong><br>`;
+      let step = 1;
+      
+      tips += `${step++}. <b>每個整數都至少有因數：</b> 1 和數字自己本身（即對稱的左右端 1 與 ${num}）。<br>`;
+      
+      if (num % 2 === 0) {
+        tips += `${step++}. <b>這是一個偶數：</b> 所以 2 肯定是它的因數！試試輸入 2，再心算它的配對大因數。<br>`;
+      }
+      
+      if (num % 5 === 0) {
+        tips += `${step++}. <b>它的個位數字是 0 或 5：</b> 說明它一定有因數 5！試試看輸入 5，再心算它的配對大因數。<br>`;
+      }
+      
+      // 動態選擇該目標數字的真實因數作為例子
+      let exDiv = 1;
+      let exQuot = num;
+      if (typeof allFactors !== 'undefined' && allFactors.length > 2) {
+        exDiv = allFactors[1]; // 取得第一個大於 1 的非自身因數（如 2 或 3）
+        exQuot = num / exDiv;
+      }
+      
+      tips += `${step++}. <b>成對配對技巧：</b> 只要你找出一個較小的因數（例如 ${exDiv}），用目標數字除以它得到的商（例如 ${num} ÷ ${exDiv} = ${exQuot}）就是對稱的另一個大因數！`;
+      return tips;
+    }
+
+    function retryCurrentNumber() {
+      document.getElementById('overlay-timeout').classList.remove('active');
+      loadRound();
+    }
+
+    // 檢查是否在遊戲或房間等待中
+    function isGameActive() {
+      const gameActive = document.getElementById('screen-game').classList.contains('active');
+      const waitActive = document.getElementById('screen-room-waiting').classList.contains('active');
+      return gameActive || waitActive;
+    }
+
+    // 重返大廳 (回到發芽魔法選單)
+    document.getElementById('btn-back-lobby').addEventListener('click', () => {
+      if (isGameActive()) {
+        if (confirm('確定要結束目前的挑戰，返回發芽魔法選單嗎？目前的培育進度將會遺失喔！')) {
+          if (currentPlayerRef) {
+            currentPlayerRef.remove();
+          }
+          stopTimer();
+          stopFirebaseListeners();
+          showLobby();
+        }
+      } else {
+        showLobby();
+      }
+    });
+
+    // 回到共生花園 (回到入口網站 index.html)
+    document.getElementById('btn-back-portal').addEventListener('click', () => {
+      if (isGameActive()) {
+        if (confirm('確定要結束目前的挑戰，返回共生花園大廳嗎？目前的培育進度將會遺失喔！')) {
+          if (currentPlayerRef) {
+            currentPlayerRef.remove();
+          }
+          stopTimer();
+          stopFirebaseListeners();
+          window.location.href = 'index.html';
+        }
+      } else {
+        window.location.href = 'index.html';
+      }
+    });
+
+    function returnLobby() {
+      if (gameMode === 'basic' || gameMode === 'advanced' || gameMode === 'challenge') {
+        startGame(gameMode);
+      } else {
+        showLobby();
+      }
+    }
+
+    // Start screen setup
+    showLobby();
+    loadFirebaseConfig();
+  </script>
+</body>
+</html>

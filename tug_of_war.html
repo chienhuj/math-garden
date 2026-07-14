@@ -1239,6 +1239,10 @@
       }
     }
   </style>
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <!-- Firebase Realtime Database -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
 
@@ -1308,7 +1312,26 @@
           <span class="sky-number-separator">&</span>
           <input type="number" id="custom-num2" class="input-number" value="36" min="2" max="100">
         </div>
-        <button class="btn-start-custom" onclick="startCustomGame()">開啟自訂天空戰役</button>
+      </div>
+
+      <!-- Teacher & Class Setting Panel in Lobby (Hidden, managed in Portal index.html) -->
+      <div class="teacher-class-lock-panel" style="display: none;" id="teacher-class-lock-panel">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.5rem;">🏫</span>
+          <div>
+            <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: var(--text-color);">班級學習歷程設定</h4>
+            <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--text-muted);" id="teacher-class-status-text">未設定班級，目前遊玩將不會記錄歷程。</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;" id="teacher-class-inputs-container">
+          <input type="text" id="lobby-teacher-id" style="width: 120px; height: 36px; padding: 0 10px; font-size: 0.85rem; margin: 0; border: 1.5px solid rgba(43, 61, 52, 0.15); border-radius: 8px; text-align: center; background: white; color: var(--text-color); outline: none;" placeholder="教師代碼">
+          <input type="text" id="lobby-class-id" style="width: 100px; height: 36px; padding: 0 10px; font-size: 0.85rem; margin: 0; border: 1.5px solid rgba(43, 61, 52, 0.15); border-radius: 8px; text-align: center; background: white; color: var(--text-color); outline: none;" placeholder="班級 (如 501)">
+          <button class="btn-start-custom" onclick="saveTeacherClassFromLobby()" style="padding: 0 15px; height: 36px; font-size: 0.85rem; border-radius: 8px; margin: 0; border: none; background-color: var(--color-guardian); color: white; font-weight: 700; cursor: pointer;">設定</button>
+        </div>
+        <div style="display: none; align-items: center; gap: 12px; flex-wrap: wrap;" id="teacher-class-locked-container">
+          <span style="font-size: 0.9rem; font-weight: 700; color: var(--color-guardian);" id="teacher-class-locked-tag">教師：-- | 班級：--</span>
+          <button class="btn-start-custom" onclick="clearTeacherClassFromLobby()" style="padding: 0 12px; height: 30px; font-size: 0.75rem; border-radius: 6px; margin: 0; background: var(--text-muted); color: white; border: none; cursor: pointer;">清除設定</button>
+        </div>
       </div>
     </section>
 
@@ -1833,19 +1856,20 @@
         }
       }
       
-      // Round 1: Easy (10 to 30, 2-4 factors)
-      sequence.push(getRound(10, 30, 2, 4));
+      // Round 1: Easy (12 to 35, 2-4 factors)
+      sequence.push(getRound(12, 35, 2, 4));
       
-      // Round 2: Medium (20 to 60, 4-6 factors)
-      sequence.push(getRound(20, 60, 4, 6));
+      // Round 2: Medium (20 to 70, 4-6 factors)
+      sequence.push(getRound(20, 70, 4, 6));
       
-      // Round 3: Hard (40 to 100, 6-10 factors)
-      sequence.push(getRound(40, 100, 6, 10));
+      // Round 3: Hard (40 to 99, 6-10 factors)
+      sequence.push(getRound(40, 99, 6, 10));
       
       return sequence;
     }
 
     function startGame(mode) {
+      promptGcfPlayersNames(mode);
       gameMode = mode;
       window.roundHistory = []; // Reset history
       
@@ -1892,6 +1916,7 @@
         return;
       }
       
+      promptGcfPlayersNames('multi');
       gameMode = 'multi'; // Custom rounds are local versus by default
       currentRound = 1;
       maxRounds = 1; // 1 round custom fight
@@ -2478,6 +2503,7 @@
     }
 
     function showTournamentEnd() {
+      logGcfTournamentEvent();
       const modal = document.getElementById('result-modal');
       const title = document.getElementById('modal-title');
       const desc = document.getElementById('modal-desc');
@@ -2613,6 +2639,186 @@
       }, thinkTime);
     }
 
+    // --- FIREBASE CONFIG & INTEGRATION FOR TUG OF WAR ---
+    const DEFAULT_FIREBASE_CONFIG = {
+      apiKey: "AIzaSyDeLX5En1KptQznJHzsstsQr0j90WFtekY",
+      databaseURL: "https://math-garden-class-default-rtdb.firebaseio.com",
+      projectId: "math-garden-class",
+      appId: "1:1062230339831:web:0abc2d10e2e113249f23f2"
+    };
+
+    let firebaseConfig = null;
+    let database = null;
+
+    function loadFirebaseConfigTug() {
+      const savedTeacher = localStorage.getItem('current_teacher_id') || '';
+      const savedClass = localStorage.getItem('current_class_id') || '';
+      
+      const saved = localStorage.getItem('factor_garden_firebase_config');
+      if (saved) {
+        try {
+          firebaseConfig = JSON.parse(saved);
+        } catch (e) {
+          console.error("Failed to parse firebase config", e);
+        }
+      }
+
+      // Check whitelist
+      const WHITELISTED_TEACHERS = ['chhsieh', 'dreamn1', 'dreamn2', 'dreamn3'];
+      if (!firebaseConfig) {
+        if (WHITELISTED_TEACHERS.includes(savedTeacher.trim().toLowerCase())) {
+          firebaseConfig = DEFAULT_FIREBASE_CONFIG;
+        }
+      }
+
+      if (firebaseConfig && firebaseConfig.apiKey) {
+        try {
+          if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+          }
+          database = firebase.database();
+          console.log("Firebase initialized in Tug of War");
+        } catch (err) {
+          console.error("Firebase init failed in Tug of War", err);
+        }
+      }
+    }
+
+    function logGcfTournamentEvent() {
+      const teacherId = localStorage.getItem('current_teacher_id');
+      const classId = localStorage.getItem('current_class_id');
+      if (!teacherId || !classId) return;
+
+      if (!database) return;
+
+      const studentName = currentStudentName || '匿名學生';
+
+      const eventLog = {
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        playerName: studentName,
+        gameMode: gameMode, // 'ai' or 'pvp'
+        guardianScore: scores.guardian,
+        marauderScore: scores.marauder,
+        winner: scores.guardian > scores.marauder ? 'guardian' : (scores.marauder > scores.guardian ? 'marauder' : 'draw'),
+        rounds: window.roundHistory || []
+      };
+
+      const sanitizedT = teacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
+      const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
+
+      database.ref(`logs/${sanitizedT}/${sanitizedC}/gcf_game/events`).push(eventLog)
+        .catch(err => console.error("GCF log write failed", err));
+    }
+
+    // --- TEACHER & CLASS LOGS FOR TUG OF WAR ---
+    let currentStudentName = '自主練習';
+
+    function promptGcfPlayersNames(mode) {
+      const savedTeacher = localStorage.getItem('current_teacher_id');
+      const savedClass = localStorage.getItem('current_class_id');
+      
+      if (savedTeacher && savedClass) {
+        if (mode === 'ai') {
+          let name = localStorage.getItem('student_name');
+          if (!name) {
+            name = prompt("請輸入您的姓名或座號，以便將您的學習歷程記錄給老師：");
+            if (name && name.trim()) {
+              name = name.trim();
+              localStorage.setItem('student_name', name);
+            } else {
+              name = "匿名學生";
+            }
+          }
+          currentStudentName = name;
+        } else {
+          let name1 = prompt("請輸入【守護者 (左邊)】學生的姓名或座號：");
+          let name2 = prompt("請輸入【汲取者 (右邊)】學生的姓名或座號：");
+          name1 = (name1 && name1.trim()) ? name1.trim() : "左方守護";
+          name2 = (name2 && name2.trim()) ? name2.trim() : "右方汲取";
+          currentStudentName = `${name1} 🆚 ${name2}`;
+        }
+        updateTeacherClassLobbyUI();
+      } else {
+        currentStudentName = '自主練習';
+      }
+    }
+
+    function parseUrlParams() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryT = urlParams.get('t') || urlParams.get('teacher');
+      const queryC = urlParams.get('c') || urlParams.get('class');
+      
+      if (queryT) {
+        localStorage.setItem('current_teacher_id', queryT.trim());
+      }
+      if (queryC) {
+        localStorage.setItem('current_class_id', queryC.trim());
+      }
+    }
+
+    function updateTeacherClassLobbyUI() {
+      const tId = localStorage.getItem('current_teacher_id') || '';
+      const cId = localStorage.getItem('current_class_id') || '';
+      const sName = localStorage.getItem('student_name') || '';
+      
+      const statusText = document.getElementById('teacher-class-status-text');
+      const inputsCont = document.getElementById('teacher-class-inputs-container');
+      const lockedCont = document.getElementById('teacher-class-locked-container');
+      const lockedTag = document.getElementById('teacher-class-locked-tag');
+      
+      if (!statusText) return; 
+      
+      if (tId && cId) {
+        statusText.innerText = '班級學習歷程已啟用！答題歷程將寫入雲端記錄區。';
+        inputsCont.style.display = 'none';
+        lockedCont.style.display = 'flex';
+        
+        let nameHtml = sName ? ` | 👤 姓名：<strong style="color: var(--color-guardian); cursor:pointer;" onclick="changeStudentNamePrompt()">${sName} (點擊修改)</strong>` : ` | 👤 <span style="text-decoration:underline; cursor:pointer;" onclick="changeStudentNamePrompt()">設定姓名/座號</span>`;
+        lockedTag.innerHTML = `🏫 班級：<strong style="color: var(--color-guardian);">${tId} / ${cId}</strong>${nameHtml}`;
+      } else {
+        statusText.innerText = '未設定班級，目前遊玩將不會記錄歷程。';
+        inputsCont.style.display = 'flex';
+        lockedCont.style.display = 'none';
+      }
+    }
+
+    function saveTeacherClassFromLobby() {
+      const tInput = document.getElementById('lobby-teacher-id').value.trim();
+      const cInput = document.getElementById('lobby-class-id').value.trim();
+      
+      if (!tInput || !cInput) {
+        alert("請輸入教師代碼與班級代碼！");
+        return;
+      }
+      
+      localStorage.setItem('current_teacher_id', tInput);
+      localStorage.setItem('current_class_id', cInput);
+      
+      alert("班級設定成功！網頁將重新整理以重載資料庫。");
+      window.location.reload();
+    }
+
+    function clearTeacherClassFromLobby() {
+      localStorage.removeItem('current_teacher_id');
+      localStorage.removeItem('current_class_id');
+      localStorage.removeItem('student_name');
+      alert("已清除設定！");
+      window.location.reload();
+    }
+
+    function changeStudentNamePrompt() {
+      const current = localStorage.getItem('student_name') || '';
+      const n = prompt("請輸入您的姓名或座號：", current);
+      if (n && n.trim()) {
+        localStorage.setItem('student_name', n.trim());
+        updateTeacherClassLobbyUI();
+      }
+    }
+
+    // Initialize configurations
+    parseUrlParams();
+    loadFirebaseConfigTug();
+    updateTeacherClassLobbyUI();
   </script>
 </body>
 </html>

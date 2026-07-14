@@ -183,34 +183,34 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 30px 10px;
+      padding: 10px 10px 5px 10px;
       flex-grow: 1;
     }
 
     .lobby-icon {
-      font-size: 4rem;
-      margin-bottom: 20px;
+      font-size: 2.2rem;
+      margin-bottom: 8px;
       animation: float 3s ease-in-out infinite;
     }
 
     @keyframes float {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+      50% { transform: translateY(-5px); }
     }
 
     .lobby-title {
-      font-size: 2.2rem;
+      font-size: 1.7rem;
       font-weight: 900;
-      margin-bottom: 15px;
+      margin-bottom: 6px;
       color: var(--text-primary);
     }
 
     .lobby-desc {
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       color: var(--text-secondary);
       max-width: 650px;
-      margin-bottom: 40px;
-      line-height: 1.7;
+      margin-bottom: 15px;
+      line-height: 1.5;
       font-weight: 500;
     }
 
@@ -1064,7 +1064,7 @@
       <div class="hud-group" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
         <span class="badge basic" id="hud-mode-badge">基礎關</span>
         <button class="btn btn-secondary" id="btn-config-db" onclick="openConfigModal()" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px;">
-          ⚙️ 連線設定
+          ⚙️ 自訂教師專屬資料庫
         </button>
         <button class="btn btn-secondary" id="btn-back-lobby" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px; display: none;">
           發芽魔法選單
@@ -1118,20 +1118,40 @@
         </div>
 
         <!-- Card: Multiplayer Mode -->
-        <div class="mode-card challenge-card" style="width: 100%; max-width: 840px; margin-top: 25px; border-color: rgba(209, 141, 108, 0.3); background: linear-gradient(135deg, white 0%, #FAF6F4 100%); padding: 20px;" onclick="startGame('multiplayer')">
+        <div class="mode-card challenge-card" style="width: 100%; max-width: 840px; margin-top: 12px; border-color: rgba(209, 141, 108, 0.3); background: linear-gradient(135deg, white 0%, #FAF6F4 100%); padding: 10px 15px;" onclick="startGame('multiplayer')">
           <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 15px; flex-wrap: wrap;">
             <div style="display: flex; align-items: center; gap: 15px; text-align: left;">
-              <span style="font-size: 2.2rem;">👥</span>
+              <span style="font-size: 1.8rem;">👥</span>
               <div>
-                <h3 style="margin: 0 0 5px 0; font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">
+                <h3 style="margin: 0 0 3px 0; font-size: 1.05rem; font-weight: 800; color: var(--text-primary);">
                   挑戰關（多人合作連線版）
                 </h3>
-                <p style="margin: 0; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5;">
+                <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
                   合作共生，一人輸入一個因數，試著在最短時間內完成植物的夢幻進化。（需配合 Firebase 連線設定）
                 </p>
               </div>
             </div>
-            <div class="mode-btn" style="width: auto; padding: 8px 20px; background-color: var(--color-challenge); color: white; margin: 0;">進入分組連線</div>
+            <div class="mode-btn" style="width: auto; padding: 6px 15px; font-size: 0.85rem; background-color: var(--color-challenge); color: white; margin: 0;">進入分組連線</div>
+          </div>
+        </div>
+
+        <!-- Teacher & Class Setting Panel in Lobby (Hidden, managed in Portal index.html) -->
+        <div class="teacher-class-lock-panel" style="display: none;" id="teacher-class-lock-panel">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.5rem;">🏫</span>
+            <div>
+              <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">班級學習歷程設定</h4>
+              <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);" id="teacher-class-status-text">未設定班級，目前遊玩將不會記錄歷程。</p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;" id="teacher-class-inputs-container">
+            <input type="text" id="lobby-teacher-id" class="input-box" style="width: 120px; height: 36px; padding: 0 10px; font-size: 0.85rem; margin: 0; border: 1.5px solid rgba(43, 61, 52, 0.15); text-align: center;" placeholder="教師代碼">
+            <input type="text" id="lobby-class-id" class="input-box" style="width: 100px; height: 36px; padding: 0 10px; font-size: 0.85rem; margin: 0; border: 1.5px solid rgba(43, 61, 52, 0.15); text-align: center;" placeholder="班級 (如 501)">
+            <button class="btn btn-primary" onclick="saveTeacherClassFromLobby()" style="padding: 0 15px; height: 36px; font-size: 0.85rem; border-radius: 8px; margin: 0; background-color: var(--color-basic); display: inline-flex; align-items: center; justify-content: center;">設定</button>
+          </div>
+          <div style="display: none; align-items: center; gap: 12px; flex-wrap: wrap;" id="teacher-class-locked-container">
+            <span style="font-size: 0.9rem; font-weight: 700; color: var(--color-basic-hover);" id="teacher-class-locked-tag">教師：-- | 班級：--</span>
+            <button class="btn btn-secondary" onclick="clearTeacherClassFromLobby()" style="padding: 0 12px; height: 30px; font-size: 0.75rem; border-radius: 6px; border-color: rgba(0,0,0,0.15); margin: 0; display: inline-flex; align-items: center; justify-content: center;">清除設定</button>
           </div>
         </div>
       </div>
@@ -1330,10 +1350,16 @@
     <div class="overlay" id="overlay-config">
       <div class="dialog-box" style="max-width: 480px;">
         <div class="dialog-icon">⚙️</div>
-        <h3 class="dialog-title">Firebase 連線設定</h3>
-        <p class="dialog-desc">
-          請填入您的 Firebase 專案配置金鑰以啟用多人連線功能。設定會儲存於您的瀏覽器中。
+        <h3 class="dialog-title">自訂教師專屬資料庫</h3>
+        
+        <div style="background-color: #FFEBEE; border-left: 4px solid #EF5350; padding: 10px; border-radius: 4px; font-size: 0.8rem; color: #C62828; line-height: 1.4; margin-bottom: 15px; font-weight: 600; text-align: left;">
+          ⚠️ <b>注意</b>：本站預設連線為千慧老師班級專用。其他班級若要在課堂中集體使用，請在此填寫您學校專屬的 Firebase 金鑰，以防不同班級連線碰撞。
+        </div>
+
+        <p class="dialog-desc" style="font-size: 0.85rem; margin-bottom: 12px;">
+          請填入您的 Firebase 專案配置金鑰以啟用您的連線功能。設定會儲存於您的瀏覽器中。
         </p>
+        
         <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
           <div>
             <label style="font-weight: 700; font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">API Key (apiKey)</label>
@@ -1352,9 +1378,12 @@
             <input type="text" id="cfg-appId" class="input-box" style="width:100%; text-align:left; height:38px; font-size:0.9rem;" placeholder="1:123456:web:abcd...">
           </div>
         </div>
-        <div style="display: flex; gap: 15px;">
-          <button class="btn btn-secondary" onclick="closeConfigModal()" style="flex: 1; justify-content: center;">取消</button>
-          <button class="btn btn-primary" onclick="saveConfigAndConnect()" style="flex: 1.5; justify-content: center;">儲存設定</button>
+        <div style="display: flex; gap: 15px; flex-direction: column;">
+          <div style="display: flex; gap: 15px; width: 100%;">
+            <button class="btn btn-secondary" onclick="closeConfigModal()" style="flex: 1; justify-content: center; margin: 0;">取消</button>
+            <button class="btn btn-primary" onclick="saveConfigAndConnect()" style="flex: 1.5; justify-content: center; margin: 0;">儲存設定</button>
+          </div>
+          <span onclick="loadDefaultAdminConfig()" style="font-size: 0.75rem; color: var(--text-secondary); text-decoration: underline; cursor: pointer; display: block; text-align: center;">🔑 填入預設資料庫金鑰 (限管理員密碼)</span>
         </div>
       </div>
     </div>
@@ -1676,11 +1705,11 @@
     let myIndexInTurn = -1;
 
     // Pools of target numbers
-    const basicPool = [8, 9, 12, 14, 15, 16, 18, 20, 24, 25, 28, 30];
-    const advancedPool = [20, 24, 28, 32, 35, 36, 40, 42, 45, 48, 50];
+    const basicPool = [6, 8, 9, 10, 12, 14, 15, 16, 18, 20];
+    const advancedPool = [20, 24, 28, 30, 32, 35, 36, 40, 42, 44, 45, 48, 50, 52, 54, 56, 60];
     
-    // Challenge Mode target pool: exactly 4 factors between 2 and 60
-    const challengePool = [6, 8, 10, 14, 15, 21, 22, 26, 27, 33, 34, 35, 38, 39, 46, 51, 55, 57, 58];
+    // Challenge Mode target pool: exactly 4 factors between 2 and 100
+    const challengePool = [6, 8, 10, 14, 15, 21, 22, 26, 27, 33, 34, 35, 38, 39, 46, 51, 55, 57, 58, 62, 65, 69, 74, 77, 82, 85, 86, 87, 91, 93, 94, 95];
 
     // Keyboard support
     window.addEventListener('keydown', (e) => {
@@ -1734,7 +1763,7 @@
         document.getElementById('timer-section-ui').style.display = 'none';
         
         // Select 3 random unique targets
-        roundTargets = selectTargets(basicPool, [9, 16, 25]);
+        roundTargets = selectTargets(basicPool, [9, 16]);
       } else if (mode === 'advanced') {
         badge.innerText = '進階關';
         badge.className = 'badge advanced';
@@ -1777,7 +1806,15 @@
       appId: "1:1062230339831:web:0abc2d10e2e113249f23f2"
     };
 
+    let isUsingDefaultDB = false;
+    let currentStudentName = '自主練習';
+
+    const WHITELISTED_TEACHERS = ['chhsieh', 'dreamn1', 'dreamn2', 'dreamn3'];
+
     function loadFirebaseConfig() {
+      const savedTeacher = localStorage.getItem('current_teacher_id') || '';
+      const savedClass = localStorage.getItem('current_class_id') || '';
+      
       const saved = localStorage.getItem('factor_garden_firebase_config');
       if (saved) {
         try {
@@ -1788,22 +1825,41 @@
         }
       }
 
-      // 班級專案預設值
+      // 白名單機制：
+      // 如果教師代碼在白名單中，且沒有自訂 Firebase 設定，則使用預設資料庫。
+      // 如果教師代碼是其他值，且沒有自訂 Firebase 設定，則將其設為 null (不連線預設資料庫)
       if (!firebaseConfig) {
-        firebaseConfig = DEFAULT_FIREBASE_CONFIG;
-        document.getElementById('btn-config-db').innerText = '🟢 班級資料庫已連線';
-        document.getElementById('btn-config-db').style.color = '#4CAF50';
+        if (WHITELISTED_TEACHERS.includes(savedTeacher.trim().toLowerCase())) {
+          firebaseConfig = DEFAULT_FIREBASE_CONFIG;
+          document.getElementById('btn-config-db').innerText = '🟢 預設資料庫已連線';
+          document.getElementById('btn-config-db').style.color = '#4CAF50';
+          isUsingDefaultDB = true;
+        } else {
+          firebaseConfig = null;
+          document.getElementById('btn-config-db').innerText = '🔴 資料庫未設定';
+          document.getElementById('btn-config-db').style.color = '#F44336';
+          isUsingDefaultDB = false;
+        }
       } else {
-        document.getElementById('btn-config-db').innerText = '🟢 自訂連線已設定';
+        document.getElementById('btn-config-db').innerText = '🟢 自訂資料庫已設定';
         document.getElementById('btn-config-db').style.color = '#5C9E7A';
+        isUsingDefaultDB = false;
       }
 
       if (firebaseConfig && firebaseConfig.apiKey) {
         try {
-          if (firebase.apps.length === 0) {
+          // If a firebase app already exists, delete and reinitialize
+          if (firebase.apps.length) {
+            firebase.app().delete().then(() => {
+              firebase.initializeApp(firebaseConfig);
+              database = firebase.database();
+              console.log("Firebase re-initialized");
+            });
+          } else {
             firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            console.log("Firebase initialized");
           }
-          database = firebase.database();
         } catch (err) {
           console.error("Firebase initialization failed", err);
         }
@@ -1811,20 +1867,70 @@
     }
 
     function openConfigModal() {
-      // 教師安全存取控制密碼鎖
-      const pwd = prompt("此設定區僅限教師使用。請輸入管理密碼或您的 Google 帳號識別碼：");
-      if (pwd !== 'chhsieh' && pwd !== 'math52') {
-        alert("密碼錯誤，拒絕進入連線設定！");
-        return;
-      }
+      const pwd = prompt("請輸入管理員密碼以設定預設資料庫 (或輸入您的教師代碼以設定您的自訂資料庫)：");
+      if (!pwd) return;
 
-      if (firebaseConfig) {
-        document.getElementById('cfg-apiKey').value = firebaseConfig.apiKey || '';
-        document.getElementById('cfg-databaseURL').value = firebaseConfig.databaseURL || '';
-        document.getElementById('cfg-projectId').value = firebaseConfig.projectId || '';
-        document.getElementById('cfg-appId').value = firebaseConfig.appId || '';
+      const adminPasscodes = ['math52', 'ematha1', 'ematha2', 'ematha3', 'ematha4'];
+      const isTeacherIdAdmin = WHITELISTED_TEACHERS.includes(pwd.toLowerCase());
+
+      if (adminPasscodes.includes(pwd) || isTeacherIdAdmin) {
+        // 管理員模式：讀取自訂或載入預設金鑰呈現
+        const saved = localStorage.getItem('factor_garden_firebase_config');
+        if (saved) {
+          try {
+            const config = JSON.parse(saved);
+            document.getElementById('cfg-apiKey').value = config.apiKey || '';
+            document.getElementById('cfg-databaseURL').value = config.databaseURL || '';
+            document.getElementById('cfg-projectId').value = config.projectId || '';
+            document.getElementById('cfg-appId').value = config.appId || '';
+          } catch (e) {}
+        } else {
+          document.getElementById('cfg-apiKey').value = DEFAULT_FIREBASE_CONFIG.apiKey;
+          document.getElementById('cfg-databaseURL').value = DEFAULT_FIREBASE_CONFIG.databaseURL;
+          document.getElementById('cfg-projectId').value = DEFAULT_FIREBASE_CONFIG.projectId;
+          document.getElementById('cfg-appId').value = DEFAULT_FIREBASE_CONFIG.appId;
+        }
+        document.getElementById('overlay-config').classList.add('active');
+      } else {
+        // 自訂教師模式：只呈現並編輯該瀏覽器的自訂設定，不洩漏預設金鑰
+        const saved = localStorage.getItem('factor_garden_firebase_config');
+        if (saved) {
+          try {
+            const config = JSON.parse(saved);
+            // 安全防範：如果快取金鑰與預設金鑰完全相同，則對非管理員隱藏，顯示空白
+            if (config.apiKey === DEFAULT_FIREBASE_CONFIG.apiKey) {
+              document.getElementById('cfg-apiKey').value = '';
+              document.getElementById('cfg-databaseURL').value = '';
+              document.getElementById('cfg-projectId').value = '';
+              document.getElementById('cfg-appId').value = '';
+            } else {
+              document.getElementById('cfg-apiKey').value = config.apiKey || '';
+              document.getElementById('cfg-databaseURL').value = config.databaseURL || '';
+              document.getElementById('cfg-projectId').value = config.projectId || '';
+              document.getElementById('cfg-appId').value = config.appId || '';
+            }
+          } catch (e) {}
+        } else {
+          document.getElementById('cfg-apiKey').value = '';
+          document.getElementById('cfg-databaseURL').value = '';
+          document.getElementById('cfg-projectId').value = '';
+          document.getElementById('cfg-appId').value = '';
+        }
+        document.getElementById('overlay-config').classList.add('active');
       }
-      document.getElementById('overlay-config').classList.add('active');
+    }
+
+    function loadDefaultAdminConfig() {
+      const pwd = prompt("請輸入管理員密碼：");
+      const adminPasscodes = ['math52', 'ematha1', 'ematha2', 'ematha3', 'ematha4'];
+      if (adminPasscodes.includes(pwd)) {
+        document.getElementById('cfg-apiKey').value = DEFAULT_FIREBASE_CONFIG.apiKey;
+        document.getElementById('cfg-databaseURL').value = DEFAULT_FIREBASE_CONFIG.databaseURL;
+        document.getElementById('cfg-projectId').value = DEFAULT_FIREBASE_CONFIG.projectId;
+        document.getElementById('cfg-appId').value = DEFAULT_FIREBASE_CONFIG.appId;
+      } else {
+        alert("密碼錯誤，拒絕讀取預設金鑰！");
+      }
     }
 
     function closeConfigModal() {
@@ -1837,8 +1943,16 @@
       const projectId = document.getElementById('cfg-projectId').value.trim();
       const appId = document.getElementById('cfg-appId').value.trim();
 
+      if (!apiKey && !databaseURL && !projectId && !appId) {
+        localStorage.removeItem('factor_garden_firebase_config');
+        closeConfigModal();
+        alert("已清除自訂設定！網頁將重新載入。");
+        window.location.reload();
+        return;
+      }
+
       if (!apiKey || !databaseURL || !projectId || !appId) {
-        alert("請填寫所有配置欄位！");
+        alert("請填寫所有配置欄位，或全部留空以清除自訂配置！");
         return;
       }
 
@@ -2340,6 +2454,7 @@
     function loadRound() {
       currentTarget = roundTargets[roundIndex];
       foundFactors.clear();
+      lastInputTimestamp = Date.now(); // reset input latency stopwatch
       
       const inputField = document.getElementById('factor-input');
       const submitBtn = document.getElementById('btn-submit-factor');
@@ -2787,6 +2902,7 @@
           } else {
             AudioSynth.playSuccess();
             foundFactors.add(val);
+            logGameplayEvent(true, val);
             
             if (foundFactors.size === allFactors.length) {
               if (roundIndex === 2) {
@@ -2835,6 +2951,7 @@
               currentRoomRef.update(updates);
             }
           }
+          logGameplayEvent(false, val);
         } else {
           AudioSynth.playError();
           setFeedback(`不正確！${currentTarget} 不能被 ${val} 整除。`, "error");
@@ -2853,6 +2970,7 @@
         } else {
           foundFactors.add(val);
           AudioSynth.playSuccess();
+          logGameplayEvent(true, val);
           
           updatePairStatus(val);
           updateFactorsHUD();
@@ -2867,6 +2985,7 @@
         }
       } else {
         AudioSynth.playError();
+        logGameplayEvent(false, val);
         setFeedback(`不正確！${currentTarget} 不能被 ${val} 整除。`, "error");
         shakeDome();
         shakeInput();
@@ -3170,9 +3289,152 @@
       }
     }
 
+    // --- 教師與班級歷程收集與自訂資料庫設定擴充 ---
+    let idleTimer = null;
+    const IDLE_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+    let lastInputTimestamp = Date.now();
+
+    function resetIdleTimer() {
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(triggerIdleDisconnect, IDLE_TIMEOUT_MS);
+    }
+
+    function triggerIdleDisconnect() {
+      if (isGameActive() && currentRoomRef) {
+        alert("您已因閒置超過 10 分鐘自動斷線，請重新整理網頁以繼續遊玩。");
+        leaveRoom();
+        window.location.reload();
+      }
+    }
+
+    // 監聽常用操作
+    ['click', 'keydown', 'touchstart', 'mousemove'].forEach(evt => {
+      window.addEventListener(evt, resetIdleTimer, { passive: true });
+    });
+    resetIdleTimer();
+
+    function parseUrlParams() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryT = urlParams.get('t') || urlParams.get('teacher');
+      const queryC = urlParams.get('c') || urlParams.get('class');
+      
+      if (queryT) {
+        localStorage.setItem('current_teacher_id', queryT.trim());
+      }
+      if (queryC) {
+        localStorage.setItem('current_class_id', queryC.trim());
+      }
+      
+      updateTeacherClassLobbyUI();
+    }
+
+    function updateTeacherClassLobbyUI() {
+      const tId = localStorage.getItem('current_teacher_id') || '';
+      const cId = localStorage.getItem('current_class_id') || '';
+      const sName = localStorage.getItem('student_name') || '';
+      
+      const statusText = document.getElementById('teacher-class-status-text');
+      const inputsCont = document.getElementById('teacher-class-inputs-container');
+      const lockedCont = document.getElementById('teacher-class-locked-container');
+      const lockedTag = document.getElementById('teacher-class-locked-tag');
+      
+      if (tId && cId) {
+        statusText.innerText = '班級學習歷程已啟用！答題歷程將寫入雲端記錄區。';
+        inputsCont.style.display = 'none';
+        lockedCont.style.display = 'flex';
+        
+        let nameHtml = sName ? ` | 👤 姓名：<strong style="color: var(--color-basic-hover); cursor:pointer;" onclick="changeStudentNamePrompt()">${sName} (點擊修改)</strong>` : ` | 👤 <span style="text-decoration:underline; cursor:pointer;" onclick="changeStudentNamePrompt()">設定您的姓名/座號</span>`;
+        lockedTag.innerHTML = `🏫 班級：<strong style="color: var(--color-basic-hover);">${tId} / ${cId}</strong>${nameHtml}`;
+      } else {
+        statusText.innerText = '未設定班級，目前遊玩將不會記錄歷程。';
+        inputsCont.style.display = 'flex';
+        lockedCont.style.display = 'none';
+      }
+    }
+
+    function saveTeacherClassFromLobby() {
+      const tInput = document.getElementById('lobby-teacher-id').value.trim();
+      const cInput = document.getElementById('lobby-class-id').value.trim();
+      
+      if (!tInput || !cInput) {
+        alert("請輸入教師代碼與班級代碼！");
+        return;
+      }
+      
+      localStorage.setItem('current_teacher_id', tInput);
+      localStorage.setItem('current_class_id', cInput);
+      
+      alert("班級設定成功！網頁將重新整理以重載資料庫。");
+      window.location.reload();
+    }
+
+    function clearTeacherClassFromLobby() {
+      localStorage.removeItem('current_teacher_id');
+      localStorage.removeItem('current_class_id');
+      localStorage.removeItem('student_name');
+      alert("已清除設定！");
+      window.location.reload();
+    }
+
+    function changeStudentNamePrompt() {
+      const current = localStorage.getItem('student_name') || '';
+      const n = prompt("請輸入您的姓名或座號：", current);
+      if (n && n.trim()) {
+        localStorage.setItem('student_name', n.trim());
+        updateTeacherClassLobbyUI();
+      }
+    }
+
+    function getOrPromptStudentName() {
+      let name = localStorage.getItem('student_name');
+      if (!name) {
+        name = prompt("請輸入您的姓名或座號，以便將您的學習歷程記錄給老師：");
+        if (name && name.trim()) {
+          name = name.trim();
+          localStorage.setItem('student_name', name);
+        } else {
+          name = "匿名學生";
+        }
+        updateTeacherClassLobbyUI();
+      }
+      return name;
+    }
+
+    function logGameplayEvent(correct, val) {
+      const teacherId = localStorage.getItem('current_teacher_id');
+      const classId = localStorage.getItem('current_class_id');
+      if (!teacherId || !classId) return; 
+
+      if (typeof database === 'undefined' || !database) return;
+
+      const duration = ((Date.now() - lastInputTimestamp) / 1000).toFixed(1);
+      lastInputTimestamp = Date.now(); 
+
+      const studentName = localStorage.getItem('student_name') || '匿名學生';
+
+      const eventLog = {
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        playerName: studentName,
+        gameMode: gameMode,
+        targetNumber: currentTarget,
+        inputNumber: val,
+        isCorrect: correct,
+        timeTaken: parseFloat(duration),
+        usedHint: document.getElementById('objective-tips-container') && document.getElementById('objective-tips-container').style.display !== 'none'
+      };
+
+      const sanitizedT = teacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
+      const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
+
+      database.ref(`logs/${sanitizedT}/${sanitizedC}/factor_game/events`).push(eventLog)
+        .catch(err => console.error("Log write failed", err));
+    }
+
     // Start screen setup
+    parseUrlParams();
     showLobby();
     loadFirebaseConfig();
+    updateTeacherClassLobbyUI();
   </script>
 </body>
 </html>

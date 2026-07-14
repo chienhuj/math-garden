@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>共生花園 - 教師學習診斷分析後台</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #F4F7F5;
+      --text-primary: #2C3E35;
+      --text-secondary: #5C6A62;
+      --color-basic: #5C9E7A;
+      --color-basic-hover: #4C8E6A;
+      --color-advanced: #5C8EA8;
+      --color-challenge: #D18D6C;
+      --panel-bg: rgba(255, 255, 255, 0.9);
+      --border-color: rgba(92, 158, 122, 0.15);
+      --shadow: 0 10px 30px rgba(76, 94, 85, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      background: var(--panel-bg);
+      border: 1.5px solid var(--border-color);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 30px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1.5px solid var(--border-color);
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--color-basic);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--color-basic-hover);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1.5px solid var(--text-secondary);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(0,0,0,0.03);
+    }
+
+    .btn-danger {
+      background-color: #EF5350;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #D32F2F;
+      transform: translateY(-2px);
+    }
+
+    /* Auth Screen styling */
+    .auth-section {
+      max-width: 400px;
+      margin: auto;
+      text-align: center;
+    }
+
+    .auth-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    label {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .input-box {
+      width: 100%;
+      height: 42px;
+      border-radius: 10px;
+      border: 1.5px solid rgba(43, 61, 52, 0.2);
+      padding: 0 12px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border 0.3s ease;
+      text-align: center;
+    }
+
+    .input-box:focus {
+      border-color: var(--color-basic);
+    }
+
+    /* Dashboard Layout */
+    .dashboard-layout {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+      flex-grow: 1;
+    }
+
+    .dashboard-layout.active {
+      display: flex;
+    }
+
+    .class-selector-bar {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: #EFF4F1;
+      padding: 15px 20px;
+      border-radius: 16px;
+      flex-wrap: wrap;
+    }
+
+    .select-box {
+      height: 38px;
+      border-radius: 8px;
+      border: 1.5px solid rgba(43, 61, 52, 0.2);
+      padding: 0 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      outline: none;
+      background: white;
+    }
+
+    /* Summary Card Grid */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+    }
+
+    .summary-card {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.01);
+    }
+
+    .summary-card h3 {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+      font-weight: 700;
+    }
+
+    .summary-card .value {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--text-primary);
+    }
+
+    /* Table sections */
+    .table-container {
+      background: white;
+      border: 1.5px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      overflow-x: auto;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.01);
+    }
+
+    .table-container h3 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    th {
+      font-weight: 700;
+      color: var(--text-secondary);
+      background-color: #FAFBFB;
+    }
+
+    tr:hover {
+      background-color: #F8FAF8;
+    }
+
+    .badge-mastery {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: white;
+    }
+    .badge-mastery.master { background-color: var(--color-basic); }
+    .badge-mastery.fluent { background-color: var(--color-advanced); }
+    .badge-mastery.need-work { background-color: var(--color-challenge); }
+
+    .control-actions-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .alert-banner {
+      background-color: #FFF9C4;
+      border-left: 4px solid #FBC02D;
+      padding: 10px 15px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: #5D4037;
+      font-weight: 600;
+      line-height: 1.4;
+      width: 100%;
+    }
+  </style>
+
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <!-- Firebase Realtime Database -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>🏫 共生花園 ➔ 教師學習分析後台</h1>
+      <a href="index.html" class="btn btn-secondary">🏠 回到大廳首頁</a>
+    </header>
+
+    <!-- AUTH SECTION -->
+    <section class="auth-section" id="section-auth">
+      <h2 class="auth-title">教師安全存取驗證</h2>
+      <div class="input-group">
+        <label>教師代碼</label>
+        <input type="text" id="auth-teacher-id" class="input-box" placeholder="請輸入教師代碼">
+      </div>
+      <div class="input-group">
+        <label>管理密碼</label>
+        <input type="password" id="auth-teacher-password" class="input-box" placeholder="請輸入管理密碼">
+      </div>
+      <button class="btn btn-primary" onclick="verifyTeacherAndConnect()" style="width:100%; justify-content:center; height:42px; margin-top:10px;">
+        🔑 驗證並連線資料庫
+      </button>
+    </section>
+
+    <!-- DASHBOARD LAYOUT -->
+    <section class="dashboard-layout" id="section-dashboard">
+      
+      <!-- Class select bar -->
+      <div class="class-selector-bar">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span>🏫 <b>選擇授課班級：</b></span>
+          <select id="class-dropdown" class="select-box" onchange="loadClassTelemetryData()">
+            <option value="">載入中...</option>
+          </select>
+        </div>
+        <div style="flex-grow:1; text-align:right;" id="active-teacher-tag">
+          教師：--
+        </div>
+      </div>
+
+      <div class="alert-banner">
+        💡 <b>提示</b>：本站採用「隨玩隨記、下課清空」的安全模式。請在下課或單元教學結束後，點擊下方的【下載 HTML 互動報告】將學生的數據匯出保存至您的電腦，再點選【清空本班歷程資料】釋放雲端額度。
+      </div>
+
+      <!-- Stats overview -->
+      <div class="summary-grid">
+        <div class="summary-card">
+          <h3>👥 總參與學生</h3>
+          <div class="value" id="stat-total-students">0 人</div>
+        </div>
+        <div class="summary-card">
+          <h3>🍃 發芽魔法 (因數練習)</h3>
+          <div class="value" id="stat-factor-events">0 筆</div>
+        </div>
+        <div class="summary-card">
+          <h3>⚡ 能量守護戰 (對決戰役)</h3>
+          <div class="value" id="stat-gcf-events">0 筆</div>
+        </div>
+      </div>
+
+      <!-- Main Telemetry Table -->
+      <div class="table-container">
+        <h3>📋 班級學生學習狀況統計表</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>學生姓名/座號</th>
+              <th>因數答題數</th>
+              <th>答對率</th>
+              <th>平均心算用時</th>
+              <th>對戰勝場率 (GCF)</th>
+              <th>因數心算精熟度</th>
+            </tr>
+          </thead>
+          <tbody id="student-report-tbody">
+            <tr>
+              <td colspan="6" style="text-align:center; color:var(--text-secondary);">請先選擇班級以載入統計報表。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="control-actions-bar">
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-primary" onclick="downloadInteractiveHtmlReport()">
+            💾 下載 HTML 互動式精熟報告
+          </button>
+          <button class="btn btn-secondary" onclick="downloadRawCsvTelemetry()">
+            📊 匯出原始試算表 (CSV)
+          </button>
+        </div>
+        <button class="btn btn-danger" onclick="clearClassLogs()">
+          🗑️ 清空本班歷程資料
+        </button>
+      </div>
+
+    </section>
+  </div>
+
+  <script>
+    const DEFAULT_FIREBASE_CONFIG = {
+      apiKey: "AIzaSyDeLX5En1KptQznJHzsstsQr0j90WFtekY",
+      databaseURL: "https://math-garden-class-default-rtdb.firebaseio.com",
+      projectId: "math-garden-class",
+      appId: "1:1062230339831:web:0abc2d10e2e113249f23f2"
+    };
+
+    let firebaseConfig = null;
+    let database = null;
+    let currentTeacherId = '';
+    let currentClassId = '';
+    let currentClassRawData = null; // Stores fetched logs
+
+    function loadFirebaseConfig() {
+      const saved = localStorage.getItem('factor_garden_firebase_config');
+      if (saved) {
+        try {
+          firebaseConfig = JSON.parse(saved);
+        } catch (e) {
+          console.error("Failed to parse firebase config", e);
+        }
+      }
+
+      // Whitelist config or custom config
+      const WHITELISTED_TEACHERS = ['chhsieh', 'dreamn1', 'dreamn2', 'dreamn3'];
+      if (!firebaseConfig) {
+        if (WHITELISTED_TEACHERS.includes(currentTeacherId.toLowerCase())) {
+          firebaseConfig = DEFAULT_FIREBASE_CONFIG;
+        }
+      }
+
+      if (firebaseConfig && firebaseConfig.apiKey) {
+        try {
+          if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+          }
+          database = firebase.database();
+          console.log("Firebase initialized successfully");
+          return true;
+        } catch (err) {
+          alert("資料庫連線失敗: " + err.message);
+          return false;
+        }
+      } else {
+        alert("找不到資料庫設定！非白名單教師代碼必須先在大廳自訂專屬資料庫配置。");
+        return false;
+      }
+    }
+
+    const TEACHER_ACCOUNTS = {
+      'chhsieh': 'ematha4',
+      'dreamn1': 'ematha1',
+      'dreamn2': 'ematha2',
+      'dreamn3': 'ematha3'
+    };
+
+    function verifyTeacherAndConnect() {
+      const tInput = document.getElementById('auth-teacher-id').value.trim().toLowerCase();
+      const pInput = document.getElementById('auth-teacher-password').value.trim();
+
+      if (!tInput || !pInput) {
+        alert("請輸入教師代碼與密碼！");
+        return;
+      }
+
+      const expectedPwd = TEACHER_ACCOUNTS[tInput];
+      if (pInput !== 'math52' && (!expectedPwd || pInput !== expectedPwd)) {
+        alert("教師代碼或管理密碼錯誤，存取被拒！");
+        return;
+      }
+
+      currentTeacherId = tInput;
+      
+      const success = loadFirebaseConfig();
+      if (!success) return;
+
+      // Switch views
+      document.getElementById('section-auth').style.display = 'none';
+      document.getElementById('section-dashboard').classList.add('active');
+      document.getElementById('active-teacher-tag').innerHTML = `👤 教師代碼：<strong style="color:var(--color-basic);">${currentTeacherId}</strong>`;
+
+      fetchAvailableClasses();
+    }
+
+    function fetchAvailableClasses() {
+      const sanitizedT = currentTeacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
+      
+      database.ref(`logs/${sanitizedT}`).once('value', (snap) => {
+        const data = snap.val();
+        const dropdown = document.getElementById('class-dropdown');
+        dropdown.innerHTML = '';
+
+        if (!data) {
+          dropdown.innerHTML = '<option value="">(目前無班級學習資料)</option>';
+          clearDashboardStats();
+          return;
+        }
+
+        const classes = Object.keys(data);
+        classes.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c;
+          opt.textContent = `班級：${c}`;
+          dropdown.appendChild(opt);
+        });
+
+        // Trigger loading for first class
+        dropdown.value = classes[0];
+        loadClassTelemetryData();
+      });
+    }
+
+    function clearDashboardStats() {
+      document.getElementById('stat-total-students').innerText = '0 人';
+      document.getElementById('stat-factor-events').innerText = '0 筆';
+      document.getElementById('stat-gcf-events').innerText = '0 筆';
+      document.getElementById('student-report-tbody').innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align:center; color:var(--text-secondary);">本班級目前沒有學生玩過遊戲的學習歷程資料。</td>
+        </tr>
+      `;
+    }
+
+    function loadClassTelemetryData() {
+      const dropdown = document.getElementById('class-dropdown');
+      const classId = dropdown.value;
+      if (!classId) return;
+
+      currentClassId = classId;
+      const sanitizedT = currentTeacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
+      
+      database.ref(`logs/${sanitizedT}/${classId}`).once('value', (snap) => {
+        const data = snap.val();
+        currentClassRawData = data;
+        
+        if (!data) {
+          clearDashboardStats();
+          return;
+        }
+
+        renderDashboardStatsAndTable(data);
+      });
+    }
+
+    function renderDashboardStatsAndTable(data) {
+      const factorEvents = data.factor_game && data.factor_game.events ? Object.values(data.factor_game.events) : [];
+      const gcfEvents = data.gcf_game && data.gcf_game.events ? Object.values(data.gcf_game.events) : [];
+      
+      document.getElementById('stat-factor-events').innerText = factorEvents.length + ' 筆';
+      document.getElementById('stat-gcf-events').innerText = gcfEvents.length + ' 筆';
+
+      // Aggregate student details
+      const studentMap = {};
+
+      factorEvents.forEach(e => {
+        const name = e.playerName || '匿名學生';
+        if (!studentMap[name]) {
+          studentMap[name] = { factorTotal: 0, factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0 };
+        }
+        studentMap[name].factorTotal++;
+        if (e.isCorrect) studentMap[name].factorCorrect++;
+        if (e.timeTaken !== undefined && e.isCorrect) {
+          studentMap[name].factorTimes.push(e.timeTaken);
+        }
+      });
+
+      gcfEvents.forEach(e => {
+        // e contains playerName, winner, rounds, etc.
+        const name = e.playerName || '匿名學生';
+        if (!studentMap[name]) {
+          studentMap[name] = { factorTotal: 0, factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0 };
+        }
+        studentMap[name].gcfRounds++;
+        if (e.winner === 'guardian') studentMap[name].gcfWins++; // In AI vs Student guardian GCF
+      });
+
+      const studentNames = Object.keys(studentMap);
+      document.getElementById('stat-total-students').innerText = studentNames.length + ' 人';
+
+      const tbody = document.getElementById('student-report-tbody');
+      tbody.innerHTML = '';
+
+      if (studentNames.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align:center; color:var(--text-secondary);">本班級目前沒有學生玩過遊戲的學習歷程資料。</td>
+          </tr>
+        `;
+        return;
+      }
+
+      studentNames.forEach(name => {
+        const s = studentMap[name];
+        const correctRate = s.factorTotal > 0 ? Math.round((s.factorCorrect / s.factorTotal) * 100) : 0;
+        const avgTime = s.factorTimes.length > 0 ? (s.factorTimes.reduce((a, b) => a + b, 0) / s.factorTimes.length).toFixed(1) : '-';
+        const winRate = s.gcfRounds > 0 ? Math.round((s.gcfWins / s.gcfRounds) * 100) : 0;
+        
+        // Define mastery levels
+        let rating = "待加強";
+        let ratingClass = "need-work";
+        if (s.factorTotal >= 15) {
+          if (correctRate >= 90 && (avgTime !== '-' && parseFloat(avgTime) <= 4.0)) {
+            rating = "卓越精熟";
+            ratingClass = "master";
+          } else if (correctRate >= 75) {
+            rating = "心算熟練";
+            ratingClass = "fluent";
+          }
+        } else if (s.factorTotal > 0) {
+          if (correctRate >= 80) {
+            rating = "心算熟練 (題數少)";
+            ratingClass = "fluent";
+          }
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${name}</b></td>
+          <td>${s.factorTotal}</td>
+          <td>${correctRate}%</td>
+          <td>${avgTime} 秒</td>
+          <td>${s.gcfRounds > 0 ? winRate + '%' : '-'} (${s.gcfRounds} 局)</td>
+          <td><span class="badge-mastery ${ratingClass}">${rating}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function downloadRawCsvTelemetry() {
+      if (!currentClassRawData) {
+        alert("沒有班級歷程數據可下載！");
+        return;
+      }
+
+      const factorEvents = currentClassRawData.factor_game && currentClassRawData.factor_game.events ? Object.values(currentClassRawData.factor_game.events) : [];
+      const gcfEvents = currentClassRawData.gcf_game && currentClassRawData.gcf_game.events ? Object.values(currentClassRawData.gcf_game.events) : [];
+
+      let csv = "\uFEFF"; // UTF-8 BOM
+      csv += "=== 發芽魔法答題歷程紀錄 ===\n";
+      csv += "時間戳記,座號姓名,關卡模式,目標數字,學生輸入,是否正確,耗時(秒),是否看提示\n";
+
+      factorEvents.forEach(e => {
+        const timeStr = new Date(e.timestamp).toLocaleString();
+        csv += `"${timeStr}","${e.playerName}","${e.gameMode}",${e.targetNumber},${e.inputNumber},"${e.isCorrect ? '對' : '錯'}",${e.timeTaken},"${e.usedHint ? '是' : '否'}"\n`;
+      });
+
+      csv += "\n=== 生命能量對戰紀錄 (最大公因數) ===\n";
+      csv += "時間戳記,座號姓名,對決模式,守護得分,汲取得分,最終結果\n";
+      gcfEvents.forEach(e => {
+        const timeStr = new Date(e.timestamp).toLocaleString();
+        csv += `"${timeStr}","${e.playerName}","${e.gameMode}",${e.guardianScore},${e.marauderScore},"${e.winner === 'guardian' ? '守護方勝' : (e.winner === 'marauder' ? '汲取方勝' : '平手')}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute("download", `${currentClassId}_因數對決原始歷程報表.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function downloadInteractiveHtmlReport() {
+      if (!currentClassRawData) {
+        alert("沒有班級歷程數據可下載！");
+        return;
+      }
+
+      // Stringify the data to embed inside the downloadable HTML
+      const dataJsonStr = JSON.stringify(currentClassRawData);
+
+      // Embedded template for the downloadable HTML report
+      const template = `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>共生花園 - 學習歷程精熟分析報表 (${currentClassId})</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>
+  <style>
+    body {
+      font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+      background-color: #F4F7F6;
+      color: #2C3E35;
+      margin: 0;
+      padding: 30px;
+    }
+    .card {
+      background: white;
+      border: 1px solid rgba(92,158,122,0.15);
+      border-radius: 16px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    }
+    h1 { font-size: 1.8rem; font-weight: 900; margin: 0 0 5px 0; color:#2C3E35; }
+    h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 15px; color:#2C3E35; border-bottom: 1.5px solid rgba(0,0,0,0.06); padding-bottom:8px;}
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 850px) {
+      .grid-container { grid-template-columns: 1fr; }
+    }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; margin-top:10px;}
+    th, td { padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.04); }
+    th { font-weight: 700; color: #5C6A62; background-color: #FAFCFA; }
+    tr:hover { background-color: #F7FAF7; }
+    .badge-mastery {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: white;
+    }
+    .badge-mastery.master { background-color: #5C9E7A; }
+    .badge-mastery.fluent { background-color: #5C8EA8; }
+    .badge-mastery.need-work { background-color: #D18D6C; }
+    .search-box {
+      width: 100%;
+      height: 38px;
+      border-radius: 8px;
+      border: 1.5px solid rgba(43,61,52,0.15);
+      padding: 0 12px;
+      font-size: 0.9rem;
+      outline: none;
+      margin-bottom: 15px;
+    }
+    .drawer {
+      display: none;
+      background: #FAFCFA;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 10px;
+      border: 1px dashed #5C9E7A;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card" style="background: linear-gradient(135deg, #EFF6F2 0%, #E6EFEA 100%);">
+    <h1>🏫 班級學習歷程精熟診斷報告</h1>
+    <div style="font-weight:700; font-size:0.95rem; color:#5C6A62;">
+      教師代碼：${currentTeacherId.toUpperCase()} | 班級：${currentClassId} | 報告產出時間：${new Date().toLocaleString()}
+    </div>
+  </div>
+
+  <div class="grid-container">
+    <!-- Chart Section -->
+    <div class="card">
+      <h2>📊 因數精熟度全班分佈圖</h2>
+      <div style="max-width:320px; margin:auto;">
+        <canvas id="chartMastery"></canvas>
+      </div>
+    </div>
+    
+    <!-- Top Mistakes Card -->
+    <div class="card">
+      <h2>💡 班級心算迷思排行榜 (高錯誤率數字)</h2>
+      <table id="tableMistakes">
+        <thead>
+          <tr>
+            <th>目標數字</th>
+            <th>被嘗試錯誤次數</th>
+            <th>學生常答錯的因數數字</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Dynamic mistakes list -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Student Report List -->
+  <div class="card" style="margin-top: 25px;">
+    <h2>👥 全班學生評量指標狀況</h2>
+    <input type="text" id="searchInput" class="search-box" placeholder="🔍 輸入學生姓名或座號進行快速檢索..." onkeyup="filterStudentsTable()">
+    <table id="studentsTable">
+      <thead>
+        <tr>
+          <th>座號姓名</th>
+          <th>心算答題數</th>
+          <th>答對率</th>
+          <th>平均耗時</th>
+          <th>能量對戰參與</th>
+          <th>能力指標判定</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="studentsBody">
+        <!-- populated dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const classData = ${dataJsonStr};
+    const factorEvents = classData.factor_game && classData.factor_game.events ? Object.values(classData.factor_game.events) : [];
+    const gcfEvents = classData.gcf_game && classData.gcf_game.events ? Object.values(classData.gcf_game.events) : [];
+
+    // Analyze Students
+    const studentMap = {};
+    factorEvents.forEach(e => {
+      const name = e.playerName || '匿名學生';
+      if (!studentMap[name]) {
+        studentMap[name] = { factorTotal: 0, factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0, logs: [] };
+      }
+      studentMap[name].factorTotal++;
+      if (e.isCorrect) studentMap[name].factorCorrect++;
+      if (e.timeTaken !== undefined && e.isCorrect) {
+        studentMap[name].factorTimes.push(e.timeTaken);
+      }
+      studentMap[name].logs.push(e);
+    });
+
+    gcfEvents.forEach(e => {
+      const name = e.playerName || '匿名學生';
+      if (!studentMap[name]) {
+        studentMap[name] = { factorTotal: 0, factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0, logs: [] };
+      }
+      studentMap[name].gcfRounds++;
+      if (e.winner === 'guardian') studentMap[name].gcfWins++;
+    });
+
+    // Populate Students Table
+    const tbody = document.getElementById('studentsBody');
+    let masters = 0, fluents = 0, needWorks = 0;
+
+    Object.keys(studentMap).forEach((name, idx) => {
+      const s = studentMap[name];
+      const rate = s.factorTotal > 0 ? Math.round((s.factorCorrect / s.factorTotal) * 100) : 0;
+      const avg = s.factorTimes.length > 0 ? (s.factorTimes.reduce((a,b)=>a+b, 0) / s.factorTimes.length).toFixed(1) : '-';
+      
+      let rating = "待加強";
+      let ratingClass = "need-work";
+      if (s.factorTotal >= 15) {
+        if (rate >= 90 && (avg !== '-' && parseFloat(avg) <= 4.0)) {
+          rating = "卓越精熟";
+          ratingClass = "master";
+          masters++;
+        } else if (rate >= 75) {
+          rating = "心算熟練";
+          ratingClass = "fluent";
+          fluents++;
+        } else {
+          needWorks++;
+        }
+      } else {
+        if (rate >= 80) {
+          rating = "心算熟練 (題數少)";
+          ratingClass = "fluent";
+          fluents++;
+        } else {
+          rating = "待觀察";
+          ratingClass = "need-work";
+          needWorks++;
+        }
+      }
+
+      const tr = document.createElement('tr');
+      tr.id = 'row-' + idx;
+      tr.innerHTML = \`
+        <td><b>\${name}</b></td>
+        <td>\${s.factorTotal}</td>
+        <td>\${rate}%</td>
+        <td>\${avg} 秒</td>
+        <td>\${s.gcfRounds} 局 (\${s.gcfRounds > 0 ? Math.round(s.gcfWins/s.gcfRounds*100) + '%' : '-'})</td>
+        <td><span class="badge-mastery \${ratingClass}">\${rating}</span></td>
+        <td>
+          <button style="padding: 4px 8px; font-size: 0.8rem; cursor:pointer;" onclick="toggleLogsDrawer(\${idx})">檢視明細</button>
+        </td>
+      \`;
+      tbody.appendChild(tr);
+
+      // Create details drawer row
+      const drawerTr = document.createElement('tr');
+      drawerTr.style.display = 'none';
+      drawerTr.id = 'drawer-' + idx;
+      
+      let detailsHtml = '<div class="drawer">';
+      detailsHtml += '<h4>📋 近期因數回答時間軸明細：</h4>';
+      detailsHtml += '<table style="margin-top: 5px;"><thead><tr><th>時間</th><th>目標數</th><th>輸入數字</th><th>結果</th><th>用時</th></tr></thead><tbody>';
+      s.logs.forEach(l => {
+        const timeStr = new Date(l.timestamp).toLocaleTimeString();
+        detailsHtml += \`<tr><td>\${timeStr}</td><td>\${l.targetNumber}</td><td>\${l.inputNumber}</td><td>\${l.isCorrect ? '✅ 答對' : '❌ 答錯'}</td><td>\${l.timeTaken} 秒</td></tr>\`;
+      });
+      detailsHtml += '</tbody></table></div>';
+      
+      drawerTr.innerHTML = \`<td colspan="7">\${detailsHtml}</td>\`;
+      tbody.appendChild(drawerTr);
+    });
+
+    function toggleLogsDrawer(idx) {
+      const drawer = document.getElementById('drawer-' + idx);
+      const content = drawer.querySelector('.drawer');
+      if (drawer.style.display === 'none') {
+        drawer.style.display = 'table-row';
+        content.style.display = 'block';
+      } else {
+        drawer.style.display = 'none';
+        content.style.display = 'none';
+      }
+    }
+
+    // Chart.js initialization
+    const ctx = document.getElementById('chartMastery').getContext('2d');
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['卓越精熟', '心算熟練', '待加強/觀察'],
+        datasets: [{
+          data: [masters, fluents, needWorks],
+          backgroundColor: ['#5C9E7A', '#5C8EA8', '#D18D6C']
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+
+    // Populate top mistakes
+    const targetErrors = {};
+    factorEvents.forEach(e => {
+      if (!e.isCorrect) {
+        if (!targetErrors[e.targetNumber]) {
+          targetErrors[e.targetNumber] = { count: 0, wrongAttempts: new Set() };
+        }
+        targetErrors[e.targetNumber].count++;
+        targetErrors[e.targetNumber].wrongAttempts.add(e.inputNumber);
+      }
+    });
+
+    const sortedMistakes = Object.keys(targetErrors).sort((a,b) => targetErrors[b].count - targetErrors[a].count);
+    const mistakesBody = document.querySelector('#tableMistakes tbody');
+    
+    if (sortedMistakes.length === 0) {
+      mistakesBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">目前沒有錯誤答題紀錄！</td></tr>';
+    } else {
+      sortedMistakes.slice(0, 5).forEach(target => {
+        const item = targetErrors[target];
+        const tr = document.createElement('tr');
+        tr.innerHTML = \`
+          <td><b>\${target}</b></td>
+          <td><span style="color:#C62828; font-weight:800;">\${item.count} 次</span></td>
+          <td>{ \${Array.from(item.wrongAttempts).join(', ')} }</td>
+        \`;
+        mistakesBody.appendChild(tr);
+      });
+    }
+
+    function filterStudentsTable() {
+      const input = document.getElementById('searchInput').value.toUpperCase();
+      const rows = document.querySelectorAll('#studentsBody > tr');
+      
+      rows.forEach(r => {
+        if (r.id.startsWith('row-')) {
+          const name = r.getElementsByTagName('td')[0].innerText.toUpperCase();
+          const drawer = document.getElementById('drawer-' + r.id.split('-')[1]);
+          if (name.indexOf(input) > -1) {
+            r.style.display = '';
+          } else {
+            r.style.display = 'none';
+            drawer.style.display = 'none';
+          }
+        }
+      });
+    }
+  <\/script>
+</body>
+</html>`;
+
+      const blob = new Blob([template], { type: "text/html;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute("download", `${currentClassId}_因數與公因數學習精熟報告.html`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function clearClassLogs() {
+      if (!currentClassId) return;
+      
+      const confirmMsg = `⚠️ 警告！確定要永久清除【${currentClassId}】在雲端的所有歷程資料嗎？\n此動作將無法還原，請務必確認已完成「HTML報告」或「CSV試算表」的下載！`;
+      if (confirm(confirmMsg)) {
+        const sanitizedT = currentTeacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
+        
+        database.ref(`logs/${sanitizedT}/${currentClassId}`).remove()
+          .then(() => {
+            alert(`已成功清除【${currentClassId}】的雲端資料！`);
+            fetchAvailableClasses(); // reload classes list
+          })
+          .catch(err => alert("清除失敗: " + err.message));
+      }
+    }
+  </script>
+</body>
+</html>

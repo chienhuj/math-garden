@@ -3427,7 +3427,10 @@
       const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
 
       database.ref(`logs/${sanitizedT}/${sanitizedC}/factor_game/events`).push(eventLog)
-        .catch(err => console.error("Log write failed", err));
+        .catch(err => {
+          console.error("Log write failed", err);
+          alert("⚠️ 學習歷程寫入雲端失敗！請檢查您的 Firebase 專案安全性規則（Rules）是否已設為允許寫入。\n錯誤原因：" + err.message);
+        });
     }
 
     // Start screen setup

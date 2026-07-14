@@ -502,6 +502,13 @@
         // Trigger loading for first class
         dropdown.value = classes[0];
         loadClassTelemetryData();
+      }, (error) => {
+        console.error("Database read failed:", error);
+        alert("資料庫連線或讀取失敗！請檢查您的 Firebase 安全性規則（Rules）是否已設定為允許讀取。\n錯誤訊息：" + error.message);
+        const dropdown = document.getElementById('class-dropdown');
+        if (dropdown) {
+          dropdown.innerHTML = '<option value="">(讀取失敗，請檢查金鑰或規則)</option>';
+        }
       });
     }
 
@@ -534,6 +541,9 @@
         }
 
         renderDashboardStatsAndTable(data);
+      }, (error) => {
+        console.error("Database class details read failed:", error);
+        alert("讀取班級歷程明細失敗！\n錯誤訊息：" + error.message);
       });
     }
 

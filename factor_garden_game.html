@@ -2029,8 +2029,14 @@
         // 自行清理舊關卡殘留狀態：僅在進入房間時執行一次
         if (!hasCleanedStaleRoom) {
           hasCleanedStaleRoom = true;
-          const playerKeys = Object.keys(roomData.players || {});
-          if (playerKeys.length === 1 && playerKeys[0] === myPlayerId && status !== 'lobby') {
+          const playerKeys = Object.keys(roomData.players || {}).sort();
+          const hostId = playerKeys[0];
+          
+          // 條件一：狀態為已結束 (finished) ➔ 應自動重設為 lobby
+          // 條件二：房間只剩我一人且狀態非 lobby ➔ 應自動重設為 lobby
+          const shouldReset = (status === 'finished') || (playerKeys.length === 1 && playerKeys[0] === myPlayerId && status !== 'lobby');
+          
+          if (shouldReset && hostId === myPlayerId) {
             currentRoomRef.update({
               status: 'lobby',
               roundTargets: null,
@@ -3120,30 +3126,38 @@
     document.getElementById('btn-back-lobby').addEventListener('click', () => {
       if (isGameActive()) {
         if (confirm('確定要結束目前的挑戰，返回發芽魔法選單嗎？目前的培育進度將會遺失喔！')) {
-          if (currentPlayerRef) {
-            currentPlayerRef.remove();
-          }
-          stopTimer();
-          stopFirebaseListeners();
-          showLobby();
+          leaveRoom();
         }
       } else {
-        showLobby();
+        leaveRoom();
       }
     });
 
-    // 回到共生花園 (回到入口網站 index.html)
+    // 回對戰大廳 (回到入口網站 index.html)
     document.getElementById('btn-back-portal').addEventListener('click', () => {
       if (isGameActive()) {
         if (confirm('確定要結束目前的挑戰，返回共生花園大廳嗎？目前的培育進度將會遺失喔！')) {
+          stopTimer();
+          stopFirebaseListeners();
           if (currentPlayerRef) {
             currentPlayerRef.remove();
           }
-          stopTimer();
-          stopFirebaseListeners();
+          currentRoomRef = null;
+          currentPlayerRef = null;
+          myPlayerId = null;
+          myRoomId = '';
           window.location.href = 'index.html';
         }
       } else {
+        stopTimer();
+        stopFirebaseListeners();
+        if (currentPlayerRef) {
+          currentPlayerRef.remove();
+        }
+        currentRoomRef = null;
+        currentPlayerRef = null;
+        myPlayerId = null;
+        myRoomId = '';
         window.location.href = 'index.html';
       }
     });

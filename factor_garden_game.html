@@ -1069,6 +1069,8 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <!-- Firebase Realtime Database -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <!-- Shared Config -->
+  <script src="config.js"></script>
 </head>
 <body>
 
@@ -1785,6 +1787,14 @@
         // Select 3 unique targets with exactly 4 factors
         roundTargets = selectTargets(challengePool, [8, 27]);
       } else if (mode === 'multiplayer') {
+        // Check if teacher ID and class ID are set
+        const teacherId = localStorage.getItem('current_teacher_id') || '';
+        const classId = localStorage.getItem('current_class_id') || '';
+        if (!teacherId || !classId) {
+          alert("⚠️ 請先在首頁設定「玩家班級」！");
+          return;
+        }
+
         // 多人連線模式：確認連線設定
         if (!database) {
           alert("請先點擊入口右上角的「⚙️ 自訂教師專屬資料庫」，填入您的 Firebase 專案配置金鑰以啟用多人連線功能！相關步驟請參考專案目錄下的 firebase_setup_guide.md 檔案。");
@@ -1803,18 +1813,8 @@
     }
 
     // --- FIREBASE MULTIPLAYER FUNCTIONALITY ---
-    // --- FIREBASE MULTIPLAYER CONFIGURATION ---
-    const DEFAULT_FIREBASE_CONFIG = {
-      apiKey: "AIzaSyDeLX5En1KptQznJHzsstsQr0j90WFtekY",
-      databaseURL: "https://math-garden-class-default-rtdb.firebaseio.com",
-      projectId: "math-garden-class",
-      appId: "1:1062230339831:web:0abc2d10e2e113249f23f2"
-    };
-
     let isUsingDefaultDB = false;
     let currentStudentName = '自主練習';
-
-    const WHITELISTED_TEACHERS = ['chhsieh', 'dreamn1', 'dreamn2', 'dreamn3'];
 
     function loadFirebaseConfig() {
       const savedTeacher = localStorage.getItem('current_teacher_id') || '';
@@ -1830,14 +1830,11 @@
         }
       }
 
-      // 白名單機制：
-      // 如果教師代碼在白名單中，且沒有自訂 Firebase 設定，則使用預設資料庫。
-      // 如果教師代碼是其他值，且沒有自訂 Firebase 設定，則將其設為 null (不連線預設資料庫)
       if (!firebaseConfig) {
-        if (WHITELISTED_TEACHERS.includes(savedTeacher.trim().toLowerCase())) {
+        if (savedTeacher) {
           firebaseConfig = DEFAULT_FIREBASE_CONFIG;
-          document.getElementById('btn-config-db').innerText = '🟢 預設資料庫已連線';
-          document.getElementById('btn-config-db').style.color = '#4CAF50';
+          document.getElementById('btn-config-db').innerText = '⏳ 正在檢查連線...';
+          document.getElementById('btn-config-db').style.color = '#FFA000';
           isUsingDefaultDB = true;
         } else {
           firebaseConfig = null;
@@ -1853,17 +1850,32 @@
 
       if (firebaseConfig && firebaseConfig.apiKey) {
         try {
-          // If a firebase app already exists, delete and reinitialize
           if (firebase.apps.length) {
             firebase.app().delete().then(() => {
               firebase.initializeApp(firebaseConfig);
               database = firebase.database();
-              console.log("Firebase re-initialized");
+              const btn = document.getElementById('btn-config-db');
+              checkTeacherWhitelistStatus(savedTeacher, isUsingDefaultDB, btn, (isValid) => {
+                if (!isValid) {
+                  database = null;
+                  if (firebase.apps.length) {
+                    firebase.app().delete();
+                  }
+                }
+              });
             });
           } else {
             firebase.initializeApp(firebaseConfig);
             database = firebase.database();
-            console.log("Firebase initialized");
+            const btn = document.getElementById('btn-config-db');
+            checkTeacherWhitelistStatus(savedTeacher, isUsingDefaultDB, btn, (isValid) => {
+              if (!isValid) {
+                database = null;
+                if (firebase.apps.length) {
+                  firebase.app().delete();
+                }
+              }
+            });
           }
         } catch (err) {
           console.error("Firebase initialization failed", err);
@@ -1876,7 +1888,7 @@
       if (!pwd) return;
 
       const adminPasscodes = ['math52', 'ematha1', 'ematha2', 'ematha3', 'ematha4'];
-      const isTeacherIdAdmin = WHITELISTED_TEACHERS.includes(pwd.toLowerCase());
+      const isTeacherIdAdmin = pwd.trim().length > 0;
 
       if (adminPasscodes.includes(pwd) || isTeacherIdAdmin) {
         // 管理員模式：讀取自訂或載入預設金鑰呈現
@@ -1994,7 +2006,7 @@
       const teacherId = localStorage.getItem('current_teacher_id') || '';
       const classId = localStorage.getItem('current_class_id') || '';
       if (!teacherId || !classId) {
-        alert("⚠️ 請先在首頁設定「班級學習歷程」（教師代碼與班級）！");
+        alert("⚠️ 請先在首頁設定「玩家班級」！");
         return;
       }
 

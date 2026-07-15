@@ -273,6 +273,8 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <!-- Firebase Realtime Database -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <!-- Shared Config -->
+  <script src="config.js"></script>
 </head>
 <body>
 
@@ -315,7 +317,7 @@
       <div style="display: flex; align-items: center; gap: 10px;">
         <span style="font-size: 1.5rem;">🏫</span>
         <div>
-          <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">玩家設定</h4>
+          <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">玩家班級</h4>
           <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);" id="teacher-class-status-text">未設定，遊玩將不記錄學習歷程。</p>
         </div>
       </div>
@@ -478,14 +480,6 @@
       }
     }
 
-    const DEFAULT_FIREBASE_CONFIG = {
-      apiKey: "AIzaSyDeLX5En1KptQznJHzsstsQr0j90WFtekY",
-      databaseURL: "https://math-garden-class-default-rtdb.firebaseio.com",
-      projectId: "math-garden-class",
-      appId: "1:1062230339831:web:0abc2d10e2e113249f23f2"
-    };
-
-    const WHITELISTED_TEACHERS = ['chhsieh', 'dreamn1', 'dreamn2', 'dreamn3'];
     let firebaseConfig = null;
     let database = null;
     let isUsingDefaultDB = false;
@@ -506,10 +500,10 @@
       if (!btn) return;
 
       if (!firebaseConfig) {
-        if (WHITELISTED_TEACHERS.includes(savedTeacher.trim().toLowerCase())) {
+        if (savedTeacher) {
           firebaseConfig = DEFAULT_FIREBASE_CONFIG;
-          btn.innerText = '🟢 預設資料庫已連線';
-          btn.style.color = '#4CAF50';
+          btn.innerText = '⏳ 正在檢查連線...';
+          btn.style.color = '#FFA000';
           isUsingDefaultDB = true;
         } else {
           firebaseConfig = null;
@@ -529,12 +523,26 @@
             firebase.app().delete().then(() => {
               firebase.initializeApp(firebaseConfig);
               database = firebase.database();
-              console.log("Firebase re-initialized in Portal");
+              checkTeacherWhitelistStatus(savedTeacher, isUsingDefaultDB, btn, (isValid) => {
+                if (!isValid) {
+                  database = null;
+                  if (firebase.apps.length) {
+                    firebase.app().delete();
+                  }
+                }
+              });
             });
           } else {
             firebase.initializeApp(firebaseConfig);
             database = firebase.database();
-            console.log("Firebase initialized in Portal");
+            checkTeacherWhitelistStatus(savedTeacher, isUsingDefaultDB, btn, (isValid) => {
+              if (!isValid) {
+                database = null;
+                if (firebase.apps.length) {
+                  firebase.app().delete();
+                }
+              }
+            });
           }
         } catch (err) {
           console.error("Firebase init failed in Portal", err);
@@ -547,7 +555,7 @@
       if (!pwd) return;
 
       const adminPasscodes = ['math52', 'ematha1', 'ematha2', 'ematha3', 'ematha4'];
-      const isTeacherIdAdmin = WHITELISTED_TEACHERS.includes(pwd.toLowerCase());
+      const isTeacherIdAdmin = pwd.trim().length > 0;
 
       if (adminPasscodes.includes(pwd) || isTeacherIdAdmin) {
         // Admin mode: show default config or custom if exists

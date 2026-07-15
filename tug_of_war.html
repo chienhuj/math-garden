@@ -2196,7 +2196,7 @@
         const classId = localStorage.getItem('current_class_id') || '';
         const sanitizedT = teacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
         const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
-        const factorPath = `rooms/gcf_${sanitizedT}_${sanitizedC}_${myRoomId}/gameState/usedFactors/${val}`;
+        const factorPath = `logs/${sanitizedT}/${sanitizedC}/gcf_rooms/${myRoomId}/gameState/usedFactors/${val}`;
         
         database.ref(factorPath).transaction((currentData) => {
           if (currentData === null) {
@@ -3056,7 +3056,7 @@
       const sanitizedT = teacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
       const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
       
-      const checkPath = `rooms/gcf_${sanitizedT}_${sanitizedC}_${myRoomId}/players`;
+      const checkPath = `logs/${sanitizedT}/${sanitizedC}/gcf_rooms/${myRoomId}/players`;
       database.ref(checkPath).once('value', (snap) => {
         const players = snap.val() || {};
         let count = 0;
@@ -3088,7 +3088,7 @@
       const sanitizedT = teacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
       const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
       
-      roomRefGcf = database.ref(`rooms/gcf_${sanitizedT}_${sanitizedC}_${roomId}`);
+      roomRefGcf = database.ref(`logs/${sanitizedT}/${sanitizedC}/gcf_rooms/${roomId}`);
       
       // Reset waiting room buttons
       const readyBtn = document.getElementById('btn-ready-toggle-gcf');

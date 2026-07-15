@@ -360,15 +360,16 @@
             <tr>
               <th>學生姓名/座號</th>
               <th>因數答題數</th>
+              <th>公因數答題數</th>
               <th>答對率</th>
-              <th>平均心算用時</th>
-              <th>對戰勝場率 (GCF)</th>
-              <th>因數心算精熟度</th>
+              <th>計算用時平均</th>
+              <th>搶得GCF率</th>
+              <th>學習判定</th>
             </tr>
           </thead>
           <tbody id="student-report-tbody">
             <tr>
-              <td colspan="6" style="text-align:center; color:var(--text-secondary);">請先選擇班級以載入統計報表。</td>
+              <td colspan="7" style="text-align:center; color:var(--text-secondary);">請先選擇班級以載入統計報表。</td>
             </tr>
           </tbody>
         </table>
@@ -518,7 +519,7 @@
       document.getElementById('stat-gcf-events').innerText = '0 筆';
       document.getElementById('student-report-tbody').innerHTML = `
         <tr>
-          <td colspan="6" style="text-align:center; color:var(--text-secondary);">本班級目前沒有學生玩過遊戲的學習歷程資料。</td>
+          <td colspan="7" style="text-align:center; color:var(--text-secondary);">本班級目前沒有學生玩過遊戲的學習歷程資料。</td>
         </tr>
       `;
     }
@@ -547,6 +548,42 @@
       });
     }
 
+    // Helper to parse GCF participants and their sides
+    function parseGcfParticipantsAndSides(e) {
+      const list = [];
+      const pName = e.playerName || '';
+      if (pName.startsWith('[連線]')) {
+        const parts = pName.split(' 🆚 ');
+        parts.forEach(part => {
+          const cleanPart = part.replace('[連線] ', '');
+          const side = cleanPart.includes('守護') ? 'guardian' : 'marauder';
+          const nameListStr = cleanPart.substring(cleanPart.indexOf(':') + 1).trim();
+          if (nameListStr) {
+            nameListStr.split(',').forEach(n => {
+              const name = n.trim();
+              if (name && name !== '無') {
+                list.push({ name, side });
+              }
+            });
+          }
+        });
+      } else if (pName.includes(' 🆚 ')) {
+        const names = pName.split(' 🆚 ');
+        if (names[0] && names[0].trim()) {
+          list.push({ name: names[0].trim(), side: 'guardian' });
+        }
+        if (names[1] && names[1].trim()) {
+          list.push({ name: names[1].trim(), side: 'marauder' });
+        }
+      } else {
+        const name = pName.trim();
+        if (name && name !== '自主練習' && name !== '匿名學生') {
+          list.push({ name, side: 'guardian' });
+        }
+      }
+      return list;
+    }
+
     function renderDashboardStatsAndTable(data) {
       const factorEvents = data.factor_game && data.factor_game.events ? Object.values(data.factor_game.events) : [];
       const gcfEvents = data.gcf_game && data.gcf_game.events ? Object.values(data.gcf_game.events) : [];
@@ -560,7 +597,7 @@
       factorEvents.forEach(e => {
         const name = e.playerName || '匿名學生';
         if (!studentMap[name]) {
-          studentMap[name] = { factorEvents: [], factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0 };
+          studentMap[name] = { factorEvents: [], factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0, gcfClaimedCount: 0 };
         }
         studentMap[name].factorEvents.push(e);
         if (e.isCorrect) studentMap[name].factorCorrect++;
@@ -570,12 +607,25 @@
       });
 
       gcfEvents.forEach(e => {
-        const name = e.playerName || '匿名學生';
-        if (!studentMap[name]) {
-          studentMap[name] = { factorEvents: [], factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0 };
-        }
-        studentMap[name].gcfRounds++;
-        if (e.winner === 'guardian') studentMap[name].gcfWins++;
+        const participants = parseGcfParticipantsAndSides(e);
+        const rounds = e.rounds || [];
+        participants.forEach(p => {
+          const name = p.name;
+          if (!studentMap[name]) {
+            studentMap[name] = { factorEvents: [], factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0, gcfClaimedCount: 0 };
+          }
+          
+          studentMap[name].gcfRounds += rounds.length;
+          
+          rounds.forEach(r => {
+            if (r.winner === p.side) {
+              studentMap[name].gcfWins++;
+            }
+            if (r.gcfClaimer && r.gcfClaimer === name) {
+              studentMap[name].gcfClaimedCount++;
+            }
+          });
+        });
       });
 
       const studentNames = Object.keys(studentMap);
@@ -587,7 +637,7 @@
       if (studentNames.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="6" style="text-align:center; color:var(--text-secondary);">本班級目前沒有學生玩過遊戲的學習歷程資料。</td>
+            <td colspan="7" style="text-align:center; color:var(--text-secondary);">本班級目前沒有學生玩過遊戲的學習歷程資料。</td>
           </tr>
         `;
         return;
@@ -664,6 +714,8 @@
         }
 
         const tr = document.createElement('tr');
+        const gcfClaimRate = s.gcfRounds > 0 ? Math.round((s.gcfClaimedCount / s.gcfRounds) * 100) : 0;
+        
         tr.innerHTML = `
           <td><b>${name}</b></td>
           <td>
@@ -672,9 +724,10 @@
               🟢易:${easyCount} | 🟡中:${mediumCount} | 🔴難:${hardCount}
             </span>
           </td>
+          <td>${s.gcfRounds} 局</td>
           <td>${correctRate}%</td>
           <td>${avgTime} 秒</td>
-          <td>${s.gcfRounds > 0 ? winRate + '%' : '-'} (${s.gcfRounds} 局)</td>
+          <td>${s.gcfRounds > 0 ? gcfClaimRate + '%' : '-'} (${s.gcfClaimedCount}次)</td>
           <td><span class="badge-mastery ${ratingClass}">${rating}</span></td>
         `;
         tbody.appendChild(tr);
@@ -837,11 +890,12 @@
       <thead>
         <tr>
           <th>座號姓名</th>
-          <th>心算答題數</th>
+          <th>因數答題數</th>
+          <th>公因數答題數</th>
           <th>答對率</th>
-          <th>平均耗時</th>
-          <th>能量對戰參與</th>
-          <th>能力指標判定</th>
+          <th>計算用時平均</th>
+          <th>搶得GCF率</th>
+          <th>學習判定</th>
           <th>操作</th>
         </tr>
       </thead>
@@ -856,12 +910,48 @@
     const factorEvents = classData.factor_game && classData.factor_game.events ? Object.values(classData.factor_game.events) : [];
     const gcfEvents = classData.gcf_game && classData.gcf_game.events ? Object.values(classData.gcf_game.events) : [];
 
+    // Helper to parse GCF participants and their sides
+    function parseGcfParticipantsAndSides(e) {
+      const list = [];
+      const pName = e.playerName || '';
+      if (pName.startsWith('[連線]')) {
+        const parts = pName.split(' 🆚 ');
+        parts.forEach(part => {
+          const cleanPart = part.replace('[連線] ', '');
+          const side = cleanPart.includes('守護') ? 'guardian' : 'marauder';
+          const nameListStr = cleanPart.substring(cleanPart.indexOf(':') + 1).trim();
+          if (nameListStr) {
+            nameListStr.split(',').forEach(n => {
+              const name = n.trim();
+              if (name && name !== '無') {
+                list.push({ name, side });
+              }
+            });
+          }
+        });
+      } else if (pName.includes(' 🆚 ')) {
+        const names = pName.split(' 🆚 ');
+        if (names[0] && names[0].trim()) {
+          list.push({ name: names[0].trim(), side: 'guardian' });
+        }
+        if (names[1] && names[1].trim()) {
+          list.push({ name: names[1].trim(), side: 'marauder' });
+        }
+      } else {
+        const name = pName.trim();
+        if (name && name !== '自主練習' && name !== '匿名學生') {
+          list.push({ name, side: 'guardian' });
+        }
+      }
+      return list;
+    }
+
     // Analyze Students
     const studentMap = {};
     factorEvents.forEach(e => {
       const name = e.playerName || '匿名學生';
       if (!studentMap[name]) {
-        studentMap[name] = { factorEvents: [], factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0, logs: [] };
+        studentMap[name] = { factorEvents: [], factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0, gcfClaimedCount: 0, logs: [] };
       }
       studentMap[name].factorEvents.push(e);
       if (e.isCorrect) studentMap[name].factorCorrect++;
@@ -872,12 +962,25 @@
     });
 
     gcfEvents.forEach(e => {
-      const name = e.playerName || '匿名學生';
-      if (!studentMap[name]) {
-        studentMap[name] = { factorEvents: [], factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0, logs: [] };
-      }
-      studentMap[name].gcfRounds++;
-      if (e.winner === 'guardian') studentMap[name].gcfWins++;
+      const participants = parseGcfParticipantsAndSides(e);
+      const rounds = e.rounds || [];
+      participants.forEach(p => {
+        const name = p.name;
+        if (!studentMap[name]) {
+          studentMap[name] = { factorEvents: [], factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0, gcfClaimedCount: 0, logs: [] };
+        }
+        
+        studentMap[name].gcfRounds += rounds.length;
+        
+        rounds.forEach(r => {
+          if (r.winner === p.side) {
+            studentMap[name].gcfWins++;
+          }
+          if (r.gcfClaimer && r.gcfClaimer === name) {
+            studentMap[name].gcfClaimedCount++;
+          }
+        });
+      });
     });
 
     // Populate Students Table
@@ -959,6 +1062,8 @@
 
       const tr = document.createElement('tr');
       tr.id = 'row-' + idx;
+      const gcfClaimRate = s.gcfRounds > 0 ? Math.round((s.gcfClaimedCount / s.gcfRounds) * 100) : 0;
+      
       tr.innerHTML = \`
         <td><b>\${name}</b></td>
         <td>
@@ -967,9 +1072,10 @@
             🟢易:\${easyCount} | 🟡中:\${mediumCount} | 🔴難:\${hardCount}
           </span>
         </td>
+        <td>\${s.gcfRounds} 局</td>
         <td>\${rate}%</td>
         <td>\${avg} 秒</td>
-        <td>\${s.gcfRounds} 局 (\${s.gcfRounds > 0 ? Math.round(s.gcfWins/s.gcfRounds*100) + '%' : '-'})</td>
+        <td>\${s.gcfRounds > 0 ? gcfClaimRate + '%' : '-'} (\${s.gcfClaimedCount}次)</td>
         <td><span class="badge-mastery \${ratingClass}">\${rating}</span></td>
         <td>
           <button style="padding: 4px 8px; font-size: 0.8rem; cursor:pointer;" onclick="toggleLogsDrawer(\${idx})">檢視明細</button>
@@ -991,7 +1097,7 @@
       });
       detailsHtml += '</tbody></table></div>';
       
-      drawerTr.innerHTML = \`<td colspan="7">\${detailsHtml}</td>\`;
+      drawerTr.innerHTML = \`<td colspan="8">\${detailsHtml}</td>\`;
       tbody.appendChild(drawerTr);
     });
 

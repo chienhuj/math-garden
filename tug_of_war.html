@@ -2622,13 +2622,22 @@
       }
       
       // Save round history
+      let gcfClaimerName = '無';
+      const gcfClaimerSide = lockedFactors[gcfValue];
+      if (gcfClaimerSide === 'guardian') {
+        gcfClaimerName = (gameMode === 'ai') ? (localStorage.getItem('student_name') || '匿名學生') : (currentStudentName.split(' 🆚 ')[0] || '左方守護');
+      } else if (gcfClaimerSide === 'marauder') {
+        gcfClaimerName = (gameMode === 'ai') ? 'AI軍團' : (currentStudentName.split(' 🆚 ')[1] || '右方汲取');
+      }
+
       if (!window.roundHistory) window.roundHistory = [];
       window.roundHistory.push({
         roundNum: currentRound,
         num1: num1,
         num2: num2,
         factors: [...commonFactors],
-        winner: winner
+        winner: winner,
+        gcfClaimer: gcfClaimerName
       });
       
       const modal = document.getElementById('result-modal');
@@ -3604,18 +3613,25 @@
       else if (energyVal < 50) roundWinner = 'marauder';
 
       if (!window.roundHistory) window.roundHistory = [];
-      const rh = {
-        roundNum: currentRound,
-        n1: num1,
-        n2: num2,
-        winner: roundWinner,
-        factors: [...usedFactors]
-      };
+      
+      // Query Firebase for the GCF claimer
+      roomRefGcf.child('gameState/usedFactors/' + gcfValue).once('value', (snapGcf) => {
+        const gcfClaimerVal = snapGcf.val();
+        const gcfClaimerName = (gcfClaimerVal && gcfClaimerVal.playerName) ? gcfClaimerVal.playerName : '無';
 
-      // Write round history
-      roomRefGcf.child(`gameState/roundHistory/${currentRound}`).set(rh).then(() => {
-        // Calculate scores from history
-        roomRefGcf.child('gameState/roundHistory').once('value', (snapRH) => {
+        const rh = {
+          roundNum: currentRound,
+          n1: num1,
+          n2: num2,
+          winner: roundWinner,
+          factors: [...usedFactors],
+          gcfClaimer: gcfClaimerName
+        };
+
+        // Write round history
+        roomRefGcf.child(`gameState/roundHistory/${currentRound}`).set(rh).then(() => {
+          // Calculate scores from history
+          roomRefGcf.child('gameState/roundHistory').once('value', (snapRH) => {
           const history = snapRH.val() || {};
           let gWins = 0;
           let mWins = 0;

@@ -3341,30 +3341,31 @@
         }
       });
 
+      let isStartingGame = false; // Flag to track active game transition
+
       // Synchronize room status
       roomRefGcf.child('status').on('value', (snap) => {
         const status = snap.val();
         if (status === 'playing') {
-          // Guard: ignore stale playing status when waiting room screen is active but countdown is not
-          const waitScreen = document.getElementById('screen-room-waiting-gcf');
-          const waitingScreenActive = waitScreen && (waitScreen.style.display === 'flex' || waitScreen.style.display === 'block');
-          const countdownEl = document.getElementById('countdown-overlay-gcf');
-          const countdownActive = countdownEl && (countdownEl.style.display === 'flex');
-          
-          if (waitingScreenActive && !countdownActive) {
+          if (!isStartingGame) {
             console.log("Ignoring stale playing status");
             return;
           }
+          isStartingGame = false; // Reset flag
           enterGcfMultiplayArena();
         } else if (status === 'countdown') {
+          isStartingGame = true;
           triggerGcfRoomCountdown();
         } else if (status === 'result') {
+          isStartingGame = false;
           // If player is in wait room screen, do NOT show result modal (waiting for host reset)
           const waitScreen = document.getElementById('screen-room-waiting-gcf');
           if (waitScreen && (waitScreen.style.display === 'flex' || waitScreen.style.display === 'block')) {
             return;
           }
           enterGcfMultiplayResult();
+        } else if (status === 'waiting') {
+          isStartingGame = false;
         }
       });
     }
@@ -3505,6 +3506,7 @@
       document.querySelector('#panel-marauder .team-name').textContent = '汲取方';
       document.querySelector('#panel-marauder .team-desc').textContent = '汲取能量至 0%';
       
+      document.getElementById('ai-bubble-msg').style.display = 'none';
       document.getElementById('marauder-controls').style.display = 'flex';
       document.getElementById('guardian-controls').style.display = 'flex';
 

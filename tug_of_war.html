@@ -2100,15 +2100,7 @@
       document.getElementById('sky-n2').textContent = num2;
       
       // Populate factors list in UI
-      const factorsGrid = document.getElementById('factors-grid');
-      factorsGrid.innerHTML = '';
-      commonFactors.forEach(factor => {
-        const badge = document.createElement('span');
-        badge.className = `factor-badge${factor === gcfValue ? ' is-gcf' : ''}`;
-        badge.id = `badge-${factor}`;
-        badge.textContent = '?';
-        factorsGrid.appendChild(badge);
-      });
+      renderFactorsGrid();
       
       // Reset logs panel
       document.getElementById('round-log').innerHTML = `<div style="color: var(--text-muted); text-align: center; font-weight: bold; width: 100%;">戰局即時快報 (天空對戰數字：${num1} & ${num2})</div>`;
@@ -2123,6 +2115,30 @@
       if (gameMode === 'ai') {
         triggerAIThinking();
       }
+    }
+
+    function renderFactorsGrid() {
+      const factorsGrid = document.getElementById('factors-grid');
+      if (!factorsGrid) return;
+      factorsGrid.innerHTML = '';
+      commonFactors.forEach(factor => {
+        const badge = document.createElement('span');
+        
+        // In online mode, check usedFactors. In local mode, check lockedFactors
+        const isUnlocked = (gameMode === 'online') ? usedFactors.includes(factor) : !!lockedFactors[factor];
+        
+        badge.className = `factor-badge${factor === gcfValue ? ' is-gcf' : ''}${isUnlocked ? ' unlocked' : ''}`;
+        badge.id = `badge-${factor}`;
+        badge.setAttribute('data-val', factor);
+        
+        if (isUnlocked) {
+          badge.textContent = factor;
+          badge.style.opacity = '0.4';
+        } else {
+          badge.textContent = '?';
+        }
+        factorsGrid.appendChild(badge);
+      });
     }
 
     // --- INTERACTIVE MECHANICS ---
@@ -2196,7 +2212,7 @@
         const classId = localStorage.getItem('current_class_id') || '';
         const sanitizedT = teacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
         const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
-        const factorPath = `logs/${sanitizedT}/${sanitizedC}/gcf_rooms/${myRoomId}/gameState/usedFactors/${val}`;
+        const factorPath = `logs/${sanitizedT}/${sanitizedC}/gcf_game/rooms/${myRoomId}/gameState/usedFactors/${val}`;
         
         database.ref(factorPath).transaction((currentData) => {
           if (currentData === null) {
@@ -2991,6 +3007,7 @@
     let isReadyGcf = false;
     let isHostGcf = false;
     let roomRefGcf = null;
+    let usedFactors = [];
 
     function openRoomJoinGcfModal() {
       const name = localStorage.getItem('student_name') || '';
@@ -3056,7 +3073,7 @@
       const sanitizedT = teacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
       const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
       
-      const checkPath = `logs/${sanitizedT}/${sanitizedC}/gcf_rooms/${myRoomId}/players`;
+      const checkPath = `logs/${sanitizedT}/${sanitizedC}/gcf_game/rooms/${myRoomId}/players`;
       database.ref(checkPath).once('value', (snap) => {
         const players = snap.val() || {};
         let count = 0;
@@ -3088,7 +3105,7 @@
       const sanitizedT = teacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
       const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
       
-      roomRefGcf = database.ref(`logs/${sanitizedT}/${sanitizedC}/gcf_rooms/${roomId}`);
+      roomRefGcf = database.ref(`logs/${sanitizedT}/${sanitizedC}/gcf_game/rooms/${roomId}`);
       
       // Reset waiting room buttons
       const readyBtn = document.getElementById('btn-ready-toggle-gcf');
@@ -3329,6 +3346,10 @@
         maxRounds = state.maxRounds;
         energyVal = state.plantEnergy;
         roundSequence = state.roundSequence;
+
+        // Reconstruct usedFactors array from Firebase state
+        const fbUsed = state.usedFactors || {};
+        usedFactors = Object.keys(fbUsed).map(k => parseInt(k));
 
         // Local load round UI updates
         commonFactors = getCommonFactors(num1, num2);

@@ -72,34 +72,60 @@
       right: -100px;
     }
 
+    /* Floating container */
+    .game-container {
+      width: 95%;
+      max-width: 1100px;
+      min-height: 720px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1.5px solid var(--glass-border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      margin: 15px auto;
+      box-sizing: border-box;
+    }
+
     /* Global Header */
     header {
-      padding: 15px 30px;
+      padding: 15px 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
       z-index: 10;
+      border-bottom: 1px solid rgba(43, 61, 52, 0.1);
+      margin-bottom: 25px;
     }
 
-    .logo-area {
+    .title-group {
       display: flex;
       flex-direction: column;
     }
 
-    .game-title {
-      font-size: 1.6rem;
+    .title-group h1 {
+      font-size: 1.8rem;
       font-weight: 800;
       letter-spacing: -0.5px;
       background: linear-gradient(135deg, var(--color-guardian) 30%, var(--color-marauder) 70%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
     }
 
-    .subtitle {
-      font-size: 0.8rem;
+    .title-group p {
+      font-size: 0.95rem;
+      font-weight: 700;
       color: var(--text-muted);
-      font-weight: 500;
-      margin-top: 2px;
+      margin-top: 3px;
     }
 
     .nav-controls {
@@ -140,27 +166,22 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start; /* 頂部對齊，確保捲動時不會裁切上方 */
-      padding: 0 30px 30px 30px;
+      justify-content: flex-start;
+      padding: 0;
       position: relative;
       z-index: 5;
+      width: 100%;
     }
 
     /* SCREEN 0: Lobby Menu */
     #screen-lobby {
       width: 100%;
       max-width: 850px;
-      background: var(--glass-bg);
-      backdrop-filter: blur(20px);
-      border: 1.5px solid var(--glass-border);
-      border-radius: 24px;
-      padding: 35px;
-      box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
       gap: 25px;
       transition: opacity 0.4s ease, transform 0.4s ease;
-      margin-top: 10px;
+      margin: 0 auto;
     }
 
     .lobby-header {
@@ -1247,6 +1268,24 @@
         border-radius: 10px !important;
       }
     }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 5px !important;
+      }
+      #screen-lobby {
+        padding: 15px 10px !important;
+      }
+      header {
+        flex-direction: column;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 8px 10px !important;
+      }
+      .logo-area {
+        text-align: center !important;
+      }
+    }
   </style>
   <!-- Firebase App (the core Firebase SDK) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -1259,75 +1298,75 @@
   <div class="bg-glow" id="glow-left"></div>
   <div class="bg-glow" id="glow-right"></div>
 
-  <!-- Header -->
-  <header>
-    <div class="logo-area">
-      <h1 class="game-title">共生生命能量守護戰</h1>
-      <span class="subtitle">公因數能量平衡與 GCF 技能戰術對決</span>
-    </div>
-    
-    <div class="nav-controls">
-      <a href="index.html" class="btn-nav">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-          <polyline points="9 22 9 12 15 12 15 22"></polyline>
-        </svg>
-        <span>返回共生花園</span>
-      </a>
-      <button class="btn-nav" id="btn-restart-lobby" style="display: none;" onclick="showLobby()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-          <path d="M3 3v5h5"></path>
-        </svg>
-        <span>重選模式</span>
-      </button>
-    </div>
-  </header>
+  <div class="game-container">
 
-  <!-- Main Container -->
-  <main>
-
-    <!-- SCREEN 0: Lobby Mode Selection -->
-    <section id="screen-lobby">
-      <div class="lobby-header">
-        <h2>守護魔力植物的生命能量！</h2>
-        <p>這是一款能量平衡守護戰。輸入雙數的天空<b>「公因數」</b>，即可為中央植物注入生命能（守護方）或汲取能量（汲取方）！<br>
-        搶下<b>最大公因數 (GCF)</b> 能激發高達 <b>+10 點的額外能量脈衝</b>，並觸發專屬技能！</p>
+    <!-- Header -->
+    <header>
+      <div class="title-group">
+        <h1>⚡ 能量對戰</h1>
+        <p>找公因數</p>
       </div>
+      
+      <div class="nav-controls">
+        <a href="index.html" class="btn-nav">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>返回入口</span>
+        </a>
+        <button class="btn-nav" id="btn-restart-lobby" style="display: none;" onclick="showLobby()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+          </svg>
+          <span>重選模式</span>
+        </button>
+      </div>
+    </header>
 
-      <div class="mode-select-grid">
+    <!-- Main Container -->
+    <main>
+
+      <!-- SCREEN 0: Lobby Mode Selection -->
+      <section id="screen-lobby">
+        <div class="lobby-header" style="text-align: center; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%;">
+          <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-color); margin-bottom: 4px; text-align: center;">⚡ 能量對戰</h2>
+          <p style="font-size: 0.95rem; color: var(--text-muted); text-align: center; margin-bottom: 20px; font-weight: 500; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+            公因數是神奇植物生長的能量，選擇守護讓花園璀璨發光，或選擇汲取讓花園重回蠻荒。
+          </p>
+        </div>
+        <div class="mode-select-grid">
         <!-- Mode 1: Dual Match -->
         <div class="mode-card guardian-theme" onclick="startGame('multi')">
           <div class="mode-icon">⚔️</div>
-          <h3>雙方對抗</h3>
-          <p>適合雙方共學、課堂大螢幕或平板對抗。左側控制守護方，右側控制汲取方。</p>
-          <span class="mode-tag">同螢幕均勢對抗</span>
+          <h3>雙方共學</h3>
+          <span class="mode-tag">同螢幕對戰</span>
         </div>
 
         <!-- Mode 2: VS AI -->
         <div class="mode-card marauder-theme" onclick="startGame('ai')">
           <div class="mode-icon">🤖</div>
-          <h3>挑戰AI軍團</h3>
-          <p>對決AI軍團。AI會以逼真心算速度搶答，你必須比AI更快搶下最大公因數！</p>
-          <span class="mode-tag">人機策略對抗</span>
+          <h3>挑戰AI</h3>
+          <span class="mode-tag">人機對戰</span>
         </div>
 
         <!-- Mode 3: Online Multiplayer -->
         <div class="mode-card online-theme" onclick="startGame('online')" style="border-color: rgba(55,138,212,0.3); background: linear-gradient(135deg, white 0%, #E3F2FD 100%);">
           <div class="mode-icon">🌐</div>
-          <h3>多人合作對戰 (連線版)</h3>
-          <p>運用進入遊戲室機制，可選擇成為守護方或汲取方，任一方1人或2人即可開始對決！</p>
-          <span class="mode-tag">即時線上合作搶答</span>
+          <h3>合作共生</h3>
+          <span class="mode-tag">多人遊戲室對戰</span>
         </div>
       </div>
 
       <!-- Custom Match (Teacher settings) -->
-      <div class="custom-match-panel">
-        <div class="custom-inputs">
-          <label>自訂天空對戰數字：</label>
-          <input type="number" id="custom-num1" class="input-number" value="24" min="2" max="100">
-          <span class="sky-number-separator">&</span>
-          <input type="number" id="custom-num2" class="input-number" value="36" min="2" max="100">
+      <div class="custom-match-panel" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <div class="custom-inputs" style="display: flex; align-items: center; gap: 8px;">
+          <label style="font-weight: 800; font-size: 0.95rem; color: var(--text-color);">自訂對戰數字：</label>
+          <input type="number" id="custom-num1" class="input-number" value="24" min="2" max="100" style="width: 70px; text-align: center; font-weight: 800; border-radius: 8px; border: 1.5px solid var(--glass-border); padding: 5px;">
+          <span class="sky-number-separator" style="font-weight: 800; color: var(--text-muted);">&</span>
+          <input type="number" id="custom-num2" class="input-number" value="36" min="2" max="100" style="width: 70px; text-align: center; font-weight: 800; border-radius: 8px; border: 1.5px solid var(--glass-border); padding: 5px;">
+          <button class="btn-start-custom" onclick="startCustomGame()" style="margin: 0; padding: 6px 14px; font-size: 0.85rem; border-radius: 8px; height: 36px; background-color: var(--color-guardian); color: white; border: none; font-weight: 700; cursor: pointer;">開始自訂對抗</button>
         </div>
       </div>
 
@@ -1356,7 +1395,7 @@
     <div class="modal-overlay" id="overlay-room-join-gcf" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; opacity: 1;">
       <div class="modal-content" style="background: white; border-radius: 20px; padding: 25px; max-width: 440px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; box-sizing: border-box; transform: scale(1);">
         <div style="font-size: 2.2rem; margin-bottom: 12px;">🚪</div>
-        <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 15px; color: var(--text-color);">進入生命能量(公因數)對戰連線遊戲室</h3>
+        <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 15px; color: var(--text-color);">進入連線遊戲室</h3>
         
         <div style="display: flex; flex-direction: column; gap: 15px; text-align: left; margin-bottom: 20px;">
           <div>
@@ -1529,7 +1568,7 @@
 
           <!-- Locked Factors scorecard -->
           <div class="factors-lock-panel">
-            <h4 id="factors-title">公因鎖定狀態 (計算並解鎖以轉化能量！)</h4>
+            <h4 id="factors-title">已輸入公因數</h4>
             <div class="factors-grid" id="factors-grid">
               <!-- Dynamically populated e.g. <span class="factor-badge">2</span> -->
             </div>
@@ -1596,6 +1635,7 @@
     </section>
 
   </main>
+</div>
 
   <!-- Victory / Settlement Modal Popup -->
   <div class="modal-overlay" id="result-modal">
@@ -2298,7 +2338,7 @@
       
       if (isGCF) {
         energyImpact = 20; // GCF gets a bonus (total 20 points)
-        gcfText = " [最大公因數 GCF 能量脈衝 +10 點！] ";
+        gcfText = " [最大公因數能量脈衝 +10 點！] ";
         playSound('gcf');
         triggerScreenShake();
       } else {
@@ -2327,7 +2367,7 @@
       energyVal = Math.min(100, Math.max(0, energyVal));
       
       // Trigger floating text animation
-      triggerFloatingText(side, isGCF ? `GCF PULSE +${actualImpact}⚡` : `+${actualImpact} 點`, side === 'guardian' ? 120 : 280);
+      triggerFloatingText(side, isGCF ? `最大公因數 +${actualImpact}⚡` : `+${actualImpact} 點`, side === 'guardian' ? 120 : 280);
       
       // Log event
       addLog(side, `搶下公因數 [ ${val} ]，${side === 'guardian' ? '注入' : '汲取'}了 ${actualImpact} 點${side === 'guardian' ? '生命' : '暗影'}能量！${gcfText}`);
@@ -2677,8 +2717,10 @@
         icon.innerHTML = svgGlowingPlant;
         title.textContent = '守護方 獲勝！';
         title.style.color = 'var(--color-guardian)';
-        desc.innerHTML = `在本輪對戰中，<b>守護方</b>成功注入生命能量，共生植物散發出璀璨的生命之光！<br>
-        天空數字：<b>${num1} & ${num2}</b> 的公因數為：<b>{ ${commonFactors.join(', ')} }</b>，最大公因數為 <b>${gcfValue}</b>！`;
+        desc.innerHTML = `在本輪對戰中，<b>守護方</b>成功注入生命能量，共生植物散發出璀璨的生命之光！<br><br>
+        天空數字：<b>${num1} & ${num2}</b><br>
+        公因數：<b>{ ${commonFactors.join(', ')} }</b><br>
+        最大公因數：<b>${gcfValue}</b>`;
         playSound('win');
       } else if (winner === 'marauder') {
         scores.marauder++;
@@ -2686,15 +2728,19 @@
         icon.innerHTML = svgWitheredPlant;
         title.textContent = gameMode === 'ai' ? 'AI軍團 獲勝！' : '汲取方 獲勝！';
         title.style.color = 'var(--color-marauder)';
-        desc.innerHTML = `在本輪對戰中，<b>汲取方</b>將生命能量完全汲取，植物萎縮枯萎！<br>
-        天空數字：<b>${num1} & ${num2}</b> 的公因數為：<b>{ ${commonFactors.join(', ')} }</b>，最大公因數為 <b>${gcfValue}</b>！`;
+        desc.innerHTML = `在本輪對戰中，<b>汲取方</b>將生命能量完全汲取，植物萎縮枯萎！<br><br>
+        天空數字：<b>${num1} & ${num2}</b><br>
+        公因數：<b>{ ${commonFactors.join(', ')} }</b><br>
+        最大公因數：<b>${gcfValue}</b>`;
         playSound('lose');
       } else {
         icon.innerHTML = '⚖️';
         title.textContent = '戰局完美平手！';
         title.style.color = 'var(--text-color)';
-        desc.innerHTML = `雙方的能量傳輸極其平衡，所有公因數皆已揭曉！<br>
-        天空數字：<b>${num1} & ${num2}</b> 的公因數為：<b>{ ${commonFactors.join(', ')} }</b>！`;
+        desc.innerHTML = `雙方的能量傳輸極其平衡，所有公因數皆已揭曉！<br><br>
+        天空數字：<b>${num1} & ${num2}</b><br>
+        公因數：<b>{ ${commonFactors.join(', ')} }</b><br>
+        最大公因數：<b>${gcfValue}</b>`;
         playSound('win');
       }
       
@@ -2800,7 +2846,7 @@
       playSound(soundToPlay);
       
       const btn = document.querySelector('.btn-modal');
-      btn.textContent = "返回遊戲大廳";
+      btn.textContent = "返回遊戲入口";
       btn.onclick = function() {
         modal.classList.remove('active');
         showLobby();
@@ -3113,7 +3159,7 @@
       }
 
       if (!database) {
-        alert("資料庫尚未連接，請先點選大廳自訂資料庫設定連線！");
+        alert("資料庫尚未連接，請先在入口自訂資料庫設定連線！");
         return;
       }
 
@@ -3575,9 +3621,9 @@
           updateEnergyBarUI();
           updatePlantSVG();
 
-          triggerFloatingText(logData.side, isGCF ? `GCF PULSE +${actualImpact}!` : `+${actualImpact}!`, logData.side === 'guardian' ? 120 : 280);
+          triggerFloatingText(logData.side, isGCF ? `最大公因數 +${actualImpact}!` : `+${actualImpact}!`, logData.side === 'guardian' ? 120 : 280);
           
-          let logText = isGCF ? ` [最大公因數 GCF 爆發 +10 點!]` : '';
+          let logText = isGCF ? ` [最大公因數爆發 +10 點!]` : '';
           addLog(logData.side, `🎯 [${logData.playerName}] 搶下公因數 [ ${factor} ]，拉扯 ${actualImpact} 點能量！${logText}`);
           
           if (isGCF) {
@@ -3773,7 +3819,7 @@
       desc.innerHTML = `<p style="margin: 0 0 6px 0; font-size:0.85rem; font-weight:700; color:var(--text-color);">${winnerText}</p>` + membersHtml + historyHtml;
 
       const btn = document.querySelector('.btn-modal');
-      btn.textContent = "返回遊戲大廳";
+      btn.textContent = "返回遊戲入口";
       btn.onclick = function() {
         modal.classList.remove('active');
         leaveGcfRoom();

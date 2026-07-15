@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌱 共生花園 - 因數與公因數學習大廳</title>
+  <title>🌱 共生花園 - 因數與公因數學習入口</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Outfit:wght@300;400;600;800&display=swap');
 
@@ -106,6 +106,12 @@
     }
 
     @media (max-width: 700px) {
+      body {
+        padding: 10px;
+      }
+      .portal-container {
+        padding: 30px 15px;
+      }
       .portal-grid {
         grid-template-columns: 1fr;
         gap: 30px;
@@ -277,7 +283,7 @@
     <header style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 800px; margin-bottom: 25px; border-bottom: 1.5px solid rgba(43,61,52,0.08); padding-bottom: 15px; flex-wrap: wrap; gap: 10px;">
       <div class="logo-area" style="text-align: left;">
         <h1 style="font-size: 1.8rem; font-weight: 900; margin: 0; display: flex; align-items: center; gap: 8px; color: var(--text-primary);">🌱 共生花園</h1>
-        <p style="margin: 3px 0 0 0; font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">國小數學五年級因數與公因數學習大廳 <span style="font-size: 0.8rem; background-color: var(--color-garden); color: white; padding: 2px 6px; border-radius: 6px; font-weight: 700; margin-left: 5px;">v3.2</span></p>
+        <p style="margin: 3px 0 0 0; font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">國小五年級因數與公因數學習入口</p>
       </div>
       <button class="btn btn-secondary" id="btn-config-db" onclick="openConfigModal()" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px; margin: 0;">
         ⚙️ 自訂教師專屬資料庫
@@ -287,19 +293,19 @@
     <div class="portal-grid">
       <!-- Game 1: Sprouting Magic -->
       <a href="factor_garden_game.html" class="game-card card-garden">
-        <span class="card-badge">單人探究／小組共學</span>
+        <span class="card-badge">找因數</span>
         <div class="card-icon">🍃</div>
-        <h2>因數花園之發芽魔法</h2>
-        <p>輸入一個神奇數字的因數，讓植物發芽生長。</p>
+        <h2>發芽魔法</h2>
+        <p>輸入目標數字的因數，讓植物發芽生長，並觀察因數出現的規律。</p>
         <div class="play-btn">進入溫室培育</div>
       </a>
 
       <!-- Game 2: Tug of War -->
       <a href="tug_of_war.html" class="game-card card-battle">
-        <span class="card-badge">雙人對戰 / AI 挑戰</span>
+        <span class="card-badge">找公因數</span>
         <div class="card-icon">⚡</div>
-        <h2>共生生命能量守護戰</h2>
-        <p>選擇守護方或汲取方，輪流輸入兩個數字的公因數進行能量拉鋸。搶先找出最大公因數 (GCF) 還能發動強力暴擊！</p>
+        <h2>能量對戰</h2>
+        <p>輸入兩個數字的公因數，獲取能量，優先輸入最大公因數還能發動祕技。</p>
         <div class="play-btn">進入能量戰場</div>
       </a>
     </div>
@@ -309,8 +315,8 @@
       <div style="display: flex; align-items: center; gap: 10px;">
         <span style="font-size: 1.5rem;">🏫</span>
         <div>
-          <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">班級學習歷程設定</h4>
-          <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);" id="teacher-class-status-text">未設定班級，目前遊玩將不會記錄歷程。</p>
+          <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">玩家設定</h4>
+          <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);" id="teacher-class-status-text">未設定，遊玩將不記錄學習歷程。</p>
         </div>
       </div>
       <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;" id="teacher-class-inputs-container">
@@ -367,8 +373,8 @@
     </div>
 
     <footer style="display: flex; flex-direction: column; gap: 8px;">
-      <span>網頁自學提示設計：謝千慧老師 ｜ 夢 N 講師 AI 協力實踐計畫</span>
-      <a href="teacher_dashboard.html" style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700; text-decoration: underline; margin-top: 5px;">🏫 進入教師學習分析診斷後台</a>
+      <a href="teacher_dashboard.html" style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700; text-decoration: underline; margin-top: 5px;">學習分析後臺</a>
+      <span style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">網頁自學提示設計：謝千慧老師</span>
     </footer>
   </div>
 

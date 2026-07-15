@@ -1042,6 +1042,28 @@
         height: 120px;
       }
     }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 8px !important;
+      }
+      .game-container {
+        padding: 12px 10px !important;
+        border-radius: 12px !important;
+      }
+      header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 10px !important;
+      }
+      .hud-group {
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .dome-visualizer {
+        height: 240px !important;
+      }
+    }
   </style>
   <!-- Firebase App (the core Firebase SDK) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -1059,7 +1081,7 @@
     <header>
       <div class="title-group">
         <h1>🌱 發芽魔法</h1>
-        <p>國小數學五年級因數</p>
+        <p>找因數</p>
       </div>
       <div class="hud-group" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
         <span class="badge basic" id="hud-mode-badge">基礎關</span>
@@ -1067,32 +1089,26 @@
           ⚙️ 自訂教師專屬資料庫
         </button>
         <button class="btn btn-secondary" id="btn-back-lobby" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px; display: none;">
-          發芽魔法選單
+          重選關卡
         </button>
         <button class="btn btn-secondary" id="btn-back-portal" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px;">
-          回到共生花園大廳
+          返回入口
         </button>
       </div>
     </header>
 
     <!-- SCREEN 0: LOBBY -->
     <section id="screen-lobby" class="screen active">
-      <div class="lobby-layout">
-        <div class="lobby-icon">✨</div>
-        <h2 class="lobby-title">培育你的因數共生花園</h2>
-        <p class="lobby-desc">
-          當你輸入一個神奇數字的「因數」時，植物的葉子就會開始生長。<br>
-          試著找出所有的因數，並觀察因數出現的規律。
+      <div class="lobby-layout" style="padding-top: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+        <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; text-align: center;">🌱 培育神奇植物</h2>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); text-align: center; margin-bottom: 20px; font-weight: 500; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+          輸入目標數字的因數，讓植物發芽生長，並觀察因數出現的規律。
         </p>
-
         <div class="modes-grid">
           <!-- Card: Basic Mode -->
           <div class="mode-card basic-card" onclick="startGame('basic')">
             <div class="icon">🌱</div>
             <h3>基礎關</h3>
-            <p>
-              沒有時間限制，讓你能靜下心來思考。每次隨機挑選3個2～20的目標數字，找齊對應因數，培植出開花植物。
-            </p>
             <div class="mode-btn">開始培育</div>
           </div>
 
@@ -1100,38 +1116,27 @@
           <div class="mode-card advanced-card" onclick="startGame('advanced')">
             <div class="icon">⚡</div>
             <h3>進階關</h3>
-            <p>
-              加入時間壓力，每題限時30秒。每次隨機挑選3個20～60的目標數字，找齊對應因數，培植出開花植物。
-            </p>
-            <div class="mode-btn">開始限時挑戰</div>
+            <div class="mode-btn">限時探索</div>
           </div>
 
           <!-- Card: Challenge Mode (Offline) -->
           <div class="mode-card challenge-card" onclick="startGame('challenge')">
             <div class="icon">⏱️</div>
             <h3>挑戰關</h3>
-            <p>
-              加入時間累計，考驗因數心算速度。每次隨機挑選3個2～100的目標數字，找齊對應因數，培植出開花植物。
-            </p>
-            <div class="mode-btn">開始心算挑戰</div>
+            <div class="mode-btn">計時心算</div>
           </div>
         </div>
 
         <!-- Card: Multiplayer Mode -->
-        <div class="mode-card challenge-card" style="width: 100%; max-width: 840px; margin-top: 12px; border-color: rgba(209, 141, 108, 0.3); background: linear-gradient(135deg, white 0%, #FAF6F4 100%); padding: 10px 15px;" onclick="startGame('multiplayer')">
+        <div class="mode-card challenge-card" style="width: 100%; max-width: 840px; margin-top: 12px; border-color: rgba(209, 141, 108, 0.3); background: linear-gradient(135deg, white 0%, #FAF6F4 100%); padding: 12px 20px;" onclick="startGame('multiplayer')">
           <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 15px; flex-wrap: wrap;">
             <div style="display: flex; align-items: center; gap: 15px; text-align: left;">
               <span style="font-size: 1.8rem;">👥</span>
               <div>
-                <h3 style="margin: 0 0 3px 0; font-size: 1.05rem; font-weight: 800; color: var(--text-primary);">
-                  挑戰關（多人合作連線版）
-                </h3>
-                <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
-                  合作共生，一人輸入一個因數，試著在最短時間內完成植物的夢幻進化。（需配合 Firebase 連線設定）
-                </p>
+                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: var(--text-primary);">共生關</h3>
               </div>
             </div>
-            <div class="mode-btn" style="width: auto; padding: 6px 15px; font-size: 0.85rem; background-color: var(--color-challenge); color: white; margin: 0;">進入分組連線</div>
+            <div class="mode-btn" style="width: auto; padding: 8px 20px; font-size: 0.9rem; background-color: var(--color-challenge); color: white; margin: 0;">小組連線</div>
           </div>
         </div>
 
@@ -1676,8 +1681,8 @@
     let foundFactors = new Set();
     
     // Timer Variables
-    let countdownTime = 30; // 30 seconds countdown for Advanced Mode
-    let countdownValue = 30;
+    let countdownTime = 60; // 60 seconds countdown for Advanced Mode
+    let countdownValue = 60;
     
     let challengeStartTime = null; // count-up timer for Challenge Mode
     let elapsedTimerInterval = null;
@@ -1782,7 +1787,7 @@
       } else if (mode === 'multiplayer') {
         // 多人連線模式：確認連線設定
         if (!database) {
-          alert("請先點擊大廳右上角的「⚙️ 連線設定」，填入您的 Firebase 專案配置金鑰以啟用多人連線功能！相關步驟請參考專案目錄下的 firebase_setup_guide.md 檔案。");
+          alert("請先點擊入口右上角的「⚙️ 自訂教師專屬資料庫」，填入您的 Firebase 專案配置金鑰以啟用多人連線功能！相關步驟請參考專案目錄下的 firebase_setup_guide.md 檔案。");
           openConfigModal();
           return;
         }
@@ -2571,7 +2576,7 @@
           const isFound = foundFactors.has(f);
           
           row.innerHTML = `
-            <span>完全平方根：</span>
+            <span>中心自乘數：</span>
             <div class="pairing-node center-square ${isFound ? 'found' : ''}">
               ${isFound ? f : '?'}
             </div>
@@ -3087,7 +3092,7 @@
         
       } else if (gameMode === 'advanced') {
         title.innerText = '⚡ 進階關卡進化完成！';
-        desc.innerHTML = `恭喜你！在 30 秒倒數壓力下成功將 3 株進階植物進化！心算技巧非常卓越！`;
+        desc.innerHTML = `恭喜你！在 60 秒倒數壓力下成功將 3 株進階植物進化！`;
         
         // Award Advanced Plant Card
         awardSvgHolder.innerHTML = plant.drawSVG('advanced');
@@ -3257,10 +3262,10 @@
       return gameActive || waitActive;
     }
 
-    // 重返大廳 (回到發芽魔法選單)
+    // 重返入口 (回到發芽魔法選單)
     document.getElementById('btn-back-lobby').addEventListener('click', () => {
       if (isGameActive()) {
-        if (confirm('確定要結束目前的挑戰，返回發芽魔法選單嗎？目前的培育進度將會遺失喔！')) {
+        if (confirm('確定要結束目前的挑戰，返回重選關卡嗎？目前的培育進度將會遺失喔！')) {
           leaveRoom();
         }
       } else {
@@ -3268,10 +3273,10 @@
       }
     });
 
-    // 回對戰大廳 (回到入口網站 index.html)
+    // 回對戰入口 (回到入口網站 index.html)
     document.getElementById('btn-back-portal').addEventListener('click', () => {
       if (isGameActive()) {
-        if (confirm('確定要結束目前的挑戰，返回共生花園大廳嗎？目前的培育進度將會遺失喔！')) {
+        if (confirm('確定要結束目前的挑戰，返回入口嗎？目前的培育進度將會遺失喔！')) {
           stopTimer();
           stopFirebaseListeners();
           if (currentPlayerRef) {

@@ -560,9 +560,9 @@
       factorEvents.forEach(e => {
         const name = e.playerName || '匿名學生';
         if (!studentMap[name]) {
-          studentMap[name] = { factorTotal: 0, factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0 };
+          studentMap[name] = { factorEvents: [], factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0 };
         }
-        studentMap[name].factorTotal++;
+        studentMap[name].factorEvents.push(e);
         if (e.isCorrect) studentMap[name].factorCorrect++;
         if (e.timeTaken !== undefined && e.isCorrect) {
           studentMap[name].factorTimes.push(e.timeTaken);
@@ -570,13 +570,12 @@
       });
 
       gcfEvents.forEach(e => {
-        // e contains playerName, winner, rounds, etc.
         const name = e.playerName || '匿名學生';
         if (!studentMap[name]) {
-          studentMap[name] = { factorTotal: 0, factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0 };
+          studentMap[name] = { factorEvents: [], factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0 };
         }
         studentMap[name].gcfRounds++;
-        if (e.winner === 'guardian') studentMap[name].gcfWins++; // In AI vs Student guardian GCF
+        if (e.winner === 'guardian') studentMap[name].gcfWins++;
       });
 
       const studentNames = Object.keys(studentMap);
@@ -596,32 +595,47 @@
 
       studentNames.forEach(name => {
         const s = studentMap[name];
-        const correctRate = s.factorTotal > 0 ? Math.round((s.factorCorrect / s.factorTotal) * 100) : 0;
+        
+        // Calculate GCF/Factor correctness and targetCount
+        const attemptsCount = s.factorEvents.length;
+        const correctAttempts = s.factorCorrect;
+        const correctRate = attemptsCount > 0 ? Math.round((correctAttempts / attemptsCount) * 100) : 0;
+        
+        // Count target number blocks chronologically
+        const sortedEvents = s.factorEvents.sort((a, b) => a.timestamp - b.timestamp);
+        let targetCount = 0;
+        let lastTarget = null;
+        sortedEvents.forEach(e => {
+          if (e.targetNumber !== lastTarget) {
+            targetCount++;
+            lastTarget = e.targetNumber;
+          }
+        });
+
         const avgTime = s.factorTimes.length > 0 ? (s.factorTimes.reduce((a, b) => a + b, 0) / s.factorTimes.length).toFixed(1) : '-';
         const winRate = s.gcfRounds > 0 ? Math.round((s.gcfWins / s.gcfRounds) * 100) : 0;
         
-        // Define mastery levels
-        let rating = "待加強";
+        // Mastery Evaluation
+        let rating = "發展中";
         let ratingClass = "need-work";
-        if (s.factorTotal >= 15) {
-          if (correctRate >= 90 && (avgTime !== '-' && parseFloat(avgTime) <= 4.0)) {
-            rating = "卓越精熟";
+        if (targetCount > 0) {
+          const avgTimeVal = avgTime !== '-' ? parseFloat(avgTime) : 999;
+          if (correctRate >= 90 && avgTimeVal <= 15) {
+            rating = "精熟";
             ratingClass = "master";
-          } else if (correctRate >= 75) {
-            rating = "心算熟練";
+          } else if (correctRate >= 80 && avgTimeVal <= 30) {
+            rating = "熟練";
             ratingClass = "fluent";
           }
-        } else if (s.factorTotal > 0) {
-          if (correctRate >= 80) {
-            rating = "心算熟練 (題數少)";
-            ratingClass = "fluent";
-          }
+        } else {
+          rating = "-";
+          ratingClass = "need-work";
         }
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><b>${name}</b></td>
-          <td>${s.factorTotal}</td>
+          <td>${targetCount} 題</td>
           <td>${correctRate}%</td>
           <td>${avgTime} 秒</td>
           <td>${s.gcfRounds > 0 ? winRate + '%' : '-'} (${s.gcfRounds} 局)</td>
@@ -811,9 +825,9 @@
     factorEvents.forEach(e => {
       const name = e.playerName || '匿名學生';
       if (!studentMap[name]) {
-        studentMap[name] = { factorTotal: 0, factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0, logs: [] };
+        studentMap[name] = { factorEvents: [], factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0, logs: [] };
       }
-      studentMap[name].factorTotal++;
+      studentMap[name].factorEvents.push(e);
       if (e.isCorrect) studentMap[name].factorCorrect++;
       if (e.timeTaken !== undefined && e.isCorrect) {
         studentMap[name].factorTimes.push(e.timeTaken);
@@ -824,7 +838,7 @@
     gcfEvents.forEach(e => {
       const name = e.playerName || '匿名學生';
       if (!studentMap[name]) {
-        studentMap[name] = { factorTotal: 0, factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0, logs: [] };
+        studentMap[name] = { factorEvents: [], factorCorrect: 0, factorTimes: [], gcfRounds: 0, gcfWins: 0, logs: [] };
       }
       studentMap[name].gcfRounds++;
       if (e.winner === 'guardian') studentMap[name].gcfWins++;
@@ -836,40 +850,50 @@
 
     Object.keys(studentMap).forEach((name, idx) => {
       const s = studentMap[name];
-      const rate = s.factorTotal > 0 ? Math.round((s.factorCorrect / s.factorTotal) * 100) : 0;
+      
+      const attemptsCount = s.factorEvents.length;
+      const correctAttempts = s.factorCorrect;
+      const rate = attemptsCount > 0 ? Math.round((correctAttempts / attemptsCount) * 100) : 0;
+      
+      // Count unique targets
+      const sortedEvents = s.factorEvents.sort((a, b) => a.timestamp - b.timestamp);
+      let targetCount = 0;
+      let lastTarget = null;
+      sortedEvents.forEach(e => {
+        if (e.targetNumber !== lastTarget) {
+          targetCount++;
+          lastTarget = e.targetNumber;
+        }
+      });
+
       const avg = s.factorTimes.length > 0 ? (s.factorTimes.reduce((a,b)=>a+b, 0) / s.factorTimes.length).toFixed(1) : '-';
       
-      let rating = "待加強";
+      let rating = "發展中";
       let ratingClass = "need-work";
-      if (s.factorTotal >= 15) {
-        if (rate >= 90 && (avg !== '-' && parseFloat(avg) <= 4.0)) {
-          rating = "卓越精熟";
+      if (targetCount > 0) {
+        const avgVal = avg !== '-' ? parseFloat(avg) : 999;
+        if (rate >= 90 && avgVal <= 15) {
+          rating = "精熟";
           ratingClass = "master";
           masters++;
-        } else if (rate >= 75) {
-          rating = "心算熟練";
+        } else if (rate >= 80 && avgVal <= 30) {
+          rating = "熟練";
           ratingClass = "fluent";
           fluents++;
         } else {
           needWorks++;
         }
       } else {
-        if (rate >= 80) {
-          rating = "心算熟練 (題數少)";
-          ratingClass = "fluent";
-          fluents++;
-        } else {
-          rating = "待觀察";
-          ratingClass = "need-work";
-          needWorks++;
-        }
+        rating = "-";
+        ratingClass = "need-work";
+        needWorks++;
       }
 
       const tr = document.createElement('tr');
       tr.id = 'row-' + idx;
       tr.innerHTML = \`
         <td><b>\${name}</b></td>
-        <td>\${s.factorTotal}</td>
+        <td>\${targetCount} 題</td>
         <td>\${rate}%</td>
         <td>\${avg} 秒</td>
         <td>\${s.gcfRounds} 局 (\${s.gcfRounds > 0 ? Math.round(s.gcfWins/s.gcfRounds*100) + '%' : '-'})</td>

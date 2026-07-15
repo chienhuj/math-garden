@@ -3249,26 +3249,6 @@
       roomRefGcf.child('players').on('value', (snap) => {
         const players = snap.val() || {};
 
-        // Stale GCF Room state cleanup: Run once on join
-        if (!hasCleanedStaleGcfRoom) {
-          hasCleanedStaleGcfRoom = true;
-          roomRefGcf.once('value', (snapRoom) => {
-            const roomData = snapRoom.val() || {};
-            const rStatus = roomData.status || 'waiting';
-            const rPlayers = roomData.players || {};
-            const rPlayerIds = Object.keys(rPlayers).sort();
-            const hostId = rPlayerIds[0];
-            
-            const shouldReset = (rStatus === 'result') || (rPlayerIds.length === 1 && rPlayerIds[0] === myPlayerId && rStatus !== 'waiting');
-            if (shouldReset && hostId === myPlayerId) {
-              roomRefGcf.update({
-                status: 'waiting',
-                gameState: null
-              });
-            }
-          });
-        }
-
         const gList = document.getElementById('guardian-players-list-gcf');
         const mList = document.getElementById('marauder-players-list-gcf');
         if (!gList || !mList) return;
@@ -3284,6 +3264,24 @@
 
         // Host is the lexicographically first playerId
         isHostGcf = (playerIds[0] === myPlayerId);
+
+        // Host active self-healing cleanup to clear stale status/gameState
+        if (isHostGcf) {
+          roomRefGcf.child('status').once('value', (snapStatus) => {
+            const rStatus = snapStatus.val() || 'waiting';
+            const waitScreen = document.getElementById('screen-room-waiting-gcf');
+            const waitingScreenActive = waitScreen && (waitScreen.style.display === 'flex' || waitScreen.style.display === 'block');
+            const shouldReset = (rStatus === 'result' && waitingScreenActive) ||
+                                (rStatus === 'playing' && waitingScreenActive) ||
+                                (playerIds.length === 1 && rStatus !== 'waiting');
+            if (shouldReset) {
+              roomRefGcf.update({
+                status: 'waiting',
+                gameState: null
+              });
+            }
+          });
+        }
 
         Object.entries(players).forEach(([pid, p]) => {
           const item = document.createElement('div');
@@ -3331,6 +3329,16 @@
       roomRefGcf.child('status').on('value', (snap) => {
         const status = snap.val();
         if (status === 'playing') {
+          // Guard: ignore stale playing status when waiting room screen is active but countdown is not
+          const waitScreen = document.getElementById('screen-room-waiting-gcf');
+          const waitingScreenActive = waitScreen && (waitScreen.style.display === 'flex' || waitScreen.style.display === 'block');
+          const countdownEl = document.getElementById('countdown-overlay-gcf');
+          const countdownActive = countdownEl && (countdownEl.style.display === 'flex');
+          
+          if (waitingScreenActive && !countdownActive) {
+            console.log("Ignoring stale playing status");
+            return;
+          }
           enterGcfMultiplayArena();
         } else if (status === 'countdown') {
           triggerGcfRoomCountdown();

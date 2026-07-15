@@ -3019,6 +3019,7 @@
     let usedFactors = [];
     let gcfUsedFactorsMap = {};
     let gcfCountdownTimer = null;
+    let hasCleanedStaleGcfRoom = false;
 
     function openRoomJoinGcfModal() {
       const name = localStorage.getItem('student_name') || '';
@@ -3110,6 +3111,7 @@
       myPlayerId = 'p_' + Math.random().toString(36).substr(2, 9);
       isReadyGcf = false;
       gameMode = 'online';
+      hasCleanedStaleGcfRoom = false;
       
       const teacherId = localStorage.getItem('current_teacher_id') || '';
       const classId = localStorage.getItem('current_class_id') || '';
@@ -3148,6 +3150,27 @@
       // Synchronize members list
       roomRefGcf.child('players').on('value', (snap) => {
         const players = snap.val() || {};
+
+        // Stale GCF Room state cleanup: Run once on join
+        if (!hasCleanedStaleGcfRoom) {
+          hasCleanedStaleGcfRoom = true;
+          roomRefGcf.once('value', (snapRoom) => {
+            const roomData = snapRoom.val() || {};
+            const rStatus = roomData.status || 'waiting';
+            const rPlayers = roomData.players || {};
+            const rPlayerIds = Object.keys(rPlayers).sort();
+            const hostId = rPlayerIds[0];
+            
+            const shouldReset = (rStatus === 'result') || (rPlayerIds.length === 1 && rPlayerIds[0] === myPlayerId && rStatus !== 'waiting');
+            if (shouldReset && hostId === myPlayerId) {
+              roomRefGcf.update({
+                status: 'waiting',
+                gameState: null
+              });
+            }
+          });
+        }
+
         const gList = document.getElementById('guardian-players-list-gcf');
         const mList = document.getElementById('marauder-players-list-gcf');
         if (!gList || !mList) return;
@@ -3214,6 +3237,11 @@
         } else if (status === 'countdown') {
           triggerGcfRoomCountdown();
         } else if (status === 'result') {
+          // If player is in wait room screen, do NOT show result modal (waiting for host reset)
+          const waitScreen = document.getElementById('screen-room-waiting-gcf');
+          if (waitScreen && (waitScreen.style.display === 'flex' || waitScreen.style.display === 'block')) {
+            return;
+          }
           enterGcfMultiplayResult();
         }
       });
@@ -3427,6 +3455,17 @@
         energyVal = state.plantEnergy;
         roundSequence = state.roundSequence;
 
+        // Reconstruct scores from Firebase state
+        if (state.scores) {
+          scores.guardian = state.scores.guardian || 0;
+          scores.marauder = state.scores.marauder || 0;
+        } else {
+          scores.guardian = 0;
+          scores.marauder = 0;
+        }
+        document.getElementById('score-g').textContent = scores.guardian;
+        document.getElementById('score-m').textContent = scores.marauder;
+
         // Reconstruct usedFactors array and map from Firebase state
         const fbUsed = state.usedFactors || {};
         usedFactors = Object.keys(fbUsed).map(k => parseInt(k));
@@ -3524,37 +3563,40 @@
 
       // Write round history
       roomRefGcf.child(`gameState/roundHistory/${currentRound}`).set(rh).then(() => {
-        const nextRound = currentRound + 1;
-        if (nextRound > maxRounds) {
-          // Final End! Calculate final score
-          roomRefGcf.child(`gameState/roundHistory`).once('value', (snapRH) => {
-            const history = snapRH.val() || {};
-            let gWins = 0;
-            let mWins = 0;
-            Object.values(history).forEach(h => {
-              if (h.winner === 'guardian') gWins++;
-              else if (h.winner === 'marauder') mWins++;
-            });
-            scores.guardian = gWins;
-            scores.marauder = mWins;
+        // Calculate scores from history
+        roomRefGcf.child('gameState/roundHistory').once('value', (snapRH) => {
+          const history = snapRH.val() || {};
+          let gWins = 0;
+          let mWins = 0;
+          Object.values(history).forEach(h => {
+            if (h.winner === 'guardian') gWins++;
+            else if (h.winner === 'marauder') mWins++;
+          });
+          
+          scores.guardian = gWins;
+          scores.marauder = mWins;
 
+          const nextRound = currentRound + 1;
+          if (nextRound > maxRounds) {
+            // Final End!
             roomRefGcf.child('gameState').update({
               scores: { guardian: gWins, marauder: mWins }
             }).then(() => {
               roomRefGcf.child('status').set('result');
             });
-          });
-        } else {
-          // Load next round
-          const nextConfig = roundSequence[nextRound - 1];
-          roomRefGcf.child('gameState').update({
-            num1: nextConfig.n1,
-            num2: nextConfig.n2,
-            currentRound: nextRound,
-            plantEnergy: 50,
-            usedFactors: {}
-          });
-        }
+          } else {
+            // Load next round
+            const nextConfig = roundSequence[nextRound - 1];
+            roomRefGcf.child('gameState').update({
+              num1: nextConfig.n1,
+              num2: nextConfig.n2,
+              currentRound: nextRound,
+              plantEnergy: 50,
+              usedFactors: {},
+              scores: { guardian: gWins, marauder: mWins }
+            });
+          }
+        });
       });
     }
 

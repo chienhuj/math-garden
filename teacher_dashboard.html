@@ -615,15 +615,46 @@
         const avgTime = s.factorTimes.length > 0 ? (s.factorTimes.reduce((a, b) => a + b, 0) / s.factorTimes.length).toFixed(1) : '-';
         const winRate = s.gcfRounds > 0 ? Math.round((s.gcfWins / s.gcfRounds) * 100) : 0;
         
-        // Mastery Evaluation
+        // Accumulate difficulty counts
+        let easyCount = 0;
+        let mediumCount = 0;
+        let hardCount = 0;
+        s.factorEvents.forEach(e => {
+          if (e.isCorrect) {
+            const val = parseInt(e.inputNumber);
+            const target = parseInt(e.targetNumber);
+            if (val === 1 || val === target) {
+              easyCount++;
+            } else if (val === 2 || val === 5) {
+              mediumCount++;
+            } else {
+              hardCount++;
+            }
+          }
+        });
+
+        // Mastery Evaluation incorporating factor difficulty
         let rating = "發展中";
         let ratingClass = "need-work";
         if (targetCount > 0) {
           const avgTimeVal = avgTime !== '-' ? parseFloat(avgTime) : 999;
-          if (correctRate >= 90 && avgTimeVal <= 15) {
+          const totalCorrect = easyCount + mediumCount + hardCount;
+          let avgDiff = 1.0;
+          if (totalCorrect > 0) {
+            avgDiff = (easyCount * 1.0 + mediumCount * 2.0 + hardCount * 3.0) / totalCorrect;
+          }
+
+          // Scale allowed average response time threshold based on difficulty
+          const masterTimeThreshold = 15 * avgDiff;
+          const fluentTimeThreshold = 30 * avgDiff;
+
+          const hasMediumOrHard = (mediumCount + hardCount) > 0;
+          const hasHard = hardCount > 0;
+
+          if (correctRate >= 90 && avgTimeVal <= masterTimeThreshold && hasHard) {
             rating = "精熟";
             ratingClass = "master";
-          } else if (correctRate >= 80 && avgTimeVal <= 30) {
+          } else if (correctRate >= 80 && avgTimeVal <= fluentTimeThreshold && hasMediumOrHard) {
             rating = "熟練";
             ratingClass = "fluent";
           }
@@ -635,7 +666,12 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><b>${name}</b></td>
-          <td>${targetCount} 題</td>
+          <td>
+            ${targetCount} 題<br>
+            <span style="font-size: 0.72rem; color: #5C6A62; font-weight: normal;">
+              🟢易:${easyCount} | 🟡中:${mediumCount} | 🔴難:${hardCount}
+            </span>
+          </td>
           <td>${correctRate}%</td>
           <td>${avgTime} 秒</td>
           <td>${s.gcfRounds > 0 ? winRate + '%' : '-'} (${s.gcfRounds} 局)</td>
@@ -868,15 +904,47 @@
 
       const avg = s.factorTimes.length > 0 ? (s.factorTimes.reduce((a,b)=>a+b, 0) / s.factorTimes.length).toFixed(1) : '-';
       
+      // Accumulate difficulty counts
+      let easyCount = 0;
+      let mediumCount = 0;
+      let hardCount = 0;
+      s.factorEvents.forEach(e => {
+        if (e.isCorrect) {
+          const val = parseInt(e.inputNumber);
+          const target = parseInt(e.targetNumber);
+          if (val === 1 || val === target) {
+            easyCount++;
+          } else if (val === 2 || val === 5) {
+            mediumCount++;
+          } else {
+            hardCount++;
+          }
+        }
+      });
+
+      // Mastery Evaluation incorporating factor difficulty
       let rating = "發展中";
       let ratingClass = "need-work";
       if (targetCount > 0) {
         const avgVal = avg !== '-' ? parseFloat(avg) : 999;
-        if (rate >= 90 && avgVal <= 15) {
+        const totalCorrect = easyCount + mediumCount + hardCount;
+        let avgDiff = 1.0;
+        if (totalCorrect > 0) {
+          avgDiff = (easyCount * 1.0 + mediumCount * 2.0 + hardCount * 3.0) / totalCorrect;
+        }
+
+        // Scale allowed average response time threshold based on difficulty
+        const masterTimeThreshold = 15 * avgDiff;
+        const fluentTimeThreshold = 30 * avgDiff;
+
+        const hasMediumOrHard = (mediumCount + hardCount) > 0;
+        const hasHard = hardCount > 0;
+
+        if (rate >= 90 && avgVal <= masterTimeThreshold && hasHard) {
           rating = "精熟";
           ratingClass = "master";
           masters++;
-        } else if (rate >= 80 && avgVal <= 30) {
+        } else if (rate >= 80 && avgVal <= fluentTimeThreshold && hasMediumOrHard) {
           rating = "熟練";
           ratingClass = "fluent";
           fluents++;
@@ -893,7 +961,12 @@
       tr.id = 'row-' + idx;
       tr.innerHTML = \`
         <td><b>\${name}</b></td>
-        <td>\${targetCount} 題</td>
+        <td>
+          \${targetCount} 題<br>
+          <span style="font-size: 0.72rem; color: #5C6A62; font-weight: normal;">
+            🟢易:\${easyCount} | 🟡中:\${mediumCount} | 🔴難:\${hardCount}
+          </span>
+        </td>
         <td>\${rate}%</td>
         <td>\${avg} 秒</td>
         <td>\${s.gcfRounds} 局 (\${s.gcfRounds > 0 ? Math.round(s.gcfWins/s.gcfRounds*100) + '%' : '-'})</td>

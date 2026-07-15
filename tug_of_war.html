@@ -2121,15 +2121,24 @@
       const factorsGrid = document.getElementById('factors-grid');
       if (!factorsGrid) return;
       factorsGrid.innerHTML = '';
+      
+      const n1 = parseInt(num1) || 0;
+      const n2 = parseInt(num2) || 0;
+      if (n1 === 0 || n2 === 0) return;
+      
+      commonFactors = getCommonFactors(n1, n2);
+      gcfValue = commonFactors[commonFactors.length - 1];
+
       commonFactors.forEach(factor => {
         const badge = document.createElement('span');
-        
-        // In online mode, check usedFactors. In local mode, check lockedFactors
-        const isUnlocked = (gameMode === 'online') ? usedFactors.includes(factor) : !!lockedFactors[factor];
-        
-        badge.className = `factor-badge${factor === gcfValue ? ' is-gcf' : ''}${isUnlocked ? ' unlocked' : ''}`;
         badge.id = `badge-${factor}`;
         badge.setAttribute('data-val', factor);
+        
+        // Check who claimed the factor in online mode or local mode
+        const claimSide = (gameMode === 'online') ? gcfUsedFactorsMap[factor] : lockedFactors[factor];
+        const isUnlocked = !!claimSide;
+        
+        badge.className = `factor-badge${factor === gcfValue ? ' is-gcf' : ''}${isUnlocked ? ' locked-' + claimSide : ''}`;
         
         if (isUnlocked) {
           badge.textContent = factor;
@@ -3008,6 +3017,7 @@
     let isHostGcf = false;
     let roomRefGcf = null;
     let usedFactors = [];
+    let gcfUsedFactorsMap = {};
 
     function openRoomJoinGcfModal() {
       const name = localStorage.getItem('student_name') || '';
@@ -3347,9 +3357,15 @@
         energyVal = state.plantEnergy;
         roundSequence = state.roundSequence;
 
-        // Reconstruct usedFactors array from Firebase state
+        // Reconstruct usedFactors array and map from Firebase state
         const fbUsed = state.usedFactors || {};
         usedFactors = Object.keys(fbUsed).map(k => parseInt(k));
+        gcfUsedFactorsMap = {};
+        Object.entries(fbUsed).forEach(([k, val]) => {
+          if (val && val.side) {
+            gcfUsedFactorsMap[k] = val.side;
+          }
+        });
 
         // Local load round UI updates
         commonFactors = getCommonFactors(num1, num2);
@@ -3372,11 +3388,13 @@
 
         if (!usedFactors.includes(factor)) {
           usedFactors.push(factor);
+          gcfUsedFactorsMap[factor] = logData.side;
 
           // Render unlock UI
-          const badge = document.querySelector(`.factor-badge[data-val="${factor}"]`);
+          const badge = document.getElementById(`badge-${factor}`);
           if (badge) {
-            badge.classList.add('unlocked');
+            badge.className = `factor-badge${factor === gcfValue ? ' is-gcf' : ''} locked-${logData.side}`;
+            badge.textContent = factor;
             badge.style.opacity = '0.4';
           }
 

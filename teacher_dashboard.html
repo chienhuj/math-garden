@@ -621,7 +621,7 @@
             if (r.winner === p.side) {
               studentMap[name].gcfWins++;
             }
-            if (r.gcfClaimer && r.gcfClaimer === name) {
+            if (r.gcfClaimer && r.gcfClaimer.trim().toLowerCase() === name.trim().toLowerCase()) {
               studentMap[name].gcfClaimedCount++;
             }
           });
@@ -976,7 +976,7 @@
           if (r.winner === p.side) {
             studentMap[name].gcfWins++;
           }
-          if (r.gcfClaimer && r.gcfClaimer === name) {
+          if (r.gcfClaimer && r.gcfClaimer.trim().toLowerCase() === name.trim().toLowerCase()) {
             studentMap[name].gcfClaimedCount++;
           }
         });

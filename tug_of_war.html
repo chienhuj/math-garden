@@ -2950,22 +2950,18 @@
       if (savedTeacher && savedClass) {
         if (mode === 'ai') {
           let name = localStorage.getItem('student_name');
-          let namePrompted = false;
           if (!name) {
             name = prompt("請輸入您的姓名或座號，以便將您的學習歷程記錄給老師：");
             if (name && name.trim()) {
               name = name.trim();
               localStorage.setItem('student_name', name);
-              namePrompted = true;
             } else {
               name = "匿名學生";
             }
-          } else {
-            namePrompted = true;
           }
           currentStudentName = name;
           // Mark as anonymous local play if they cancelled or entered default anonymous tag
-          isAnonymousLocalPlay = !namePrompted || name === "匿名學生";
+          isAnonymousLocalPlay = name === "匿名學生";
         } else {
           let name1 = prompt("請輸入【守護者 (左邊)】學生的姓名或座號：");
           let name2 = prompt("請輸入【汲取者 (右邊)】學生的姓名或座號：");

@@ -2972,9 +2972,9 @@
               currentRoomRef.update(updates);
             }
           }
-          logGameplayEvent(false, val);
         } else {
           AudioSynth.playError();
+          logGameplayEvent(false, val);
           setFeedback(`不正確！${currentTarget} 不能被 ${val} 整除。`, "error");
           shakeDome();
           shakeInput();

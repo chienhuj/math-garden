@@ -1308,13 +1308,13 @@
       </div>
       
       <div class="nav-controls">
-        <a href="index.html" class="btn-nav">
+        <button class="btn-nav" onclick="handleBackPortal()">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
           </svg>
           <span>返回入口</span>
-        </a>
+        </button>
         <button class="btn-nav" id="btn-restart-lobby" style="display: none;" onclick="showLobby()">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
@@ -3201,7 +3201,12 @@
     }
 
     function joinGcfRoom(roomId, name, side) {
-      myPlayerId = 'p_' + Math.random().toString(36).substr(2, 9);
+      // Retrieve or generate persistent playerId for this browser session to avoid duplicate entries on reconnect
+      myPlayerId = sessionStorage.getItem('gcf_player_id');
+      if (!myPlayerId) {
+        myPlayerId = 'p_' + Math.random().toString(36).substr(2, 9);
+        sessionStorage.setItem('gcf_player_id', myPlayerId);
+      }
       isReadyGcf = false;
       gameMode = 'online';
       hasCleanedStaleGcfRoom = false;
@@ -3369,6 +3374,17 @@
       showLobby();
     }
 
+    function handleBackPortal() {
+      leaveGcfRoom();
+      window.location.href = 'index.html';
+    }
+
+    window.addEventListener('beforeunload', () => {
+      if (roomRefGcf && myPlayerId) {
+        roomRefGcf.child(`players/${myPlayerId}`).remove();
+      }
+    });
+
     function startGcfCountdown() {
       if (!roomRefGcf) return;
       // Host generates the rounds
@@ -3458,6 +3474,15 @@
       document.getElementById('screen-room-waiting-gcf').style.display = 'none';
       document.getElementById('screen-arena').style.display = 'grid';
       document.getElementById('btn-restart-lobby').style.display = 'none'; // Lock exit during battle to avoid breaking multiplayer
+
+      // Reset panel titles, descriptions and visibility for online play
+      document.querySelector('#panel-guardian .team-name').textContent = '守護方';
+      document.querySelector('#panel-guardian .team-desc').textContent = '注入能量至 100%';
+      document.querySelector('#panel-marauder .team-name').textContent = '汲取方';
+      document.querySelector('#panel-marauder .team-desc').textContent = '汲取能量至 0%';
+      
+      document.getElementById('marauder-controls').style.display = 'flex';
+      document.getElementById('guardian-controls').style.display = 'flex';
 
       // Setup team overlays based on the player side
       const gOverlay = document.getElementById('guardian-enemy-overlay');

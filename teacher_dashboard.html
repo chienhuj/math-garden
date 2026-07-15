@@ -1136,11 +1136,17 @@
     const targetErrors = {};
     factorEvents.forEach(e => {
       if (!e.isCorrect) {
-        if (!targetErrors[e.targetNumber]) {
-          targetErrors[e.targetNumber] = { count: 0, wrongAttempts: new Set() };
+        const target = parseInt(e.targetNumber);
+        const input = parseInt(e.inputNumber);
+        // Safeguard: only count as mistake if input is not a correct factor of target
+        if (isNaN(target) || isNaN(input) || target % input === 0) {
+          return;
         }
-        targetErrors[e.targetNumber].count++;
-        targetErrors[e.targetNumber].wrongAttempts.add(e.inputNumber);
+        if (!targetErrors[target]) {
+          targetErrors[target] = { count: 0, wrongAttempts: new Set() };
+        }
+        targetErrors[target].count++;
+        targetErrors[target].wrongAttempts.add(input);
       }
     });
 

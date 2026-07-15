@@ -1356,7 +1356,7 @@
     <div class="modal-overlay" id="overlay-room-join-gcf" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; opacity: 1;">
       <div class="modal-content" style="background: white; border-radius: 20px; padding: 25px; max-width: 440px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; box-sizing: border-box; transform: scale(1);">
         <div style="font-size: 2.2rem; margin-bottom: 12px;">🚪</div>
-        <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 15px; color: var(--text-color);">進入公因數連線遊戲室</h3>
+        <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 15px; color: var(--text-color);">進入生命能量(公因數)對戰連線遊戲室</h3>
         
         <div style="display: flex; flex-direction: column; gap: 15px; text-align: left; margin-bottom: 20px;">
           <div>
@@ -2192,11 +2192,11 @@
           return;
         }
 
-        const teacherId = localStorage.getItem('current_teacher_id');
-        const classId = localStorage.getItem('current_class_id');
+        const teacherId = localStorage.getItem('current_teacher_id') || '';
+        const classId = localStorage.getItem('current_class_id') || '';
         const sanitizedT = teacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
         const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
-        const factorPath = `rooms_gcf/${sanitizedT}/${sanitizedC}/${myRoomId}/gameState/usedFactors/${val}`;
+        const factorPath = `rooms/gcf_${sanitizedT}_${sanitizedC}_${myRoomId}/gameState/usedFactors/${val}`;
         
         database.ref(factorPath).transaction((currentData) => {
           if (currentData === null) {
@@ -3047,12 +3047,16 @@
       currentStudentName = name;
 
       // Check slot limits
-      const teacherId = localStorage.getItem('current_teacher_id');
-      const classId = localStorage.getItem('current_class_id');
+      const teacherId = localStorage.getItem('current_teacher_id') || '';
+      const classId = localStorage.getItem('current_class_id') || '';
+      if (!teacherId || !classId) {
+        alert("⚠️ 請先在首頁設定「班級學習歷程」（教師代碼與班級）！");
+        return;
+      }
       const sanitizedT = teacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
       const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
       
-      const checkPath = `rooms_gcf/${sanitizedT}/${sanitizedC}/${myRoomId}/players`;
+      const checkPath = `rooms/gcf_${sanitizedT}_${sanitizedC}_${myRoomId}/players`;
       database.ref(checkPath).once('value', (snap) => {
         const players = snap.val() || {};
         let count = 0;
@@ -3068,6 +3072,9 @@
         // Proceed to join
         document.getElementById('overlay-room-join-gcf').style.display = 'none';
         joinGcfRoom(myRoomId, myPlayerName, side);
+      }, (err) => {
+        console.error("Firebase GCF connection failed:", err);
+        alert("⚠️ 連線資料庫失敗！請檢查首頁自訂資料庫的 API 設定是否正確。\n錯誤原因：" + err.message);
       });
     }
 
@@ -3076,12 +3083,12 @@
       isReadyGcf = false;
       gameMode = 'online';
       
-      const teacherId = localStorage.getItem('current_teacher_id');
-      const classId = localStorage.getItem('current_class_id');
+      const teacherId = localStorage.getItem('current_teacher_id') || '';
+      const classId = localStorage.getItem('current_class_id') || '';
       const sanitizedT = teacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
       const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
       
-      roomRefGcf = database.ref(`rooms_gcf/${sanitizedT}/${sanitizedC}/${roomId}`);
+      roomRefGcf = database.ref(`rooms/gcf_${sanitizedT}_${sanitizedC}_${roomId}`);
       
       // Reset waiting room buttons
       const readyBtn = document.getElementById('btn-ready-toggle-gcf');

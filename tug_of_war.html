@@ -3018,6 +3018,7 @@
     let roomRefGcf = null;
     let usedFactors = [];
     let gcfUsedFactorsMap = {};
+    let gcfCountdownTimer = null;
 
     function openRoomJoinGcfModal() {
       const name = localStorage.getItem('student_name') || '';
@@ -3210,6 +3211,8 @@
         const status = snap.val();
         if (status === 'playing') {
           enterGcfMultiplayArena();
+        } else if (status === 'countdown') {
+          triggerGcfRoomCountdown();
         } else if (status === 'result') {
           enterGcfMultiplayResult();
         }
@@ -3259,8 +3262,75 @@
         usedFactors: {},
         roundSequence: roundSequence
       }).then(() => {
-        roomRefGcf.child('status').set('playing');
+        roomRefGcf.child('status').set('countdown');
+        
+        setTimeout(() => {
+          if (roomRefGcf) {
+            roomRefGcf.child('status').set('playing');
+          }
+        }, 3200);
       });
+    }
+
+    function triggerGcfRoomCountdown() {
+      // Create or show a countdown overlay
+      let overlay = document.getElementById('countdown-overlay-gcf');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'countdown-overlay-gcf';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100vw';
+        overlay.style.height = '100vh';
+        overlay.style.background = 'rgba(0,0,0,0.85)';
+        overlay.style.color = '#FFF';
+        overlay.style.display = 'flex';
+        overlay.style.flexDirection = 'column';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.zIndex = '9999';
+        overlay.style.fontFamily = "'Outfit', sans-serif";
+        
+        const numDiv = document.createElement('div');
+        numDiv.id = 'countdown-number-gcf';
+        numDiv.style.fontSize = '8rem';
+        numDiv.style.fontWeight = '900';
+        numDiv.style.textShadow = '0 0 20px rgba(255,255,255,0.4)';
+        
+        const labelDiv = document.createElement('div');
+        labelDiv.innerText = "天空之戰即將爆發...";
+        labelDiv.style.fontSize = '1.5rem';
+        labelDiv.style.fontWeight = '700';
+        labelDiv.style.marginTop = '15px';
+        labelDiv.style.color = '#E1EBE7';
+
+        overlay.appendChild(numDiv);
+        overlay.appendChild(labelDiv);
+        document.body.appendChild(overlay);
+      }
+      overlay.style.display = 'flex';
+      
+      const numDiv = document.getElementById('countdown-number-gcf');
+      let c = 3;
+      numDiv.innerText = c;
+      playSound('correct');
+      
+      if (gcfCountdownTimer) clearInterval(gcfCountdownTimer);
+      
+      gcfCountdownTimer = setInterval(() => {
+        c--;
+        if (c > 0) {
+          numDiv.innerText = c;
+          playSound('correct');
+        } else if (c === 0) {
+          numDiv.innerText = "START!";
+          playSound('gcf');
+        } else {
+          clearInterval(gcfCountdownTimer);
+          overlay.style.display = 'none';
+        }
+      }, 1000);
     }
 
     function enterGcfMultiplayArena() {

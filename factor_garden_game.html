@@ -1986,6 +1986,13 @@
         return;
       }
 
+      const teacherId = localStorage.getItem('current_teacher_id') || '';
+      const classId = localStorage.getItem('current_class_id') || '';
+      if (!teacherId || !classId) {
+        alert("⚠️ 請先在首頁設定「班級學習歷程」（教師代碼與班級）！");
+        return;
+      }
+
       if (!database) {
         alert("資料庫尚未連接，請先點選右上角齒輪設定連線！");
         return;
@@ -2021,12 +2028,17 @@
       isReady = false;
       hasCleanedStaleRoom = false;
 
-      currentRoomRef = database.ref(`rooms/${roomId}`);
+      const teacherId = localStorage.getItem('current_teacher_id') || '';
+      const classId = localStorage.getItem('current_class_id') || '';
+      const sanitizedT = teacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
+      const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
+
+      currentRoomRef = database.ref(`logs/${sanitizedT}/${sanitizedC}/factor_game/rooms/${roomId}`);
       
       // Clean player name to be database path safe (remove Firebase forbidden chars: . $ # [ ] /)
       const safePlayerKey = playerName.replace(/[\.\$\#\[\]\/]/g, '_');
       myPlayerId = safePlayerKey;
-      currentPlayerRef = database.ref(`rooms/${roomId}/players/${myPlayerId}`);
+      currentPlayerRef = database.ref(`logs/${sanitizedT}/${sanitizedC}/factor_game/rooms/${roomId}/players/${myPlayerId}`);
       
       // Clear previous listeners if any
       stopFirebaseListeners();
@@ -2042,7 +2054,7 @@
       currentPlayerRef.onDisconnect().remove();
 
       // Listen to player presence changes in wait room
-      playersListener = database.ref(`rooms/${roomId}/players`).on('value', (snapshot) => {
+      playersListener = database.ref(`logs/${sanitizedT}/${sanitizedC}/factor_game/rooms/${roomId}/players`).on('value', (snapshot) => {
         const players = snapshot.val();
         updatePlayersListUI(players);
       });
@@ -2128,8 +2140,12 @@
 
     function stopFirebaseListeners() {
       if (database && myRoomId) {
-        database.ref(`rooms/${myRoomId}/players`).off('value', playersListener);
-        database.ref(`rooms/${myRoomId}`).off('value', roomListener);
+        const teacherId = localStorage.getItem('current_teacher_id') || '';
+        const classId = localStorage.getItem('current_class_id') || '';
+        const sanitizedT = teacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
+        const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
+        database.ref(`logs/${sanitizedT}/${sanitizedC}/factor_game/rooms/${myRoomId}/players`).off('value', playersListener);
+        database.ref(`logs/${sanitizedT}/${sanitizedC}/factor_game/rooms/${myRoomId}`).off('value', roomListener);
       }
     }
 

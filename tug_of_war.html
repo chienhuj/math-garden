@@ -2757,6 +2757,7 @@
         num1: num1,
         num2: num2,
         factors: [...commonFactors],
+        gcf: gcfValue,
         winner: winner,
         gcfClaimer: gcfClaimerName,
         scoreG: scores.guardian,
@@ -2922,7 +2923,7 @@
           }
           historyHtml += `<div style="margin-bottom: 6px; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 4px; line-height: 1.4;">` +
                          `<b>第 ${r.roundNum} 局</b>：天空對戰數字 <b>{${r.num1}, ${r.num2}}</b> (得分 ${r.scoreG} : ${r.scoreM})<br>` +
-                         `公因數為 <b>{ ${r.factors.join(', ')} }</b> (${winText})` +
+                         `公因數為 <b>{ ${r.factors.join(', ')} }</b>，最大公因數為 <b>${r.gcf}</b> (${winText})` +
                          `</div>`;
         });
       } else {

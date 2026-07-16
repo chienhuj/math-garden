@@ -76,31 +76,31 @@
     .game-container {
       width: 95%;
       max-width: 1100px;
-      min-height: 720px;
+      min-height: 580px;
       background: var(--glass-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1.5px solid var(--glass-border);
       border-radius: 24px;
       box-shadow: var(--shadow);
-      padding: 30px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       position: relative;
       overflow: hidden;
-      margin: 15px auto;
+      margin: 8px auto;
       box-sizing: border-box;
     }
 
     /* Global Header */
     header {
-      padding: 15px 0;
+      padding: 8px 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
       z-index: 10;
       border-bottom: 1px solid rgba(43, 61, 52, 0.1);
-      margin-bottom: 25px;
+      margin-bottom: 12px;
     }
 
     .title-group {
@@ -371,25 +371,55 @@
     .sky-numbers {
       display: flex;
       justify-content: center;
+      width: 100%;
+      margin: 4px 0;
+    }
+
+    .sky-numbers-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      padding-left: 20px;
+    }
+
+    .sky-factor-row {
+      display: flex;
       align-items: center;
-      gap: 15px;
-      margin: 2px 0;
-    }
-
-    .sky-number-card {
-      background: #fff;
+      background: rgba(255, 255, 255, 0.75);
       padding: 6px 18px;
-      border-radius: 10px;
-      font-size: 1.8rem;
-      font-weight: 800;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
-      border: 1px solid rgba(0,0,0,0.02);
+      border-radius: 12px;
+      border: 1px solid rgba(43, 61, 52, 0.05);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+      font-size: 1.2rem;
+      font-weight: 700;
+      min-width: 340px;
     }
 
-    .sky-number-separator {
-      font-size: 1.4rem;
+    .sky-num-badge {
+      background: #5C9E7A;
+      color: white;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 1.25rem;
       font-weight: 800;
-      color: var(--text-muted);
+      margin-right: 10px;
+    }
+    
+    #sky-row2 .sky-num-badge {
+      background: #7B1FA2;
+    }
+
+    .sky-label {
+      color: var(--text-secondary);
+      margin-right: 6px;
+      font-size: 1.15rem;
+    }
+
+    .sky-factors-list {
+      color: var(--text-primary);
+      letter-spacing: 1.5px;
+      font-size: 1.25rem;
     }
 
     .sky-instruction {
@@ -498,6 +528,7 @@
       flex-direction: column;
       gap: 8px;
       z-index: 2;
+      flex-shrink: 0;
     }
 
     .control-box label {
@@ -509,10 +540,14 @@
     .input-row {
       display: flex;
       gap: 6px;
+      flex-shrink: 0;
     }
 
     .input-factor {
       flex: 1;
+      flex-shrink: 0;
+      height: 40px;
+      box-sizing: border-box;
       padding: 8px;
       border-radius: 8px;
       border: 1.5px solid rgba(0,0,0,0.1);
@@ -844,6 +879,68 @@
       gap: 10px;
     }
 
+    /* On-Screen Keypad */
+    .keypad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    .keypad-btn {
+      height: 34px;
+      border-radius: 8px;
+      background: #F5F7F6;
+      border: 1px solid rgba(43, 61, 52, 0.05);
+      color: var(--text-primary);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .keypad-btn:hover {
+      background: #E1EBE7;
+      transform: scale(1.02);
+    }
+    .keypad-btn:active {
+      transform: scale(0.98);
+    }
+    .keypad-btn.action-btn {
+      background: #E2E8E5;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    .keypad-btn.enter-btn {
+      grid-column: span 3;
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 700;
+      height: 34px;
+    }
+    
+    .keypad-btn.enter-btn.btn-g-submit {
+      background: var(--color-guardian);
+      box-shadow: 0 4px 10px var(--color-guardian-glow);
+    }
+    .keypad-btn.enter-btn.btn-g-submit:hover {
+      background: #4C8E6A;
+    }
+    
+    .keypad-btn.enter-btn.btn-m-submit {
+      background: var(--color-marauder);
+      box-shadow: 0 4px 10px rgba(123,31,162,0.2);
+    }
+    .keypad-btn.enter-btn.btn-m-submit:hover {
+      background: #6A1B9A;
+    }
+
     .factor-badge {
       width: 40px;
       height: 40px;
@@ -899,66 +996,83 @@
     }
 
     /* Score HUD & Round logs */
-    .arena-footer {
-      width: 100%;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-top: 5px;
-    }
-
-    .round-log-panel {
-      background: var(--glass-bg);
-      backdrop-filter: blur(10px);
-      border: 1.5px solid var(--glass-border);
-      border-radius: 14px;
-      padding: 8px 15px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 2px;
-      font-size: 0.78rem;
-      max-height: 60px;
-      overflow-y: auto;
-    }
-
-    .log-item {
+    /* Sky Scoreboard (Top Right) */
+    .sky-dome-main {
       display: flex;
       justify-content: space-between;
-      font-weight: 600;
-      border-bottom: 1px dashed rgba(0,0,0,0.03);
-      padding: 1px 0;
+      align-items: center;
+      width: 100%;
+      margin: 6px 0;
+      gap: 15px;
     }
 
-    .log-item.guardians { color: var(--color-guardian); }
-    .log-item.marauders { color: var(--color-marauder); }
+    .sky-numbers {
+      display: flex;
+      justify-content: flex-start;
+      flex: 1;
+    }
 
-    .score-board {
-      background: var(--glass-bg);
-      backdrop-filter: blur(10px);
-      border: 1.5px solid var(--glass-border);
+    .sky-score-board {
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(43, 61, 52, 0.08);
       border-radius: 14px;
-      padding: 8px 15px;
-      box-shadow: var(--shadow);
+      padding: 6px 14px;
       display: flex;
-      justify-content: space-around;
+      flex-direction: column;
       align-items: center;
+      gap: 4px;
+      min-width: 250px;
+      box-shadow: inset 0 1px 3px rgba(255,255,255,0.8), 0 2px 8px rgba(0,0,0,0.03);
     }
 
-    .score-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .score-val {
-      font-size: 1.5rem;
+    .sky-score-title {
+      font-size: 0.75rem;
       font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
     }
 
-    .guardian-score { color: var(--color-guardian); }
-    .marauder-score { color: var(--color-marauder); }
+    .sky-score-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sky-score-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .sky-score-icon {
+      font-size: 1.1rem;
+    }
+
+    .sky-score-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .sky-score-val {
+      font-size: 1.4rem;
+      font-weight: 900;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .sky-score-item.guardian .sky-score-val {
+      color: var(--color-guardian);
+    }
+
+    .sky-score-item.marauder .sky-score-val {
+      color: var(--color-marauder);
+    }
+
+    .sky-score-vs {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
 
     /* Modal / Result overlay popup */
     .modal-overlay {
@@ -1202,6 +1316,7 @@
       .input-factor {
         font-size: 0.95rem !important;
         padding: 6px !important;
+        height: 34px !important;
       }
       .btn-pull {
         font-size: 0.8rem !important;
@@ -1352,13 +1467,6 @@
           <h3>挑戰AI</h3>
           <span class="mode-tag">人機對戰</span>
         </div>
-
-        <!-- Mode 3: Online Multiplayer -->
-        <div class="mode-card online-theme" onclick="startGame('online')" style="border-color: rgba(55,138,212,0.3); background: linear-gradient(135deg, white 0%, #E3F2FD 100%);">
-          <div class="mode-icon">🌐</div>
-          <h3>合作共生</h3>
-          <span class="mode-tag">多人遊戲室對戰</span>
-        </div>
       </div>
 
       <!-- Custom Match (Teacher settings) -->
@@ -1393,86 +1501,45 @@
       </div>
     </section>
 
-    <!-- Room Join Modal (GCF Multiplayer) -->
-    <div class="modal-overlay" id="overlay-room-join-gcf" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; opacity: 1;">
-      <div class="modal-content" style="background: white; border-radius: 20px; padding: 25px; max-width: 440px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; box-sizing: border-box; transform: scale(1);">
-        <div style="font-size: 2.2rem; margin-bottom: 12px;">🚪</div>
-        <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 15px; color: var(--text-color);">進入連線遊戲室</h3>
-        
-        <div style="display: flex; flex-direction: column; gap: 15px; text-align: left; margin-bottom: 20px;">
-          <div>
-            <label style="font-weight: 700; font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">您的姓名或座號</label>
-            <input type="text" id="join-player-name-gcf" class="input-number" style="width:100%; box-sizing:border-box; height:38px; font-size:0.9rem; padding: 0 10px; margin:0;" placeholder="例如：林大明 / 15號">
-          </div>
-          <div>
-            <label style="font-weight: 700; font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">遊戲室房號 (4位數或代碼)</label>
-            <input type="text" id="join-room-id-gcf" class="input-number" style="width:100%; box-sizing:border-box; height:38px; font-size:0.9rem; padding: 0 10px; margin:0;" placeholder="例如：1234">
-          </div>
-          <div>
-            <label style="font-weight: 700; font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 8px;">選擇陣營</label>
-            <div style="display: flex; gap: 15px; width: 100%;">
-              <button type="button" id="btn-select-guardian" onclick="selectGcfCamp('guardian')" class="btn-pull" style="flex: 1; background-color: var(--color-guardian); font-size: 0.9rem; height: 38px; opacity: 0.5; transition: opacity 0.2s; padding:0; margin:0; justify-content:center;">🔵 守護方</button>
-              <button type="button" id="btn-select-marauder" onclick="selectGcfCamp('marauder')" class="btn-pull" style="flex: 1; background-color: var(--color-marauder); font-size: 0.9rem; height: 38px; opacity: 0.5; transition: opacity 0.2s; padding:0; margin:0; justify-content:center;">🔴 汲取方</button>
-            </div>
-            <input type="hidden" id="join-player-side-gcf" value="">
-          </div>
-        </div>
-
-        <div style="display: flex; gap: 12px; margin-top: 20px;">
-          <button class="btn-pull" onclick="closeRoomJoinGcfModal()" style="flex: 1; background: var(--text-muted); font-size: 0.9rem; height: 38px; margin:0; justify-content:center; padding:0;">取消</button>
-          <button class="btn-pull" onclick="confirmJoinGcfRoom()" style="flex: 1.5; background: #378AD4; font-size: 0.9rem; height: 38px; margin:0; justify-content:center; padding:0;">確認進入</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- SCREEN 0.5: GCF Multiplayer Waiting Room -->
-    <section id="screen-room-waiting-gcf" style="display: none; padding: 20px; flex-grow: 1; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; box-sizing: border-box;">
-      <div style="font-size: 3rem; margin-bottom: 10px;">🚪</div>
-      <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-color); margin: 0 0 10px 0;" id="waiting-room-title-gcf">連線遊戲室: --</h2>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 20px 0;">
-        等待所有組員點選準備。兩邊均有玩家且全員準備就緒後，戰役即將同步爆發！
-      </p>
-
-      <!-- Two column camp members list -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 600px; margin-bottom: 25px; box-sizing: border-box;">
-        <!-- Left: Guardian Side List -->
-        <div style="background: white; border: 1.5px solid rgba(46, 125, 50, 0.15); border-radius: 16px; padding: 15px; text-align: left; box-sizing: border-box;">
-          <h4 style="margin: 0 0 10px 0; color: var(--color-guardian); font-weight: 800; border-bottom: 1.5px solid rgba(46, 125, 50, 0.1); padding-bottom: 5px; display: flex; justify-content: space-between;">
-            <span>🔵 守護方陣營</span>
-            <span id="guardian-count-gcf" style="font-size: 0.8rem; opacity: 0.8;">0/2人</span>
-          </h4>
-          <div id="guardian-players-list-gcf" style="display: flex; flex-direction: column; gap: 8px; min-height: 80px;">
-            <!-- Guardian players -->
-          </div>
-        </div>
-
-        <!-- Right: Marauder Side List -->
-        <div style="background: white; border: 1.5px solid rgba(216, 67, 21, 0.15); border-radius: 16px; padding: 15px; text-align: left; box-sizing: border-box;">
-          <h4 style="margin: 0 0 10px 0; color: var(--color-marauder); font-weight: 800; border-bottom: 1.5px solid rgba(216, 67, 21, 0.1); padding-bottom: 5px; display: flex; justify-content: space-between;">
-            <span>🔴 汲取方陣營</span>
-            <span id="marauder-count-gcf" style="font-size: 0.8rem; opacity: 0.8;">0/2人</span>
-          </h4>
-          <div id="marauder-players-list-gcf" style="display: flex; flex-direction: column; gap: 8px; min-height: 80px;">
-            <!-- Marauder players -->
-          </div>
-        </div>
-      </div>
-
-      <div style="display: flex; gap: 15px; width: 100%; max-width: 600px; justify-content: center;">
-        <button class="btn-pull" onclick="leaveGcfRoom()" style="background: var(--text-muted); font-size: 0.9rem; height: 38px; width: 120px; margin:0; padding:0; justify-content:center;">離開房間</button>
-        <button class="btn-pull" id="btn-ready-toggle-gcf" onclick="toggleGcfReady()" style="background: #378AD4; font-size: 0.9rem; height: 38px; width: 180px; margin:0; padding:0; justify-content:center;">準備好了 (Ready)</button>
-      </div>
-    </section>
-
     <!-- SCREEN 1: Game Arena -->
     <section id="screen-arena">
       <!-- Sky Dome -->
       <div class="sky-dome">
         <div class="round-indicator" id="round-lbl">戰役第一輪</div>
-        <div class="sky-numbers">
-          <div class="sky-number-card" id="sky-n1">12</div>
-          <span class="sky-number-separator">&</span>
-          <div class="sky-number-card" id="sky-n2">18</div>
+        <div class="sky-dome-main">
+          <!-- Left side: Sky numbers and factors -->
+          <div class="sky-numbers">
+            <div class="sky-numbers-wrapper">
+              <div class="sky-factor-row" id="sky-row1">
+                <span class="sky-num-badge" id="sky-n1">12</span>
+                <span class="sky-label">的因數：</span>
+                <span class="sky-factors-list" id="sky-factors-1">1, 2, 3, 4, 6, 12</span>
+              </div>
+              <div class="sky-factor-row" id="sky-row2">
+                <span class="sky-num-badge" id="sky-n2">18</span>
+                <span class="sky-label">的因數：</span>
+                <span class="sky-factors-list" id="sky-factors-2">1, 2, 3, 6, 9, 18</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right side: Scoreboard (當局得分) -->
+          <div class="sky-score-board">
+            <div class="sky-score-title">當局對戰得分</div>
+            <div class="sky-score-row">
+              <div class="sky-score-item guardian">
+                <span class="sky-score-icon">🛡️</span>
+                <span class="sky-score-name">守護方</span>
+                <span class="sky-score-val" id="score-g">0</span>
+              </div>
+              <div class="sky-score-vs">VS</div>
+              <div class="sky-score-item marauder">
+                <span class="sky-score-val" id="score-m">0</span>
+                <span class="sky-score-name">汲取方</span>
+                <span class="sky-score-icon">🔮</span>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="sky-instruction">請找出天空雙數的所有公因數，輸入以注入或汲取生命植物的能量！</div>
       </div>
@@ -1494,9 +1561,28 @@
           <!-- Controls -->
           <div class="control-box">
             <label for="input-g">輸入公因數：</label>
-            <div class="input-row">
-              <input type="number" id="input-g" class="input-factor" placeholder="?" min="1" max="100">
-              <button class="btn-pull" onclick="submitFactor('guardian')">注入！</button>
+            <div class="input-row" style="margin-bottom: 8px;">
+              <input type="text" id="input-g" class="input-factor" placeholder="?" inputmode="numeric" pattern="[0-9]*" style="background: white; cursor: text;">
+            </div>
+            
+            <div class="keypad-grid">
+              <button class="keypad-btn" onclick="pressGcfKey('guardian', '7')">7</button>
+              <button class="keypad-btn" onclick="pressGcfKey('guardian', '8')">8</button>
+              <button class="keypad-btn" onclick="pressGcfKey('guardian', '9')">9</button>
+              
+              <button class="keypad-btn" onclick="pressGcfKey('guardian', '4')">4</button>
+              <button class="keypad-btn" onclick="pressGcfKey('guardian', '5')">5</button>
+              <button class="keypad-btn" onclick="pressGcfKey('guardian', '6')">6</button>
+              
+              <button class="keypad-btn" onclick="pressGcfKey('guardian', '1')">1</button>
+              <button class="keypad-btn" onclick="pressGcfKey('guardian', '2')">2</button>
+              <button class="keypad-btn" onclick="pressGcfKey('guardian', '3')">3</button>
+              
+              <button class="keypad-btn action-btn" onclick="pressGcfKey('guardian', '0')">0</button>
+              <button class="keypad-btn action-btn" onclick="pressGcfKey('guardian', 'back')">⌫</button>
+              <button class="keypad-btn action-btn" onclick="pressGcfKey('guardian', 'clear')">清除</button>
+              
+              <button class="keypad-btn enter-btn btn-g-submit" onclick="submitFactor('guardian')">注入！ (Enter)</button>
             </div>
           </div>
 
@@ -1591,9 +1677,28 @@
           <!-- Controls -->
           <div class="control-box" id="marauder-controls">
             <label for="input-m">輸入公因數：</label>
-            <div class="input-row">
-              <input type="number" id="input-m" class="input-factor" placeholder="?" min="1" max="100">
-              <button class="btn-pull" onclick="submitFactor('marauder')">汲取！</button>
+            <div class="input-row" style="margin-bottom: 8px;">
+              <input type="text" id="input-m" class="input-factor" placeholder="?" inputmode="numeric" pattern="[0-9]*" style="background: white; cursor: text;">
+            </div>
+            
+            <div class="keypad-grid">
+              <button class="keypad-btn" onclick="pressGcfKey('marauder', '7')">7</button>
+              <button class="keypad-btn" onclick="pressGcfKey('marauder', '8')">8</button>
+              <button class="keypad-btn" onclick="pressGcfKey('marauder', '9')">9</button>
+              
+              <button class="keypad-btn" onclick="pressGcfKey('marauder', '4')">4</button>
+              <button class="keypad-btn" onclick="pressGcfKey('marauder', '5')">5</button>
+              <button class="keypad-btn" onclick="pressGcfKey('marauder', '6')">6</button>
+              
+              <button class="keypad-btn" onclick="pressGcfKey('marauder', '1')">1</button>
+              <button class="keypad-btn" onclick="pressGcfKey('marauder', '2')">2</button>
+              <button class="keypad-btn" onclick="pressGcfKey('marauder', '3')">3</button>
+              
+              <button class="keypad-btn action-btn" onclick="pressGcfKey('marauder', '0')">0</button>
+              <button class="keypad-btn action-btn" onclick="pressGcfKey('marauder', 'back')">⌫</button>
+              <button class="keypad-btn action-btn" onclick="pressGcfKey('marauder', 'clear')">清除</button>
+              
+              <button class="keypad-btn enter-btn btn-m-submit" onclick="submitFactor('marauder')">汲取！ (Enter)</button>
             </div>
           </div>
 
@@ -1614,26 +1719,7 @@
 
       </div>
 
-      <!-- Score & Log HUD -->
-      <div class="arena-footer">
-        <!-- Log panel -->
-        <div class="round-log-panel" id="round-log">
-          <div style="color: var(--text-muted); text-align: center; font-weight: bold; width: 100%;">戰局即時快報</div>
-        </div>
-        
-        <!-- Scoreboard -->
-        <div class="score-board">
-          <div class="score-item">
-            <span style="font-size: 1.2rem;">🛡️ 守護方積分</span>
-            <span class="score-val guardian-score" id="score-g">0</span>
-          </div>
-          <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-muted);">VS</div>
-          <div class="score-item">
-            <span class="score-val marauder-score" id="score-m">0</span>
-            <span style="font-size: 1.2rem;">🔮 汲取方積分</span>
-          </div>
-        </div>
-      </div>
+
     </section>
 
   </main>
@@ -1958,17 +2044,26 @@
       }
     }
 
+    function isComposite(n) {
+      if (n <= 3) return false;
+      for (let i = 2; i * i <= n; i++) {
+        if (n % i === 0) return true;
+      }
+      return false;
+    }
+
     // Generate 3 random rounds (Easy, Medium, Hard) on the fly
     function generateDynamicRounds() {
       const sequence = [];
       
       // Helper to generate a round based on criteria
-      function getRound(minVal, maxVal, minFactorsCount, maxFactorsCount) {
-        for (let attempt = 0; attempt < 300; attempt++) {
-          const n1 = Math.floor(Math.random() * (maxVal - minVal + 1)) + minVal;
-          const n2 = Math.floor(Math.random() * (maxVal - minVal + 1)) + minVal;
+      function getRound(minFactorsCount, maxFactorsCount) {
+        for (let attempt = 0; attempt < 1000; attempt++) {
+          const n1 = Math.floor(Math.random() * (65 - 12 + 1)) + 12;
+          const n2 = Math.floor(Math.random() * (65 - 12 + 1)) + 12;
           
           if (n1 === n2) continue;
+          if (!isComposite(n1) || !isComposite(n2)) continue;
           
           const cf = getCommonFactors(n1, n2);
           
@@ -1978,39 +2073,29 @@
           }
         }
         
-        // Fallbacks in case random generation fails
-        if (minFactorsCount <= 4) {
-          return { n1: 12, n2: 18 }; 
-        } else if (minFactorsCount <= 6) {
-          return { n1: 24, n2: 36 }; 
+        // Fallbacks using composite numbers in range [12, 65]
+        if (minFactorsCount <= 3) {
+          return { n1: 12, n2: 18 }; // CF: 1, 2, 3, 6 (length 4)
+        } else if (minFactorsCount <= 4) {
+          return { n1: 24, n2: 36 }; // CF: 1, 2, 3, 4, 6, 12 (length 6)
         } else {
-          return { n1: 48, n2: 72 }; 
+          return { n1: 40, n2: 60 }; // CF: 1, 2, 4, 5, 10, 20 (length 6)
         }
       }
       
-      // Round 1: Easy (12 to 35, 2-4 factors)
-      sequence.push(getRound(12, 35, 2, 4));
+      // Round 1: Easy (2-3 common factors)
+      sequence.push(getRound(2, 3));
       
-      // Round 2: Medium (20 to 70, 4-6 factors)
-      sequence.push(getRound(20, 70, 4, 6));
+      // Round 2: Medium (3-4 common factors)
+      sequence.push(getRound(3, 4));
       
-      // Round 3: Hard (40 to 99, 6-10 factors)
-      sequence.push(getRound(40, 99, 6, 10));
+      // Round 3: Hard (4-6 common factors)
+      sequence.push(getRound(4, 6));
       
       return sequence;
     }
 
     function startGame(mode) {
-      if (mode === 'online') {
-        const teacherId = localStorage.getItem('current_teacher_id');
-        const classId = localStorage.getItem('current_class_id');
-        if (!teacherId || !classId) {
-          alert("⚠️ 請先在首頁設定「玩家班級」！");
-          return;
-        }
-        openRoomJoinGcfModal();
-        return;
-      }
 
       // Reset result modal button handlers to default for local round switching
       const btnModal = document.querySelector('.btn-modal');
@@ -2063,7 +2148,7 @@
       loadRound(roundSequence[0].n1, roundSequence[0].n2);
       
       document.getElementById('screen-lobby').style.display = 'none';
-      document.getElementById('screen-arena').style.display = 'grid';
+      document.getElementById('screen-arena').style.display = 'flex';
       document.getElementById('btn-restart-lobby').style.display = 'block';
       
       if (gameMode === 'ai') {
@@ -2077,8 +2162,20 @@
       const n1 = parseInt(document.getElementById('custom-num1').value);
       const n2 = parseInt(document.getElementById('custom-num2').value);
       
-      if (isNaN(n1) || isNaN(n2) || n1 < 2 || n1 > 100 || n2 < 2 || n2 > 100) {
-        alert("請輸入介於 2 至 100 之間的有效正整數！");
+      if (isNaN(n1) || isNaN(n2) || n1 < 12 || n1 > 65 || n2 < 12 || n2 > 65) {
+        alert("請輸入介於 12 至 65 之間的有效正整數！");
+        return;
+      }
+      if (!isComposite(n1) || !isComposite(n2)) {
+        alert("請輸入合數（有 1 與本身以外因數的數，例如 12、18）！");
+        return;
+      }
+      if (n1 === n2) {
+        alert("兩個對戰數字不能相同！");
+        return;
+      }
+      if (getCommonFactors(n1, n2).length <= 1) {
+        alert("這兩個數字沒有大於 1 的公因數，無法進行對戰！");
         return;
       }
 
@@ -2103,7 +2200,7 @@
       loadRound(n1, n2);
       
       document.getElementById('screen-lobby').style.display = 'none';
-      document.getElementById('screen-arena').style.display = 'grid';
+      document.getElementById('screen-arena').style.display = 'flex';
       document.getElementById('btn-restart-lobby').style.display = 'block';
       
       // Reset layout
@@ -2123,6 +2220,10 @@
       // Clear game board state
       energyVal = 50;
       lockedFactors = {};
+      scores.guardian = 0;
+      scores.marauder = 0;
+      document.getElementById('score-g').textContent = '0';
+      document.getElementById('score-m').textContent = '0';
       
       // Clear skills
       activeSkills.guardianShield = false;
@@ -2152,14 +2253,25 @@
       
       // Update sky dome display
       document.getElementById('round-lbl').textContent = maxRounds === 1 ? `自訂天空戰役` : `戰役第 ${currentRound} 輪 / 共 ${maxRounds} 輪`;
+      // Get factors of each number
+      const factors1 = [];
+      for (let i = 1; i <= num1; i++) {
+        if (num1 % i === 0) factors1.push(i);
+      }
+      const factors2 = [];
+      for (let i = 1; i <= num2; i++) {
+        if (num2 % i === 0) factors2.push(i);
+      }
+      
       document.getElementById('sky-n1').textContent = num1;
+      document.getElementById('sky-factors-1').textContent = factors1.join(', ');
       document.getElementById('sky-n2').textContent = num2;
+      document.getElementById('sky-factors-2').textContent = factors2.join(', ');
       
       // Populate factors list in UI
       renderFactorsGrid();
       
-      // Reset logs panel
-      document.getElementById('round-log').innerHTML = `<div style="color: var(--text-muted); text-align: center; font-weight: bold; width: 100%;">戰局即時快報 (天空對戰數字：${num1} & ${num2})</div>`;
+
       
       // Sync energy bar UI
       updateEnergyBarUI();
@@ -2190,8 +2302,7 @@
         badge.id = `badge-${factor}`;
         badge.setAttribute('data-val', factor);
         
-        // Check who claimed the factor in online mode or local mode
-        const claimSide = (gameMode === 'online') ? gcfUsedFactorsMap[factor] : lockedFactors[factor];
+        const claimSide = lockedFactors[factor];
         const isUnlocked = !!claimSide;
         
         badge.className = `factor-badge${factor === gcfValue ? ' is-gcf' : ''}${isUnlocked ? ' locked-' + claimSide : ''}`;
@@ -2204,6 +2315,24 @@
         }
         factorsGrid.appendChild(badge);
       });
+    }
+
+    function pressGcfKey(side, key) {
+      initAudio();
+      const inputId = side === 'guardian' ? 'input-g' : 'input-m';
+      const inputEl = document.getElementById(inputId);
+      if (!inputEl || inputEl.disabled) return;
+      
+      let currentVal = inputEl.value;
+      if (key === 'clear') {
+        inputEl.value = '';
+      } else if (key === 'back') {
+        inputEl.value = currentVal.substring(0, currentVal.length - 1);
+      } else {
+        if (currentVal.length < 3) {
+          inputEl.value = currentVal + key;
+        }
+      }
     }
 
     // --- INTERACTIVE MECHANICS ---
@@ -2240,64 +2369,15 @@
         
         // Lock player out for 1.5s
         inputEl.disabled = true;
-        const btn = inputEl.nextElementSibling;
+        const btn = side === 'guardian' ? document.querySelector('.btn-g-submit') : document.querySelector('.btn-m-submit');
         if (btn) btn.disabled = true;
         
         setTimeout(() => {
           inputEl.disabled = false;
           if (btn) btn.disabled = false;
-          // Re-disable controls if other side in online mode
-          if (gameMode === 'online') {
-            if (myPlayerSide === 'guardian' && side === 'marauder') {
-              inputEl.disabled = true;
-              if (btn) btn.disabled = true;
-            } else if (myPlayerSide === 'marauder' && side === 'guardian') {
-              inputEl.disabled = true;
-              if (btn) btn.disabled = true;
-            }
-          }
-          inputEl.focus();
         }, 1500);
         
         inputEl.value = '';
-        return;
-      }
-      
-      if (gameMode === 'online') {
-        // Online Multiplayer Mode submission
-        if (usedFactors.includes(val)) {
-          shakeInput(inputEl);
-          playSound('incorrect');
-          addLog(myPlayerSide, `數字 [ ${val} ] 已經被對手搶先解鎖囉！`);
-          inputEl.value = '';
-          return;
-        }
-
-        const teacherId = localStorage.getItem('current_teacher_id') || '';
-        const classId = localStorage.getItem('current_class_id') || '';
-        const sanitizedT = teacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
-        const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
-        const factorPath = `logs/${sanitizedT}/${sanitizedC}/gcf_game/rooms/${myRoomId}/gameState/usedFactors/${val}`;
-        
-        database.ref(factorPath).transaction((currentData) => {
-          if (currentData === null) {
-            return {
-              playerName: myPlayerName,
-              side: myPlayerSide,
-              timestamp: firebase.database.ServerValue.TIMESTAMP
-            };
-          }
-          return; // already claimed
-        }, (error, committed, snapshot) => {
-          if (committed) {
-            inputEl.value = '';
-          } else {
-            shakeInput(inputEl);
-            playSound('incorrect');
-            addLog(myPlayerSide, `❌ 數字 [ ${val} ] 已經被搶先鎖定囉！`);
-            inputEl.value = '';
-          }
-        });
         return;
       }
       
@@ -2313,9 +2393,6 @@
       // Correct! Perform game action
       registerCorrectFactor(side, val);
       inputEl.value = '';
-      if (gameMode !== 'ai' || side === 'guardian') {
-        inputEl.focus();
-      }
     }
 
     function shakeInput(el) {
@@ -2346,7 +2423,6 @@
       } else {
         playSound('correct');
       }
-      
       // Apply Holy Shield penalty to opponent if active
       let actualImpact = energyImpact;
       if (side === 'guardian' && activeSkills.marauderShield) {
@@ -2355,6 +2431,14 @@
       } else if (side === 'marauder' && activeSkills.guardianShield) {
         actualImpact = Math.max(1, Math.round(energyImpact * 0.5));
         addLog('guardian', `🛡️ 神聖護盾阻擋！將汲取方的暗影侵蝕能量折半 (自 ${energyImpact} 減至 ${actualImpact} 點)！`);
+      }
+      
+      if (side === 'guardian') {
+        scores.guardian += actualImpact;
+        document.getElementById('score-g').textContent = scores.guardian;
+      } else {
+        scores.marauder += actualImpact;
+        document.getElementById('score-m').textContent = scores.marauder;
       }
       
       // Move Energy Bar
@@ -2396,13 +2480,13 @@
 
     function triggerGCFSkill(side) {
       if (side === 'guardian') {
-        // Guardians activate Holy Shield (🛡️)
+        // Guardians activate Holy Shield (🛡️) on themselves
         activeSkills.guardianShield = true;
         document.getElementById('panel-guardian').classList.add('has-shield');
         playSound('shield');
         
         let timeLeft = 3.0;
-        document.getElementById('skill-g').innerHTML = `<span>🛡️ 聖光護盾生效中：3.0s (減免對手拉力)</span>`;
+        document.getElementById('skill-g').innerHTML = `<span>🛡️ 聖光護盾生效中：3.0s (對手得分減半)</span>`;
         
         if (timers.gShield) clearInterval(timers.gShield);
         timers.gShield = setInterval(() => {
@@ -2413,19 +2497,21 @@
             document.getElementById('panel-guardian').classList.remove('has-shield');
             document.getElementById('skill-g').innerHTML = `<span>🛡️ 神聖護盾：已失效</span>`;
           } else {
-            document.getElementById('skill-g').innerHTML = `<span>🛡️ 聖光護盾生效中：${timeLeft.toFixed(1)}s</span>`;
+            document.getElementById('skill-g').innerHTML = `<span>🛡️ 聖光護盾生效中：${timeLeft.toFixed(1)}s (減半)</span>`;
           }
         }, 100);
       } else {
-        // Marauders activate Shadow Freeze (❄️)
+        // Marauders activate Freeze on Guardians (🛡️ is frozen)
         activeSkills.marauderFreeze = true;
         document.getElementById('panel-guardian').classList.add('has-freeze');
         document.getElementById('input-g').disabled = true;
+        const btn = document.querySelector('.btn-g-submit');
+        if (btn) btn.disabled = true;
         playSound('freeze');
         
-        let timeLeft = 2.5;
-        document.getElementById('freeze-timer-g').textContent = `剩餘 2.5 秒`;
-        document.getElementById('skill-m').innerHTML = `<span>🔮 暗影冰凍生效中：2.5s (凍結對手)</span>`;
+        let timeLeft = 1.5;
+        document.getElementById('freeze-timer-g').textContent = `剩餘 1.5 秒`;
+        document.getElementById('skill-m').innerHTML = `<span>🔮 暗影冰凍：對手遭冰凍 1.5s</span>`;
         
         if (timers.mFreeze) clearInterval(timers.mFreeze);
         timers.mFreeze = setInterval(() => {
@@ -2435,10 +2521,11 @@
             activeSkills.marauderFreeze = false;
             document.getElementById('panel-guardian').classList.remove('has-freeze');
             document.getElementById('input-g').disabled = false;
+            if (btn) btn.disabled = false;
             document.getElementById('skill-m').innerHTML = `<span>🔮 暗影冰凍：已失效</span>`;
           } else {
             document.getElementById('freeze-timer-g').textContent = `剩餘 ${timeLeft.toFixed(1)} 秒`;
-            document.getElementById('skill-m').innerHTML = `<span>🔮 暗影冰凍生效中：${timeLeft.toFixed(1)}s</span>`;
+            document.getElementById('skill-m').innerHTML = `<span>🔮 暗影冰凍：對手冰凍 ${timeLeft.toFixed(1)}s</span>`;
           }
         }, 100);
       }
@@ -2467,15 +2554,7 @@
 
     // --- LOGGING ---
     function addLog(side, message) {
-      const logBox = document.getElementById('round-log');
-      const item = document.createElement('div');
-      item.className = `log-item ${side === 'guardian' ? 'guardians' : 'marauders'}`;
-      
-      const timeStr = new Date().toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      item.innerHTML = `<span>[${timeStr}] ${side === 'guardian' ? '🛡️ 守護方' : '🔮 汲取方'}: ${message}</span>`;
-      
-      logBox.appendChild(item);
-      logBox.scrollTop = logBox.scrollHeight;
+      console.log(`[${side === 'guardian' ? '🛡️ 守護方' : '🔮 汲取方'}] ${message}`);
     }
 
     // --- UI SYNCS ---
@@ -2679,7 +2758,9 @@
         num2: num2,
         factors: [...commonFactors],
         winner: winner,
-        gcfClaimer: gcfClaimerName
+        gcfClaimer: gcfClaimerName,
+        scoreG: scores.guardian,
+        scoreM: scores.marauder
       });
       
       const modal = document.getElementById('result-modal');
@@ -2714,8 +2795,6 @@
       `;
       
       if (winner === 'guardian') {
-        scores.guardian++;
-        document.getElementById('score-g').textContent = scores.guardian;
         icon.innerHTML = svgGlowingPlant;
         title.textContent = '守護方 獲勝！';
         title.style.color = 'var(--color-guardian)';
@@ -2725,8 +2804,6 @@
         最大公因數：<b>${gcfValue}</b>`;
         playSound('win');
       } else if (winner === 'marauder') {
-        scores.marauder++;
-        document.getElementById('score-m').textContent = scores.marauder;
         icon.innerHTML = svgWitheredPlant;
         title.textContent = gameMode === 'ai' ? 'AI軍團 獲勝！' : '汲取方 獲勝！';
         title.style.color = 'var(--color-marauder)';
@@ -2798,32 +2875,41 @@
       
       title.style.color = 'var(--text-color)';
       
+      let roundsWonG = 0;
+      let roundsWonM = 0;
+      if (window.roundHistory) {
+        window.roundHistory.forEach(r => {
+          if (r.winner === 'guardian') roundsWonG++;
+          else if (r.winner === 'marauder') roundsWonM++;
+        });
+      }
+
       let loreText = "";
       let soundToPlay = 'win';
       
-      if (scores.guardian > scores.marauder) {
+      if (roundsWonG > roundsWonM) {
         icon.innerHTML = svgGlowingPlant;
         title.textContent = '👑 守護方 奪得最終總冠軍！';
-        loreText = `最終比數 <b>${scores.guardian} : ${scores.marauder}</b>！<br>
+        loreText = `最終比數 <b>${roundsWonG} 勝 : ${roundsWonM} 勝</b>！<br>
         守護方展現卓越的心算與部署，讓生命之光強勢淨化森林，成功守護了整座共生生態！`;
         soundToPlay = 'win';
-      } else if (scores.marauder > scores.guardian) {
+      } else if (roundsWonM > roundsWonG) {
         icon.innerHTML = svgWitheredPlant;
         title.textContent = gameMode === 'ai' ? '👑 AI軍團 奪得最終總冠軍！' : '👑 汲取方 奪得最終總冠軍！';
-        loreText = `最終比數 <b>${scores.guardian} : ${scores.marauder}</b>！<br>
+        loreText = `最終比數 <b>${roundsWonG} 勝 : ${roundsWonM} 勝</b>！<br>
         汲取方攻勢猛烈，將植物能量完全吸乾，森林陷入枯萎與暗影之中！`;
         soundToPlay = 'lose';
       } else {
         icon.innerHTML = '⚖️';
         title.textContent = '👑 雙方戰成平手，共享和諧生態！';
-        loreText = `最終比數 <b>${scores.guardian} : ${scores.marauder}</b>！<br>
+        loreText = `最終比數 <b>${roundsWonG} 勝 : ${roundsWonM} 勝</b>！<br>
         雙方均勢抗衡，數學力量勢均力敵，共同維持了生態的完美平衡！`;
         soundToPlay = 'win';
       }
       
       // Build round history table
       let historyHtml = '<div style="margin-top: 12px; padding: 8px 12px; background: rgba(255,255,255,0.75); border-radius: 10px; text-align: left; font-size: 0.8rem; border: 1px solid rgba(0,0,0,0.06); color: var(--text-color);">';
-      historyHtml += '<h4 style="margin-bottom: 6px; text-align: center; color: var(--text-color); font-weight: 800; font-size: 0.85rem;">📋 本屆戰役 3 局對決歷史紀錄</h4>';
+      historyHtml += `<h4 style="margin-bottom: 6px; text-align: center; color: var(--text-color); font-weight: 800; font-size: 0.85rem;">📋 本屆戰役 ${maxRounds} 局對決歷史紀錄</h4>`;
       if (window.roundHistory && window.roundHistory.length > 0) {
         window.roundHistory.forEach(r => {
           let winText = "";
@@ -2835,7 +2921,7 @@
             winText = '<span style="color: var(--text-muted); font-weight: 800;">雙方平手</span>';
           }
           historyHtml += `<div style="margin-bottom: 6px; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 4px; line-height: 1.4;">` +
-                         `<b>第 ${r.roundNum} 局</b>：天空對戰數字 <b>{${r.num1}, ${r.num2}}</b><br>` +
+                         `<b>第 ${r.roundNum} 局</b>：天空對戰數字 <b>{${r.num1}, ${r.num2}}</b> (得分 ${r.scoreG} : ${r.scoreM})<br>` +
                          `公因數為 <b>{ ${r.factors.join(', ')} }</b> (${winText})` +
                          `</div>`;
         });
@@ -2960,17 +3046,6 @@
     }
 
     function logGcfTournamentEvent() {
-      // If it is anonymous local play, do not upload telemetry
-      if (isAnonymousLocalPlay) {
-        console.log("Unidentified or anonymous local play. Telemetry write skipped.");
-        return;
-      }
-
-      // If it is online play, only the host logs to prevent duplicates
-      if (gameMode === 'online' && !isHostGcf) {
-        return;
-      }
-
       const teacherId = localStorage.getItem('current_teacher_id');
       const classId = localStorage.getItem('current_class_id');
       if (!teacherId || !classId) return;
@@ -2982,7 +3057,7 @@
       const eventLog = {
         timestamp: firebase.database.ServerValue.TIMESTAMP,
         playerName: studentName,
-        gameMode: gameMode, // 'ai', 'pvp', or 'online'
+        gameMode: gameMode, // 'ai' or 'multi'
         guardianScore: scores.guardian,
         marauderScore: scores.marauder,
         winner: scores.guardian > scores.marauder ? 'guardian' : (scores.marauder > scores.guardian ? 'marauder' : 'draw'),
@@ -3001,47 +3076,40 @@
 
     // --- TEACHER & CLASS LOGS FOR TUG OF WAR ---
     let currentStudentName = '自主練習';
-    let isAnonymousLocalPlay = false;
 
     function promptGcfPlayersNames(mode) {
       const savedTeacher = localStorage.getItem('current_teacher_id');
       const savedClass = localStorage.getItem('current_class_id');
       
-      isAnonymousLocalPlay = false; // Reset status
+      if (mode === 'ai') {
+        let name = localStorage.getItem('student_name');
+        if (!name) {
+          name = prompt("請輸入您的姓名或座號，以便將您的學習歷程記錄給老師：");
+          if (name && name.trim()) {
+            name = name.trim();
+            localStorage.setItem('student_name', name);
+          } else {
+            name = "匿名學生";
+          }
+        }
+        currentStudentName = name;
+      } else {
+        let name1 = prompt("請輸入【守護者 (左邊)】學生的姓名或座號：");
+        let name2 = prompt("請輸入【汲取者 (右邊)】學生的姓名或座號：");
+        
+        const entered1 = name1 && name1.trim();
+        const entered2 = name2 && name2.trim();
+
+        name1 = entered1 ? name1.trim() : "左方守護";
+        name2 = entered2 ? name2.trim() : "右方汲取";
+        
+        currentStudentName = `${name1} 🆚 ${name2}`;
+      }
 
       if (savedTeacher && savedClass) {
-        if (mode === 'ai') {
-          let name = localStorage.getItem('student_name');
-          if (!name) {
-            name = prompt("請輸入您的姓名或座號，以便將您的學習歷程記錄給老師：");
-            if (name && name.trim()) {
-              name = name.trim();
-              localStorage.setItem('student_name', name);
-            } else {
-              name = "匿名學生";
-            }
-          }
-          currentStudentName = name;
-          // Mark as anonymous local play if they cancelled or entered default anonymous tag
-          isAnonymousLocalPlay = name === "匿名學生";
-        } else {
-          let name1 = prompt("請輸入【守護者 (左邊)】學生的姓名或座號：");
-          let name2 = prompt("請輸入【汲取者 (右邊)】學生的姓名或座號：");
-          
-          const entered1 = name1 && name1.trim();
-          const entered2 = name2 && name2.trim();
-
-          name1 = entered1 ? name1.trim() : "左方守護";
-          name2 = entered2 ? name2.trim() : "右方汲取";
-          
-          currentStudentName = `${name1} 🆚 ${name2}`;
-          // If either player cancelled or left empty, we treat the local PvP as unidentifiable
-          isAnonymousLocalPlay = !entered1 || !entered2;
-        }
         updateTeacherClassLobbyUI();
       } else {
-        currentStudentName = '自主練習';
-        isAnonymousLocalPlay = true; // No teacher/class context means no logging
+        console.warn("Telemetry disabled because teacher/class setting is missing.");
       }
     }
 
@@ -3117,771 +3185,29 @@
       }
     }
 
-    // --- GCF MULTIPLAYER ONLINE REAL-TIME FUNCTIONALITY ---
-    let myPlayerId = '';
-    let myPlayerName = '';
-    let myPlayerSide = ''; // 'guardian' or 'marauder'
-    let myRoomId = '';
-    let isReadyGcf = false;
-    let isHostGcf = false;
-    let roomRefGcf = null;
-    let usedFactors = [];
-    let gcfUsedFactorsMap = {};
-    let gcfCountdownTimer = null;
-    let hasCleanedStaleGcfRoom = false;
-
-    function openRoomJoinGcfModal() {
-      const name = localStorage.getItem('student_name') || '';
-      if (name) {
-        document.getElementById('join-player-name-gcf').value = name;
-      }
-      document.getElementById('join-room-id-gcf').value = '';
-      selectGcfCamp(''); // Clear camp selection
-      document.getElementById('overlay-room-join-gcf').style.display = 'flex';
-    }
-
-    function closeRoomJoinGcfModal() {
-      document.getElementById('overlay-room-join-gcf').style.display = 'none';
-      showLobby();
-    }
-
-    function selectGcfCamp(side) {
-      myPlayerSide = side;
-      document.getElementById('join-player-side-gcf').value = side;
-      
-      const btnG = document.getElementById('btn-select-guardian');
-      const btnM = document.getElementById('btn-select-marauder');
-      
-      if (side === 'guardian') {
-        btnG.style.opacity = '1';
-        btnM.style.opacity = '0.4';
-      } else if (side === 'marauder') {
-        btnG.style.opacity = '0.4';
-        btnM.style.opacity = '1';
-      } else {
-        btnG.style.opacity = '0.6';
-        btnM.style.opacity = '0.6';
-      }
-    }
-
-    function confirmJoinGcfRoom() {
-      const name = document.getElementById('join-player-name-gcf').value.trim();
-      const roomIdInput = document.getElementById('join-room-id-gcf').value.trim();
-      const side = document.getElementById('join-player-side-gcf').value;
-
-      if (!name || !roomIdInput || !side) {
-        alert("請填寫您的姓名/座號、遊戲室房號並選擇陣營！");
-        return;
-      }
-
-      if (!database) {
-        alert("資料庫尚未連接，請先在入口自訂資料庫設定連線！");
-        return;
-      }
-
-      myPlayerName = name;
-      myRoomId = roomIdInput.toLowerCase().replace(/[^a-z0-9]/g, '');
-      localStorage.setItem('student_name', name);
-      currentStudentName = name;
-
-      // Check slot limits
-      const teacherId = localStorage.getItem('current_teacher_id') || '';
-      const classId = localStorage.getItem('current_class_id') || '';
-      if (!teacherId || !classId) {
-        alert("⚠️ 請先在首頁設定「玩家班級」！");
-        return;
-      }
-      const sanitizedT = teacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
-      const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
-      
-      const checkPath = `logs/${sanitizedT}/${sanitizedC}/gcf_game/rooms/${myRoomId}/players`;
-      database.ref(checkPath).once('value', (snap) => {
-        const players = snap.val() || {};
-        let count = 0;
-        Object.values(players).forEach(p => {
-          if (p.side === side) count++;
-        });
-
-        if (count >= 2) {
-          alert(`該陣營（${side === 'guardian' ? '守護方' : '汲取方'}）已額滿 2 人，請加入另一陣營或進入其他遊戲室！`);
-          return;
-        }
-
-        // Proceed to join
-        document.getElementById('overlay-room-join-gcf').style.display = 'none';
-        joinGcfRoom(myRoomId, myPlayerName, side);
-      }, (err) => {
-        console.error("Firebase GCF connection failed:", err);
-        alert("⚠️ 連線資料庫失敗！請檢查首頁自訂資料庫的 API 設定是否正確。\n錯誤原因：" + err.message);
-      });
-    }
-
-    function joinGcfRoom(roomId, name, side) {
-      // Retrieve or generate persistent playerId for this browser session to avoid duplicate entries on reconnect
-      myPlayerId = sessionStorage.getItem('gcf_player_id');
-      if (!myPlayerId) {
-        myPlayerId = 'p_' + Math.random().toString(36).substr(2, 9);
-        sessionStorage.setItem('gcf_player_id', myPlayerId);
-      }
-      isReadyGcf = false;
-      gameMode = 'online';
-      hasCleanedStaleGcfRoom = false;
-      
-      const teacherId = localStorage.getItem('current_teacher_id') || '';
-      const classId = localStorage.getItem('current_class_id') || '';
-      const sanitizedT = teacherId.replace(/[\.\$\#\[\]\/]/g, '_').trim().toLowerCase();
-      const sanitizedC = classId.replace(/[\.\$\#\[\]\/]/g, '_').trim();
-      
-      roomRefGcf = database.ref(`logs/${sanitizedT}/${sanitizedC}/gcf_game/rooms/${roomId}`);
-      
-      // Reset waiting room buttons
-      const readyBtn = document.getElementById('btn-ready-toggle-gcf');
-      readyBtn.innerText = "準備好了 (Ready)";
-      readyBtn.style.backgroundColor = "#378AD4";
-
-      // Show waiting room
-      document.getElementById('screen-lobby').style.display = 'none';
-      document.getElementById('screen-room-waiting-gcf').style.display = 'flex';
-      document.getElementById('waiting-room-title-gcf').innerText = `連線遊戲室: ${roomId.toUpperCase()}`;
-
-      // Write player profile with onDisconnect cleanup
-      const playerRef = roomRefGcf.child(`players/${myPlayerId}`);
-      playerRef.set({
-        name: name,
-        side: side,
-        ready: false
-      });
-      playerRef.onDisconnect().remove();
-
-      // Set initial room status if not exists
-      roomRefGcf.child('status').transaction((currentStatus) => {
-        if (currentStatus === null) {
-          return 'waiting';
-        }
-        return currentStatus;
-      });
-
-      // Synchronize members list
-      roomRefGcf.child('players').on('value', (snap) => {
-        const players = snap.val() || {};
-
-        const gList = document.getElementById('guardian-players-list-gcf');
-        const mList = document.getElementById('marauder-players-list-gcf');
-        if (!gList || !mList) return;
-        gList.innerHTML = '';
-        mList.innerHTML = '';
-
-        let gCount = 0;
-        let mCount = 0;
-        let allReady = true;
-        let playerIds = Object.keys(players).sort();
-
-        if (playerIds.length === 0) return;
-
-        // Host is the lexicographically first playerId
-        isHostGcf = (playerIds[0] === myPlayerId);
-
-        // Host active self-healing cleanup to clear stale status/gameState
-        if (isHostGcf) {
-          roomRefGcf.child('status').once('value', (snapStatus) => {
-            const rStatus = snapStatus.val() || 'waiting';
-            const waitScreen = document.getElementById('screen-room-waiting-gcf');
-            const waitingScreenActive = waitScreen && (waitScreen.style.display === 'flex' || waitScreen.style.display === 'block');
-            const shouldReset = (rStatus === 'result' && waitingScreenActive) ||
-                                (rStatus === 'playing' && waitingScreenActive) ||
-                                (playerIds.length === 1 && rStatus !== 'waiting');
-            if (shouldReset) {
-              roomRefGcf.update({
-                status: 'waiting',
-                gameState: null
-              });
-            }
-          });
-        }
-
-        Object.entries(players).forEach(([pid, p]) => {
-          const item = document.createElement('div');
-          item.style.padding = '6px 10px';
-          item.style.borderRadius = '8px';
-          item.style.background = '#f5f5f5';
-          item.style.fontSize = '0.85rem';
-          item.style.display = 'flex';
-          item.style.justifyContent = 'space-between';
-          item.style.alignItems = 'center';
-          item.style.fontWeight = pid === myPlayerId ? '800' : 'normal';
-          
-          const readyTag = p.ready ? '<span style="color:#2E7D32; font-weight:800;">✓ 已準備</span>' : '<span style="color:#C62828; font-weight:700;">○ 未準備</span>';
-          item.innerHTML = `<span>👤 ${p.name} ${pid === myPlayerId ? ' (你)' : ''}</span> ${readyTag}`;
-
-          if (p.side === 'guardian') {
-            gList.appendChild(item);
-            gCount++;
-          } else {
-            mList.appendChild(item);
-            mCount++;
-          }
-
-          if (!p.ready) {
-            allReady = false;
-          }
-        });
-
-        document.getElementById('guardian-count-gcf').innerText = `${gCount}/2人`;
-        document.getElementById('marauder-count-gcf').innerText = `${mCount}/2人`;
-
-        // Check start game conditions
-        if (allReady && gCount >= 1 && mCount >= 1) {
-          if (isHostGcf) {
-            roomRefGcf.child('status').once('value', (snapStatus) => {
-              if (snapStatus.val() === 'waiting') {
-                startGcfCountdown();
-              }
-            });
-          }
-        }
-      });
-
-      let isStartingGame = false; // Flag to track active game transition
-
-      // Synchronize room status
-      roomRefGcf.child('status').on('value', (snap) => {
-        const status = snap.val();
-        if (status === 'playing') {
-          if (!isStartingGame) {
-            console.log("Ignoring stale playing status");
-            return;
-          }
-          isStartingGame = false; // Reset flag
-          enterGcfMultiplayArena();
-        } else if (status === 'countdown') {
-          isStartingGame = true;
-          triggerGcfRoomCountdown();
-        } else if (status === 'result') {
-          isStartingGame = false;
-          // If player is in wait room screen, do NOT show result modal (waiting for host reset)
-          const waitScreen = document.getElementById('screen-room-waiting-gcf');
-          if (waitScreen && (waitScreen.style.display === 'flex' || waitScreen.style.display === 'block')) {
-            return;
-          }
-          enterGcfMultiplayResult();
-        } else if (status === 'waiting') {
-          isStartingGame = false;
-        }
-      });
-    }
-
-    function toggleGcfReady() {
-      if (!roomRefGcf) return;
-      isReadyGcf = !isReadyGcf;
-      const readyBtn = document.getElementById('btn-ready-toggle-gcf');
-      
-      if (isReadyGcf) {
-        readyBtn.innerText = "已準備 (Ready)";
-        readyBtn.style.backgroundColor = "#2E7D32";
-      } else {
-        readyBtn.innerText = "準備好了 (Ready)";
-        readyBtn.style.backgroundColor = "#378AD4";
-      }
-
-      roomRefGcf.child(`players/${myPlayerId}/ready`).set(isReadyGcf);
-    }
-
-    function leaveGcfRoom() {
-      if (roomRefGcf) {
-        roomRefGcf.child(`players/${myPlayerId}`).remove();
-        roomRefGcf.child('players').off();
-        roomRefGcf.child('status').off();
-        roomRefGcf.child('gameState/usedFactors').off();
-        roomRefGcf.child('gameState').off();
-        roomRefGcf = null;
-      }
-      document.getElementById('screen-room-waiting-gcf').style.display = 'none';
-      showLobby();
-    }
-
     function handleBackPortal() {
-      leaveGcfRoom();
       window.location.href = 'index.html';
     }
 
-    window.addEventListener('beforeunload', () => {
-      if (roomRefGcf && myPlayerId) {
-        roomRefGcf.child(`players/${myPlayerId}`).remove();
-      }
-    });
 
-    function startGcfCountdown() {
-      if (!roomRefGcf) return;
-      // Host generates the rounds
-      roundSequence = generateDynamicRounds();
-      
-      roomRefGcf.child('gameState').set({
-        num1: roundSequence[0].n1,
-        num2: roundSequence[0].n2,
-        currentRound: 1,
-        maxRounds: 3,
-        plantEnergy: 50,
-        usedFactors: {},
-        roundSequence: roundSequence
-      }).then(() => {
-        roomRefGcf.child('status').set('countdown');
-        
-        setTimeout(() => {
-          if (roomRefGcf) {
-            roomRefGcf.child('status').set('playing');
-          }
-        }, 3200);
-      });
-    }
-
-    function triggerGcfRoomCountdown() {
-      // Create or show a countdown overlay
-      let overlay = document.getElementById('countdown-overlay-gcf');
-      if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'countdown-overlay-gcf';
-        overlay.style.position = 'fixed';
-        overlay.style.top = '0';
-        overlay.style.left = '0';
-        overlay.style.width = '100vw';
-        overlay.style.height = '100vh';
-        overlay.style.background = 'rgba(0,0,0,0.85)';
-        overlay.style.color = '#FFF';
-        overlay.style.display = 'flex';
-        overlay.style.flexDirection = 'column';
-        overlay.style.alignItems = 'center';
-        overlay.style.justifyContent = 'center';
-        overlay.style.zIndex = '9999';
-        overlay.style.fontFamily = "'Outfit', sans-serif";
-        
-        const numDiv = document.createElement('div');
-        numDiv.id = 'countdown-number-gcf';
-        numDiv.style.fontSize = '8rem';
-        numDiv.style.fontWeight = '900';
-        numDiv.style.textShadow = '0 0 20px rgba(255,255,255,0.4)';
-        
-        const labelDiv = document.createElement('div');
-        labelDiv.innerText = "天空之戰即將爆發...";
-        labelDiv.style.fontSize = '1.5rem';
-        labelDiv.style.fontWeight = '700';
-        labelDiv.style.marginTop = '15px';
-        labelDiv.style.color = '#E1EBE7';
-
-        overlay.appendChild(numDiv);
-        overlay.appendChild(labelDiv);
-        document.body.appendChild(overlay);
-      }
-      overlay.style.display = 'flex';
-      
-      const numDiv = document.getElementById('countdown-number-gcf');
-      let c = 3;
-      numDiv.innerText = c;
-      playSound('correct');
-      
-      if (gcfCountdownTimer) clearInterval(gcfCountdownTimer);
-      
-      gcfCountdownTimer = setInterval(() => {
-        c--;
-        if (c > 0) {
-          numDiv.innerText = c;
-          playSound('correct');
-        } else if (c === 0) {
-          numDiv.innerText = "START!";
-          playSound('gcf');
-        } else {
-          clearInterval(gcfCountdownTimer);
-          overlay.style.display = 'none';
-        }
-      }, 1000);
-    }
-
-    function enterGcfMultiplayArena() {
-      document.getElementById('screen-room-waiting-gcf').style.display = 'none';
-      document.getElementById('screen-arena').style.display = 'grid';
-      document.getElementById('btn-restart-lobby').style.display = 'none'; // Lock exit during battle to avoid breaking multiplayer
-
-      // Reset panel titles, descriptions and visibility for online play
-      document.querySelector('#panel-guardian .team-name').textContent = '守護方';
-      document.querySelector('#panel-guardian .team-desc').textContent = '注入能量至 100%';
-      document.querySelector('#panel-marauder .team-name').textContent = '汲取方';
-      document.querySelector('#panel-marauder .team-desc').textContent = '汲取能量至 0%';
-      
-      document.getElementById('ai-bubble-msg').style.display = 'none';
-      document.getElementById('marauder-controls').style.display = 'flex';
-      document.getElementById('guardian-controls').style.display = 'flex';
-
-      // Setup team overlays based on the player side
-      const gOverlay = document.getElementById('guardian-enemy-overlay');
-      if (gOverlay) gOverlay.remove();
-      const mOverlay = document.getElementById('marauder-enemy-overlay');
-      if (mOverlay) mOverlay.remove();
-
-      // Show members display
-      document.getElementById('guardian-members-arena').style.display = 'block';
-      document.getElementById('marauder-members-arena').style.display = 'block';
-
-      if (myPlayerSide === 'guardian') {
-        document.getElementById('input-g').disabled = false;
-        const gBtn = document.querySelector('.guardian-panel .btn-pull');
-        if (gBtn) gBtn.disabled = false;
-
-        // Overlay Marauder panel
-        document.getElementById('input-m').disabled = true;
-        const mBtn = document.querySelector('.marauder-panel .btn-pull');
-        if (mBtn) mBtn.disabled = true;
-        const overlay = document.createElement('div');
-        overlay.id = 'marauder-enemy-overlay';
-        overlay.style.position = 'absolute';
-        overlay.style.top = '0';
-        overlay.style.left = '0';
-        overlay.style.width = '100%';
-        overlay.style.height = '100%';
-        overlay.style.background = 'rgba(0,0,0,0.08)';
-        overlay.style.backdropFilter = 'blur(1.5px)';
-        overlay.style.zIndex = '5';
-        overlay.style.display = 'flex';
-        overlay.style.alignItems = 'center';
-        overlay.style.justifyContent = 'center';
-        overlay.style.borderRadius = '16px';
-        overlay.innerHTML = `<h4 style="color:var(--color-marauder); font-weight:800; font-size:1.1rem; text-shadow:0 0 5px rgba(255,255,255,0.8);">🔮 敵方侵蝕搶答中...</h4>`;
-        document.getElementById('panel-marauder').style.position = 'relative';
-        document.getElementById('panel-marauder').appendChild(overlay);
-      } else {
-        document.getElementById('input-m').disabled = false;
-        const mBtn = document.querySelector('.marauder-panel .btn-pull');
-        if (mBtn) mBtn.disabled = false;
-
-        // Overlay Guardian panel
-        document.getElementById('input-g').disabled = true;
-        const gBtn = document.querySelector('.guardian-panel .btn-pull');
-        if (gBtn) gBtn.disabled = true;
-        const overlay = document.createElement('div');
-        overlay.id = 'guardian-enemy-overlay';
-        overlay.style.position = 'absolute';
-        overlay.style.top = '0';
-        overlay.style.left = '0';
-        overlay.style.width = '100%';
-        overlay.style.height = '100%';
-        overlay.style.background = 'rgba(0,0,0,0.08)';
-        overlay.style.backdropFilter = 'blur(1.5px)';
-        overlay.style.zIndex = '5';
-        overlay.style.display = 'flex';
-        overlay.style.alignItems = 'center';
-        overlay.style.justifyContent = 'center';
-        overlay.style.borderRadius = '16px';
-        overlay.innerHTML = `<h4 style="color:var(--color-guardian); font-weight:800; font-size:1.1rem; text-shadow:0 0 5px rgba(255,255,255,0.8);">🛡️ 敵方淨化搶答中...</h4>`;
-        document.getElementById('panel-guardian').style.position = 'relative';
-        document.getElementById('panel-guardian').appendChild(overlay);
-      }
-
-      // Populate member names
-      roomRefGcf.child('players').once('value', (snap) => {
-        const players = snap.val() || {};
-        const gNames = [];
-        const mNames = [];
-        Object.values(players).forEach(p => {
-          if (p.side === 'guardian') gNames.push(p.name);
-          else mNames.push(p.name);
-        });
-        document.getElementById('guardian-members-arena').innerText = `成員: ${gNames.join(', ')}`;
-        document.getElementById('marauder-members-arena').innerText = `成員: ${mNames.join(', ')}`;
-      });
-
-      // Synchronize game settings and states
-      roomRefGcf.child('gameState').on('value', (snap) => {
-        const state = snap.val();
-        if (!state) return;
-
-        num1 = state.num1;
-        num2 = state.num2;
-        currentRound = state.currentRound;
-        maxRounds = state.maxRounds;
-        energyVal = state.plantEnergy;
-        roundSequence = state.roundSequence;
-
-        // Reconstruct scores from Firebase state
-        if (state.scores) {
-          scores.guardian = state.scores.guardian || 0;
-          scores.marauder = state.scores.marauder || 0;
-        } else {
-          scores.guardian = 0;
-          scores.marauder = 0;
-        }
-        document.getElementById('score-g').textContent = scores.guardian;
-        document.getElementById('score-m').textContent = scores.marauder;
-
-        // Reconstruct usedFactors array and map from Firebase state
-        const fbUsed = state.usedFactors || {};
-        usedFactors = Object.keys(fbUsed).map(k => parseInt(k));
-        gcfUsedFactorsMap = {};
-        Object.entries(fbUsed).forEach(([k, val]) => {
-          if (val && val.side) {
-            gcfUsedFactorsMap[k] = val.side;
-          }
-        });
-
-        // Local load round UI updates
-        commonFactors = getCommonFactors(num1, num2);
-        gcfValue = commonFactors[commonFactors.length - 1];
-
-        document.getElementById('sky-n1').textContent = num1;
-        document.getElementById('sky-n2').textContent = num2;
-        document.getElementById('round-lbl').textContent = `戰役第 ${currentRound} 輪 / 共 ${maxRounds} 輪`;
-        
-        updateEnergyBarUI();
-        updatePlantSVG();
-        renderFactorsGrid();
-      });
-
-      // Synchronize usedFactors actions
-      roomRefGcf.child('gameState/usedFactors').off(); // avoid duplicate listeners
-      roomRefGcf.child('gameState/usedFactors').on('child_added', (snap) => {
-        const factor = parseInt(snap.key);
-        const logData = snap.val();
-
-        if (!usedFactors.includes(factor)) {
-          usedFactors.push(factor);
-          gcfUsedFactorsMap[factor] = logData.side;
-
-          // Render unlock UI
-          const badge = document.getElementById(`badge-${factor}`);
-          if (badge) {
-            badge.className = `factor-badge${factor === gcfValue ? ' is-gcf' : ''} locked-${logData.side}`;
-            badge.textContent = factor;
-            badge.style.opacity = '0.4';
-          }
-
-          // Apply physical pulling force and sound
-          const isGCF = (factor === gcfValue);
-          let energyImpact = isGCF ? 20 : 10;
-          let actualImpact = energyImpact;
-
-          // Apply Halve effect if opposite team shield is active
-          if (logData.side === 'guardian' && activeSkills.marauderShield) {
-            actualImpact = Math.max(1, Math.round(energyImpact * 0.5));
-          } else if (logData.side === 'marauder' && activeSkills.guardianShield) {
-            actualImpact = Math.max(1, Math.round(energyImpact * 0.5));
-          }
-
-          // Apply scale factor of 1.8 to match local mode
-          const scaleFactor = 1.8;
-          const energyChange = (logData.side === 'guardian') ? (actualImpact * scaleFactor) : -(actualImpact * scaleFactor);
-          energyVal += energyChange;
-          energyVal = Math.min(100, Math.max(0, energyVal));
-
-          updateEnergyBarUI();
-          updatePlantSVG();
-
-          triggerFloatingText(logData.side, isGCF ? `最大公因數 +${actualImpact}!` : `+${actualImpact}!`, logData.side === 'guardian' ? 120 : 280);
-          
-          let logText = isGCF ? ` [最大公因數爆發 +10 點!]` : '';
-          addLog(logData.side, `🎯 [${logData.playerName}] 搶下公因數 [ ${factor} ]，拉扯 ${actualImpact} 點能量！${logText}`);
-          
-          if (isGCF) {
-            playSound('gcf');
-            triggerGCFSkill(logData.side);
-          } else {
-            playSound('correct');
-          }
-
-          // If Host, synchronize the calculated energyVal to Firebase plantEnergy
-          if (isHostGcf && roomRefGcf) {
-            roomRefGcf.child('gameState').update({
-              plantEnergy: energyVal
-            });
-          }
-
-          // Check if round should end
-          if (isHostGcf && usedFactors.length === commonFactors.length) {
-            setTimeout(resolveGcfMultiplayerRoundEnd, 2000);
-          }
-        }
-      });
-    }
-
-    function resolveGcfMultiplayerRoundEnd() {
-      if (!roomRefGcf) return;
-      let roundWinner = 'draw';
-      if (energyVal > 50) roundWinner = 'guardian';
-      else if (energyVal < 50) roundWinner = 'marauder';
-
-      if (!window.roundHistory) window.roundHistory = [];
-      
-      // Query Firebase for the GCF claimer
-      roomRefGcf.child('gameState/usedFactors/' + gcfValue).once('value', (snapGcf) => {
-        const gcfClaimerVal = snapGcf.val();
-        const gcfClaimerName = (gcfClaimerVal && gcfClaimerVal.playerName) ? gcfClaimerVal.playerName : '無';
-
-        const rh = {
-          roundNum: currentRound,
-          n1: num1,
-          n2: num2,
-          winner: roundWinner,
-          factors: [...usedFactors],
-          gcfClaimer: gcfClaimerName
-        };
-
-        // Write round history
-        roomRefGcf.child(`gameState/roundHistory/${currentRound}`).set(rh).then(() => {
-          // Calculate scores from history
-          roomRefGcf.child('gameState/roundHistory').once('value', (snapRH) => {
-          const history = snapRH.val() || {};
-          let gWins = 0;
-          let mWins = 0;
-          Object.values(history).forEach(h => {
-            if (h.winner === 'guardian') gWins++;
-            else if (h.winner === 'marauder') mWins++;
-          });
-          
-          scores.guardian = gWins;
-          scores.marauder = mWins;
-
-          const nextRound = currentRound + 1;
-          if (nextRound > maxRounds) {
-            // Final End!
-            roomRefGcf.child('gameState').update({
-              scores: { guardian: gWins, marauder: mWins }
-            }).then(() => {
-              roomRefGcf.child('status').set('result');
-            });
-          } else {
-            // Load next round
-            const nextConfig = roundSequence[nextRound - 1];
-            roomRefGcf.child('gameState').update({
-              num1: nextConfig.n1,
-              num2: nextConfig.n2,
-              currentRound: nextRound,
-              plantEnergy: 50,
-              usedFactors: {},
-              scores: { guardian: gWins, marauder: mWins }
-            });
-          }
-        });
-      });
-    });
-  }
-
-    function enterGcfMultiplayResult() {
-      roomRefGcf.child('gameState').once('value', (snapState) => {
-        const state = snapState.val();
-        if (!state) return;
-
-        scores.guardian = state.scores ? state.scores.guardian : 0;
-        scores.marauder = state.scores ? state.scores.marauder : 0;
-
-        const roundHist = state.roundHistory ? Object.values(state.roundHistory) : [];
-        window.roundHistory = roundHist;
-
-        // Fetch player lists to display in pop-up
-        roomRefGcf.child('players').once('value', (snapPlayers) => {
-          const players = snapPlayers.val() || {};
-          const gNames = [];
-          const mNames = [];
-          Object.values(players).forEach(p => {
-            if (p.side === 'guardian') gNames.push(p.name);
-            else mNames.push(p.name);
-          });
-
-          showGcfMultiplayerResultModal(gNames, mNames);
-        });
-      });
-    }
-
-    function showGcfMultiplayerResultModal(gNames, mNames) {
-      if (gameMode === 'online') {
-        currentStudentName = `[連線] 守護: ${gNames.join(',')} 🆚 汲取: ${mNames.join(',')}`;
-        isAnonymousLocalPlay = false; 
-      }
-      logGcfTournamentEvent();
-      const modal = document.getElementById('result-modal');
-      const title = document.getElementById('modal-title');
-      const desc = document.getElementById('modal-desc');
-      const icon = document.getElementById('modal-icon');
-
-      // Adjust padding and scaling dynamically to fit on a single screen without scrollbars
-      const content = modal.querySelector('.modal-content');
-      content.style.padding = '15px 20px';
-      content.style.maxWidth = '460px';
-
-      const svgGlowingPlant = `
-        <svg width="60" height="60" viewBox="0 0 100 100" style="filter: drop-shadow(0px 0px 8px #FFD54F);">
-          <circle cx="50" cy="50" r="30" fill="rgba(255, 213, 79, 0.15)"></circle>
-          <path d="M 50 80 Q 50 52 50 38" fill="none" stroke="#2E7D32" stroke-width="5" stroke-linecap="round"></path>
-          <circle cx="50" cy="33" r="10" fill="#FFF59D" stroke="#FFD54F" stroke-width="2"></circle>
-        </svg>
-      `;
-
-      const svgWitheredPlant = `
-        <svg width="60" height="60" viewBox="0 0 100 100">
-          <path d="M 45 80 Q 48 62 68 52" fill="none" stroke="#5D4037" stroke-width="5" stroke-linecap="round"></path>
-          <circle cx="68" cy="52" r="7" fill="#3E2723" stroke="#5D4037" stroke-width="1.5"></circle>
-        </svg>
-      `;
-
-      let winnerText = "";
-      let soundToPlay = 'win';
-
-      if (scores.guardian > scores.marauder) {
-        icon.innerHTML = svgGlowingPlant;
-        title.textContent = '🏆 守護方 獲勝！';
-        title.style.color = 'var(--color-guardian)';
-        winnerText = `守護方成功注入生命能量，共生花園散發出璀璨之光！`;
-        soundToPlay = 'win';
-      } else if (scores.marauder > scores.guardian) {
-        icon.innerHTML = svgWitheredPlant;
-        title.textContent = '🏆 汲取方 獲勝！';
-        title.style.color = 'var(--color-marauder)';
-        winnerText = `汲取方抽取了全部能量，花園凋謝枯萎！`;
-        soundToPlay = 'lose';
-      } else {
-        icon.innerHTML = '⚖️';
-        title.textContent = '⚖️ 雙方平手！';
-        title.style.color = 'var(--text-color)';
-        winnerText = `雙方均勢抗衡，共享和諧生態平衡！`;
-        soundToPlay = 'win';
-      }
-
-      playSound(soundToPlay);
-
-      // Members List HTML
-      let membersHtml = `
-        <div style="display:flex; justify-content:space-around; gap:10px; margin: 8px 0; background:rgba(0,0,0,0.03); padding:6px; border-radius:10px; font-size:0.75rem;">
-          <div style="color:var(--color-guardian); font-weight:700;">🔵 守護方：<b>${gNames.join(', ') || '無'}</b></div>
-          <div style="color:var(--color-marauder); font-weight:700;">🔴 汲取方：<b>${mNames.join(', ') || '無'}</b></div>
-        </div>
-      `;
-
-      // Compact round details
-      let historyHtml = '<div style="margin-top: 8px; padding: 6px 10px; background: rgba(255,255,255,0.75); border-radius: 8px; text-align: left; font-size: 0.75rem; border: 1px solid rgba(0,0,0,0.06); max-height: 120px; overflow: hidden; line-height: 1.3;">';
-      historyHtml += '<h4 style="margin: 0 0 4px 0; text-align: center; color: var(--text-color); font-weight: 800; font-size: 0.8rem;">📋 連線對決歷史紀錄</h4>';
-      
-      window.roundHistory.forEach(r => {
-        let winText = "";
-        if (r.winner === 'guardian') winText = '<span style="color:var(--color-guardian); font-weight:700;">守護方勝</span>';
-        else if (r.winner === 'marauder') winText = '<span style="color:var(--color-marauder); font-weight:700;">汲取方勝</span>';
-        else winText = '<span style="color:var(--text-muted); font-weight:700;">平手</span>';
-
-        historyHtml += `<div style="margin-bottom: 4px; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 2px;">` +
-                       `<b>R${r.roundNum}</b>: 數字 {${r.n1}, ${r.n2}} (${winText})` +
-                       `</div>`;
-      });
-      historyHtml += '</div>';
-
-      desc.innerHTML = `<p style="margin: 0 0 6px 0; font-size:0.85rem; font-weight:700; color:var(--text-color);">${winnerText}</p>` + membersHtml + historyHtml;
-
-      const btn = document.querySelector('.btn-modal');
-      btn.textContent = "返回遊戲入口";
-      btn.onclick = function() {
-        modal.classList.remove('active');
-        leaveGcfRoom();
-      };
-
-      modal.classList.add('active');
-    }
 
     parseUrlParams();
     loadFirebaseConfigTug();
     updateTeacherClassLobbyUI();
+
+    // Allow physical keyboard entry with enter key submission and digit sanitization
+    document.getElementById('input-g').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') submitFactor('guardian');
+    });
+    document.getElementById('input-g').addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
+    document.getElementById('input-m').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') submitFactor('marauder');
+    });
+    document.getElementById('input-m').addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
   </script>
 </body>
 </html>

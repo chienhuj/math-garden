@@ -1342,7 +1342,7 @@
         <div class="dialog-icon">💧</div>
         <h3 class="dialog-title">時間到！培育能量乾涸</h3>
         <p class="dialog-desc" id="timeout-reason-text">
-          很遺憾，在 30 秒的限時內未能找齊所有因數，植物稍微乾枯了...
+          很遺憾，在 60 秒的限時內未能找齊所有因數，植物稍微乾枯了...
         </p>
         <div class="dialog-tip" id="timeout-recommendation-box">
           <!-- Objective recommendations go here -->
@@ -1713,7 +1713,7 @@
 
     // Pools of target numbers
     const basicPool = [6, 8, 9, 10, 12, 14, 15, 16, 18, 20];
-    const advancedPool = [20, 24, 28, 30, 32, 35, 36, 40, 42, 44, 45, 48, 50, 52, 54, 56, 60];
+    const advancedPool = Array.from({length: 40}, (_, i) => i + 21);
     
     // Challenge Mode target pool: exactly 4 factors between 2 and 100
     const challengePool = [6, 8, 10, 14, 15, 21, 22, 26, 27, 33, 34, 35, 38, 39, 46, 51, 55, 57, 58, 62, 65, 69, 74, 77, 82, 85, 86, 87, 91, 93, 94, 95];
@@ -3228,7 +3228,7 @@
       
       // Update timeout text and build customized recommendations (客觀建議)
       const desc = document.getElementById('timeout-reason-text');
-      desc.innerText = `很遺憾，在 30 秒的限時內未能找齊 ${currentTarget} 的所有因數。植物有一點點乾枯了...`;
+      desc.innerText = `很遺憾，在 60 秒的限時內未能找齊 ${currentTarget} 的所有因數。植物有一點點乾枯了...`;
       
       const tipBox = document.getElementById('timeout-recommendation-box');
       tipBox.innerHTML = generateObjectiveTip(currentTarget);

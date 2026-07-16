@@ -1712,7 +1712,7 @@
     let myIndexInTurn = -1;
 
     // Pools of target numbers
-    const basicPool = [6, 8, 9, 10, 12, 14, 15, 16, 18, 20];
+    const basicPool = Array.from({length: 19}, (_, i) => i + 2);
     const advancedPool = Array.from({length: 40}, (_, i) => i + 21);
     
     // Challenge Mode target pool: exactly 4 factors between 2 and 100

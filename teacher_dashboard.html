@@ -461,7 +461,7 @@
         if (isDefault) {
           // Query default database for the password
           database.ref(`system_config/teacher_accounts/${tInput}/${pInput}`).once('value').then((snap) => {
-            if (snap.val() === true || pInput === 'math52') {
+            if (snap.val() === true) {
               // Success!
               // Switch views
               document.getElementById('section-auth').style.display = 'none';
@@ -478,24 +478,17 @@
         } else {
           // Custom database login: query custom database
           database.ref(`system_config/teacher_accounts/${tInput}/${pInput}`).once('value').then((snap) => {
-            if (snap.val() === true || pInput === 'math52') {
+            if (snap.val() === true) {
               document.getElementById('section-auth').style.display = 'none';
               document.getElementById('section-dashboard').classList.add('active');
               document.getElementById('active-teacher-tag').innerHTML = `👤 教師代碼：<strong style="color:var(--color-basic);">${currentTeacherId}</strong>`;
               fetchAvailableClasses();
             } else {
-              alert("教師代碼或管理密碼錯誤，存取被拒！(自訂資料庫備用密碼為 math52)");
+              alert("教師代碼或管理密碼錯誤，存取被拒！");
             }
           }).catch((err) => {
-            // If custom database doesn't have system_config or rules configured, allow 'math52'
-            if (pInput === 'math52') {
-              document.getElementById('section-auth').style.display = 'none';
-              document.getElementById('section-dashboard').classList.add('active');
-              document.getElementById('active-teacher-tag').innerHTML = `👤 教師代碼：<strong style="color:var(--color-basic);">${currentTeacherId}</strong>`;
-              fetchAvailableClasses();
-            } else {
-              alert("自訂資料庫驗證失敗，請使用備用密碼 math52 登入！");
-            }
+            alert("自訂資料庫連線或驗證失敗，請檢查資料庫規則設定！");
+            console.error(err);
           });
         }
       });

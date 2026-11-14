@@ -554,7 +554,7 @@
       const pwd = prompt("請輸入管理員密碼以設定預設資料庫 (或輸入您的教師代碼以設定您的自訂資料庫)：");
       if (!pwd) return;
 
-      const adminPasscodes = ['math52', 'ematha1', 'ematha2', 'ematha3', 'ematha4'];
+      const adminPasscodes = ['admin123', 'math_admin'];
       const isTeacherIdAdmin = pwd.trim().length > 0;
 
       if (adminPasscodes.includes(pwd) || isTeacherIdAdmin) {
@@ -606,7 +606,7 @@
 
     function loadDefaultAdminConfig() {
       const pwd = prompt("請輸入管理員密碼：");
-      const adminPasscodes = ['math52', 'ematha1', 'ematha2', 'ematha3', 'ematha4'];
+      const adminPasscodes = ['admin123', 'math_admin'];
       if (adminPasscodes.includes(pwd)) {
         document.getElementById('cfg-apiKey').value = DEFAULT_FIREBASE_CONFIG.apiKey;
         document.getElementById('cfg-databaseURL').value = DEFAULT_FIREBASE_CONFIG.databaseURL;

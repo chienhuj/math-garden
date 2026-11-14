@@ -1,0 +1,22 @@
+{
+  "whitelisted_teachers": {
+    "teacher_demo": true,
+    "dreamn1": true,
+    "dreamn2": true,
+    "dreamn3": true
+  },
+  "teacher_accounts": {
+    "teacher_demo": {
+      "demo123": true
+    },
+    "dreamn1": {
+      "demo123": true
+    },
+    "dreamn2": {
+      "demo123": true
+    },
+    "dreamn3": {
+      "demo123": true
+    }
+  }
+}
